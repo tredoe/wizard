@@ -1,0 +1,31 @@
+*~
+_*
+*_
+*.pyc
+*.so
+
+# Go
+*.out
+*.a
+*.6
+*.gom
+
+# Projects
+*.kpf
+nbproject/
+
+# Setuptools
+*.egg
+*.egg-info/
+build/
+dist/
+
+# VCS
+.svn/
+
+# Data
+*.db
+*.log
+.coverage
+
+# More
