@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,6 +19,9 @@ import (
 
 // Exit status code if there is any error
 const ERROR = 2
+
+// Permissions
+const _PERM_DIRECTORY = 0755
 
 // Licenses available
 var license = map[string]string{
@@ -90,7 +94,7 @@ func checkFlags() {
 	if *fPkg == "" {
 		// The package name is created:
 		// getting the last string after of the dash ('-'), if any,
-		// and removing 'go'.
+		// and removing 'go'. Finally, it's lower cased.
 		pkg := strings.Split(*fProject, "-", -1)
 		*fPkg = reGo.ReplaceAllString(strings.ToLower(pkg[len(pkg)-1]), "")
 	} else {
@@ -98,6 +102,10 @@ func checkFlags() {
 	}
 
 	return
+}
+
+func addApp() {
+	
 }
 
 
@@ -130,6 +138,9 @@ func main() {
 		}
 		os.Exit(0)
 	}
+
+	// === Creates directories
+	os.MkdirAll(path.Join(strings.ToLower(*fProject), *fPkg), _PERM_DIRECTORY)
 
 	// === Renders files for normal project
 
