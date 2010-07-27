@@ -1,5 +1,5 @@
 // Copyright 2010, The 'gowizard' Authors.  All rights reserved.
-// Use of this source code is governed by the 2-clause BSD License
+// Use of this source code is governed by the Simplified BSD License
 // that can be found in the LICENSE file.
 
 package main
@@ -12,50 +12,62 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"template"
 	"time"
 )
 
 
+// Exit status code if there is any error
+const ERROR = 2
+
+// Licenses available
 var license = map[string]string{
 	"apache": "Apache (version 2.0)",
 	"bsd-2":  "Simplified BSD",
-	//"bsd-3":  "New BSD",
+	"bsd-3":  "New BSD",
 	"cc0":    "Creative Commons CC0 1.0 Universal",
 }
-
-// Headers for source code files
-var (
-	header    = `// Copyright {year}, The '{project}' Authors.  All rights reserved.
-// Use of this source code is governed by the {license} License
-// that can be found in the LICENSE file.
-`
-	headerCC0 = `// To the extent possible under law, Authors have waived all copyright and
-// related or neighboring rights to '{project}'.
-`
-)
 
 // Flags for the command line
 var (
 	fDebug   = flag.Bool("d", false, "debug mode")
 	fList    = flag.Bool("l", false, "show the list of licenses for the flag `license`")
-	fProject = flag.String("project", "", "the name of the project (e.g. 'goweb-foo')")
-	fPkg     = flag.String("pkg", "", "the name of the package (e.g. 'foo')")
-	fLicense = flag.String("license", "bsd-2", "the kind of license")
+	fWeb     = flag.Bool("w", false, "web application")
+	fProject = flag.String("project", "", "name of the project (e.g. 'goweb-foo')")
+	fPkg     = flag.String("pkg", "", "name of the package (e.g. 'foo')")
+	fLicense = flag.String("license", "bsd-2", "kind of license")
 )
 
+// Headers for source code files
+const (
+	t_HEADER     = `// Copyright {year}, The '{project}' Authors.  All rights reserved.
+// Use of this source code is governed by the {license} License
+// that can be found in the LICENSE file.
+`
+	t_HEADER_CC0 = `// To the extent possible under law, Authors have waived all copyright and
+// related or neighboring rights to '{project}'.
+`
+)
 
-func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: gowizard -project [-license]\n\n")
-	flag.PrintDefaults()
-	os.Exit(2)
+// === Template and data to build the file
+
+const t_PAGE = "{header}\n{content}"
+
+type page struct {
+	header  string
+	content string
 }
 
-func checkFlags() {
-	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
 
+func checkFlags() {
+	usage := func() {
+		fmt.Fprintf(os.Stderr, "Usage: gowizard -project [-license]\n\n")
+		flag.PrintDefaults()
+		os.Exit(ERROR)
+	}
 	flag.Usage = usage
 	flag.Parse()
+
+	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
 
 	if *fList {
 		fmt.Printf("Licenses\n\n")
@@ -90,14 +102,24 @@ func checkFlags() {
 
 // Main program execution
 func main() {
-	var t *template.Template
+	var renderedHeader string
 
 	checkFlags()
 
+	// Tags to pass to the templates
 	tag := map[string]string{
 		"license": license[*fLicense],
 		"pkg":     *fPkg,
 		"project": *fProject,
+	}
+
+	// === Renders the header
+
+	if *fLicense == "cc0" {
+		renderedHeader = parse(t_HEADER_CC0, tag)
+	} else {
+		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
+		renderedHeader = parse(t_HEADER, tag)
 	}
 
 	if *fDebug {
@@ -108,17 +130,22 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *fLicense == "cc0" {
-		t = template.MustParse(headerCC0, nil)
+	// === Renders files for normal project
+
+	if !*fWeb {
+
 	} else {
-		t = template.MustParse(header, nil)
-		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
+
 	}
-	t.Execute(tag, os.Stdout)
-	//fmt.Fprint(os.Stdout, )
 
-	//t = template.MustParseFile("tmpl-setup.txt", nil)
-	//t.Execute(data, c)
+	renderedContent := parseFile("web-setup", tag)
 
+	tagPage := &page{
+		header: renderedHeader,
+		content: renderedContent,
+	}
+
+	end := parse(t_PAGE, tagPage)
+	fmt.Println(end)
 }
 
