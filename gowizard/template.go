@@ -10,16 +10,17 @@ Based on http://go.hokapoka.com/go/embedding-or-nesting-go-templates/
 package main
 
 import (
+	"io/ioutil"
 	"os"
 	"template"
 )
 
 
-type parserTemplate struct {
+type templateParser struct {
 	str string
 }
 
-func (self *parserTemplate) Write(p []byte) (n int, err os.Error) {
+func (self *templateParser) Write(p []byte) (n int, err os.Error) {
 	self.str += string(p)
 
 	return len(p), nil
@@ -27,20 +28,32 @@ func (self *parserTemplate) Write(p []byte) (n int, err os.Error) {
 
 
 func parse(str string, data interface{}) string {
-	_parserTemplate := new(parserTemplate)
+	_templateParser := new(templateParser)
 
 	t := template.MustParse(str, nil)
-	t.Execute(data, _parserTemplate)
+	t.Execute(data, _templateParser)
 
-	return _parserTemplate.str
+	return _templateParser.str
 }
 
 func parseFile(filename string, data interface{}) string {
-	_parserTemplate := new(parserTemplate)
+	_templateParser := new(templateParser)
 
-	t := template.MustParseFile(filename, nil)
-	t.Execute(data, _parserTemplate)
+	// === Gets the content of filename
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic("gowizard.parseFile error: " + err.String())
+	}
 
-	return _parserTemplate.str
+	t := template.New(nil)
+	t.SetDelims("{{", "}}")
+
+	if err := t.Parse(string(b)); err != nil {
+		panic(err)
+	}
+
+	t.Execute(data, _templateParser)
+
+	return _templateParser.str
 }
 
