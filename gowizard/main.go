@@ -85,6 +85,7 @@ func checkFlags() {
 	if *fProject == "" {
 		usage()
 	}
+	*fProject = strings.TrimSpace(*fProject)
 
 	if *fPkg == "" {
 		// The package name is created:
@@ -93,7 +94,7 @@ func checkFlags() {
 		pkg := strings.Split(*fProject, "-", -1)
 		*fPkg = reGo.ReplaceAllString(strings.ToLower(pkg[len(pkg)-1]), "")
 	} else {
-		*fPkg = strings.ToLower(*fPkg)
+		*fPkg = strings.ToLower(strings.TrimSpace(*fPkg))
 	}
 
 	return
