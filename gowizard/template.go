@@ -16,6 +16,30 @@ import (
 )
 
 
+// === Template and data to build source code files
+
+// License headers
+const (
+	t_HEADER     = `// Copyright {year}, The '{project}' Authors.  All rights reserved.
+// Use of this source code is governed by the {license} License
+// that can be found in the LICENSE file.
+`
+	t_HEADER_CC0 = `// To the extent possible under law, Authors have waived all copyright and
+// related or neighboring rights to '{project}'.
+`
+)
+
+const t_PAGE = "{header}\n{content}"
+
+type page struct {
+	header  string
+	content string
+}
+
+
+// === Template parser
+// ===
+
 type templateParser struct {
 	str string
 }

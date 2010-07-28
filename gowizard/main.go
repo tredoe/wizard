@@ -43,26 +43,6 @@ var (
 	fLicense = flag.String("license", "bsd-2", "kind of license")
 )
 
-// Headers for source code files
-const (
-	t_HEADER     = `// Copyright {year}, The '{project}' Authors.  All rights reserved.
-// Use of this source code is governed by the {license} License
-// that can be found in the LICENSE file.
-`
-	t_HEADER_CC0 = `// To the extent possible under law, Authors have waived all copyright and
-// related or neighboring rights to '{project}'.
-`
-)
-
-// === Template and data to build the file
-
-const t_PAGE = "{header}\n{content}"
-
-type page struct {
-	header  string
-	content string
-}
-
 
 func checkFlags() {
 	usage := func() {
