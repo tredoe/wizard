@@ -36,11 +36,10 @@ var license = map[string]string{
 
 // Flags for the command line
 var (
-	fDebug   = flag.Bool("d", false, "debug mode")
-	fList    = flag.Bool("l", false, "show the list of licenses for the flag `license`")
-	fWeb     = flag.Bool("w", false, "web application")
-	fProject = flag.String("project", "", "name of the project (e.g. 'goweb-foo')")
-	fPkg     = flag.String("pkg", "", "name of the package (e.g. 'foo')")
+	fDebug = flag.Bool("d", false, "debug mode")
+	fList  = flag.Bool("l", false, "show the list of licenses for the flag `license`")
+	fWeb   = flag.Bool("w", false, "web application")
+
 	fLicense = flag.String("license", "bsd-2", "kind of license")
 )
 
@@ -67,7 +66,11 @@ type page struct {
 
 func checkFlags() {
 	usage := func() {
-		fmt.Fprintf(os.Stderr, "Usage: gowizard -project [-license]\n\n")
+		fmt.Fprintf(os.Stderr,
+			"Usage: gowizard -Project-name -Version -Summary -Download-URL -Author\n"+
+				"\t\t-Author-email [-Package-name -Platform -Description -Keywords\n"+
+				"\t\t-Home-page -Classifier]\n\n")
+
 		flag.PrintDefaults()
 		os.Exit(ERROR)
 	}
@@ -89,25 +92,25 @@ func checkFlags() {
 		log.Exitf("license unavailable %s", *fLicense)
 	}
 
-	if *fProject == "" {
+	if *fProjectName == "" {
 		usage()
 	}
-	*fProject = strings.TrimSpace(*fProject)
+	*fProjectName = strings.TrimSpace(*fProjectName)
 
-	if *fPkg == "" {
+	if *fPackageName == "" {
 		// The package name is created:
 		// getting the last string after of the dash ('-'), if any,
 		// and removing 'go'. Finally, it's lower cased.
-		pkg := strings.Split(*fProject, "-", -1)
-		*fPkg = reGo.ReplaceAllString(strings.ToLower(pkg[len(pkg)-1]), "")
+		pkg := strings.Split(*fProjectName, "-", -1)
+		*fPackageName = reGo.ReplaceAllString(strings.ToLower(pkg[len(pkg)-1]), "")
 	} else {
-		*fPkg = strings.ToLower(strings.TrimSpace(*fPkg))
+		*fPackageName = strings.ToLower(strings.TrimSpace(*fPackageName))
 	}
 
 	return
 }
 
-// === 
+// ===
 // ===
 
 func createCommon() {
@@ -136,8 +139,8 @@ func main() {
 	// Tags to pass to the templates
 	tag := map[string]string{
 		"license": license[*fLicense],
-		"pkg":     *fPkg,
-		"project": *fProject,
+		"pkg":     *fPackageName,
+		"project": *fProjectName,
 	}
 
 	// === Renders the header
@@ -158,7 +161,7 @@ func main() {
 	}
 
 	// === Creates directories
-	os.MkdirAll(path.Join(strings.ToLower(*fProject), *fPkg), _PERM_DIRECTORY)
+	os.MkdirAll(path.Join(strings.ToLower(*fProjectName), *fPackageName), _PERM_DIRECTORY)
 
 	// === Renders files for normal project
 
