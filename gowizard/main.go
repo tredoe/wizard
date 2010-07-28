@@ -21,7 +21,10 @@ import (
 const ERROR = 2
 
 // Permissions
-const _PERM_DIRECTORY = 0755
+const (
+	_PERM_DIRECTORY = 0755
+	_PERM_FILE      = 0644
+)
 
 // Licenses available
 var license = map[string]string{
@@ -104,8 +107,23 @@ func checkFlags() {
 	return
 }
 
-func addApp() {
-	
+// === 
+// ===
+
+func createCommon() {
+
+}
+
+func createCmd() {
+
+}
+
+func createPkg() {
+
+}
+
+func createWebgo() {
+
 }
 
 
@@ -153,7 +171,7 @@ func main() {
 	renderedContent := parseFile("web-setup", tag)
 
 	tagPage := &page{
-		header: renderedHeader,
+		header:  renderedHeader,
 		content: renderedContent,
 	}
 
