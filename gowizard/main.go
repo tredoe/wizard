@@ -7,6 +7,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -34,7 +35,13 @@ var license = map[string]string{
 	"cc0":    "Creative Commons CC0 1.0 Universal",
 }
 
-// Flags for the command line
+// Gets the data directory from `$(GOROOT)/lib/$(TARG)`
+var dataDir = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
+
+
+// === Flags for the command line
+// ===
+
 var (
 	fDebug = flag.Bool("d", false, "debug mode")
 	fList  = flag.Bool("l", false, "show the list of licenses for the flag `license`")
@@ -42,10 +49,6 @@ var (
 
 	fLicense = flag.String("license", "bsd-2", "kind of license")
 )
-
-// === Gets the data directory from `$(GOROOT)/lib/$(TARG)`
-var dataDir = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
-
 
 func checkFlags() {
 	usage := func() {
@@ -93,27 +96,28 @@ func checkFlags() {
 	return
 }
 
+
+// === Utility
 // ===
-// ===
 
-func createCommon() {
+/* Copy a file from the data directory to the project. */
+func copy(destinationFile, sourceFile string) {
+	projectName := strings.ToLower(*fProjectName)
 
+	src, err := ioutil.ReadFile(dataDir + sourceFile)
+	if err != nil {
+		log.Exit(err)
+	}
+
+	err = ioutil.WriteFile(projectName+destinationFile, src, _PERM_FILE)
+	if err != nil {
+		log.Exit(err)
+	}
 }
 
-func createCmd() {
 
-}
+// === Main program execution
 
-func createPkg() {
-
-}
-
-func createWebgo() {
-
-}
-
-
-// Main program execution
 func main() {
 	var renderedHeader string
 
@@ -143,9 +147,14 @@ func main() {
 		os.Exit(0)
 	}
 
-	// === Creates directories
+	// Creates directories
 	os.MkdirAll(path.Join(strings.ToLower(*fProjectName), *fPackageName),
 		_PERM_DIRECTORY)
+
+	// Copy common files
+	copy("/LICENSE.txt", fmt.Sprint("/license/", *fLicense, ".txt"))
+	copy("/AUTHORS.txt", "/tmpl/comon/AUTHORS.txt")
+	copy("/README.txt", "/tmpl/comon/README.txt")
 
 	// === Renders files for normal project
 
@@ -155,7 +164,7 @@ func main() {
 
 	}
 
-	renderedContent := parseFile(dataDir+"/web-setup", tag)
+	renderedContent := parseFile(dataDir+"/tmpl/web.go/setup.go", tag)
 
 	tagPage := &page{
 		header:  renderedHeader,
