@@ -7,7 +7,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -97,46 +96,32 @@ func checkFlags() {
 }
 
 
-// === Utility
-// ===
-
-/* Copy a file from the data directory to the project. */
-func copy(destinationFile, sourceFile string) {
-	projectName := strings.ToLower(*fProjectName)
-
-	src, err := ioutil.ReadFile(dataDir + sourceFile)
-	if err != nil {
-		log.Exit(err)
-	}
-
-	err = ioutil.WriteFile(projectName+destinationFile, src, _PERM_FILE)
-	if err != nil {
-		log.Exit(err)
-	}
-}
-
-
 // === Main program execution
 
 func main() {
-	var renderedHeader string
-
 	checkFlags()
 
-	// Tags to pass to the templates
+	// === Tags to pass to the templates
+	line := make([]byte, len(*fProjectName))
+	for i, _ := range line {
+		line[i] = '='
+	}
+
 	tag := map[string]string{
-		"license": license[*fLicense],
-		"pkg":     *fPackageName,
-		"project": *fProjectName,
+		"license":    license[*fLicense],
+		"pkg":        *fPackageName,
+		"project":    *fProjectName,
+		"headerLine": string(line),
 	}
 
 	// === Renders the header
+	var licenseRender string
 
 	if *fLicense == "cc0" {
-		renderedHeader = parse(t_HEADER_CC0, tag)
+		licenseRender = parse(t_LICENSE_CC0, tag)
 	} else {
 		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
-		renderedHeader = parse(t_HEADER, tag)
+		licenseRender = parse(t_LICENSE, tag)
 	}
 
 	if *fDebug {
@@ -147,31 +132,25 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Creates directories
-	os.MkdirAll(path.Join(strings.ToLower(*fProjectName), *fPackageName),
-		_PERM_DIRECTORY)
+	// Creates directories in lower case
+	*fProjectName = strings.ToLower(*fProjectName)
+	os.MkdirAll(path.Join(*fProjectName, *fPackageName), _PERM_DIRECTORY)
 
-	// Copy common files
+	// Copies license
 	copy("/LICENSE.txt", fmt.Sprint("/license/", *fLicense, ".txt"))
-	copy("/AUTHORS.txt", "/tmpl/comon/AUTHORS.txt")
-	copy("/README.txt", "/tmpl/comon/README.txt")
+
+	// === Renders common files
+	renderFile("/tmpl/common/AUTHORS.txt", tag)
+	renderFile("/tmpl/common/README.txt", tag)
 
 	// === Renders files for normal project
+
+	renderCodeFile(&licenseRender, "/tmpl/web.go/setup.go", tag)
 
 	if !*fWeb {
 
 	} else {
 
 	}
-
-	renderedContent := parseFile(dataDir+"/tmpl/web.go/setup.go", tag)
-
-	tagPage := &page{
-		header:  renderedHeader,
-		content: renderedContent,
-	}
-
-	end := parse(t_PAGE, tagPage)
-	fmt.Println(end)
 }
 

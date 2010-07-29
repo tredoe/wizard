@@ -8,29 +8,71 @@ package main
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
+	"path"
 	"template"
 )
 
 
 // === Template and data to build source code files
 
-// License headers
+// License licenses
 const (
-	t_HEADER     = `// Copyright {year}, The '{project}' Authors.  All rights reserved.
+	t_LICENSE     = `// Copyright {year}, The '{project}' Authors.  All rights reserved.
 // Use of this source code is governed by the {license} License
 // that can be found in the LICENSE file.
 `
-	t_HEADER_CC0 = `// To the extent possible under law, Authors have waived all copyright and
+	t_LICENSE_CC0 = `// To the extent possible under law, Authors have waived all copyright and
 // related or neighboring rights to '{project}'.
 `
 )
 
-const t_PAGE = "{header}\n{content}"
+const t_PAGE = "{license}\n{content}"
 
-type page struct {
-	header  string
+type code struct {
+	license string
 	content string
+}
+
+
+// === Utility
+// ===
+
+/* Copy a file from the data directory to the project. */
+func copy(destinationFile, sourceFile string) {
+	src, err := ioutil.ReadFile(dataDir + sourceFile)
+	if err != nil {
+		log.Exit(err)
+	}
+
+	err = ioutil.WriteFile(*fProjectName+destinationFile, src, _PERM_FILE)
+	if err != nil {
+		log.Exit(err)
+	}
+}
+
+/* Creates a source code file nesting both license and content. */
+func renderCodeFile(license *string, contentTemplate string, tag map[string]string) {
+	contentRender := parseFile(dataDir+contentTemplate, tag)
+	render := parse(t_PAGE, &code{*license, contentRender})
+
+	ioutil.WriteFile(
+		path.Join(*fProjectName, *fPackageName, path.Base(contentTemplate)),
+		[]byte(render),
+		_PERM_FILE,
+	)
+}
+
+/* Creates single files. */
+func renderFile(contentTemplate string, tag map[string]string) {
+	render := parseFile(dataDir+contentTemplate, tag)
+
+	ioutil.WriteFile(
+		path.Join(*fProjectName, path.Base(contentTemplate)),
+		[]byte(render),
+		_PERM_FILE,
+	)
 }
 
 
