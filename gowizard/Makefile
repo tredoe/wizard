@@ -8,3 +8,7 @@ GOFILES=\
 
 include $(GOROOT)/src/Make.cmd
 
+data:
+	[ -d $(GOROOT)/lib/$(TARG) ] || mkdir $(GOROOT)/lib/$(TARG)
+	cp -R ../data/* $(GOROOT)/lib/$(TARG)/
+
