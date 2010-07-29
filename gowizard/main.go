@@ -44,13 +44,7 @@ var (
 )
 
 // === Gets the data directory from `$(GOROOT)/lib/$(TARG)`
-var dataDir string
-
-func init() {
-	// The current directory name is called like Makefile's `TARG`.
-	workDir, _ := os.Getwd()
-	dataDir = path.Join(os.Getenv("GOROOT"), "lib", path.Base(workDir))
-}
+var dataDir = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 
 
 func checkFlags() {
