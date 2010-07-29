@@ -43,6 +43,15 @@ var (
 	fLicense = flag.String("license", "bsd-2", "kind of license")
 )
 
+// === Gets the data directory from `$(GOROOT)/lib/$(TARG)`
+var dataDir string
+
+func init() {
+	// The current directory name is called like Makefile's `TARG`.
+	workDir, _ := os.Getwd()
+	dataDir = path.Join(os.Getenv("GOROOT"), "lib", path.Base(workDir))
+}
+
 
 func checkFlags() {
 	usage := func() {
@@ -141,7 +150,8 @@ func main() {
 	}
 
 	// === Creates directories
-	os.MkdirAll(path.Join(strings.ToLower(*fProjectName), *fPackageName), _PERM_DIRECTORY)
+	os.MkdirAll(path.Join(strings.ToLower(*fProjectName), *fPackageName),
+		_PERM_DIRECTORY)
 
 	// === Renders files for normal project
 
@@ -151,7 +161,7 @@ func main() {
 
 	}
 
-	renderedContent := parseFile("web-setup", tag)
+	renderedContent := parseFile(dataDir+"/web-setup", tag)
 
 	tagPage := &page{
 		header:  renderedHeader,

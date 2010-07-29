@@ -2,10 +2,7 @@
 // Use of this source code is governed by the Simplified BSD License
 // that can be found in the LICENSE file.
 
-/* Template returns strings.
-
-Based on http://go.hokapoka.com/go/embedding-or-nesting-go-templates/
-*/
+/* Template returns strings. */
 
 package main
 
@@ -38,6 +35,7 @@ type page struct {
 
 
 // === Template parser
+// Based on http://go.hokapoka.com/go/embedding-or-nesting-go-templates/
 // ===
 
 type templateParser struct {
