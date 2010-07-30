@@ -77,7 +77,6 @@ func checkFlags() {
 
 			fmt.Printf("\n  %v: ", f.Usage)
 			*k = read()
-			*k = strings.TrimRight(*k, "\n")
 		}
 
 		fmt.Println()

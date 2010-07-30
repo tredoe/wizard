@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 )
 
 
@@ -34,6 +35,6 @@ func read() string {
 		log.Exit(err)
 	}
 
-	return input
+	return strings.TrimRight(input, "\n")
 }
 
