@@ -44,6 +44,18 @@ var (
 	fWeb = flag.Bool("w", false, "web application")
 )
 
+// Flags used in interactive mode
+var interactiveFlags = map[*string]string{
+	fProjectName: "Project-name",
+	fPackageName: "Package-name",
+	fVersion:     "Version",
+	fSummary:     "Summary",
+	fDownloadURL: "Download-URL",
+	fAuthor:      "Author",
+	fAuthorEmail: "Author-email",
+	fLicense:     "License",
+}
+
 func checkFlags() {
 	usage := func() {
 		fmt.Fprintf(os.Stderr,
@@ -54,10 +66,28 @@ func checkFlags() {
 		flag.PrintDefaults()
 		os.Exit(_ERROR)
 	}
+
 	flag.Usage = usage
 	flag.Parse()
 
 	// === Options
+	if *fInteractive {
+		for k, v := range interactiveFlags {
+			f := flag.Lookup(v)
+
+			fmt.Printf("\n  %v: ", f.Usage)
+			*k = read()
+			*k = strings.TrimRight(*k, "\n")
+		}
+
+		fmt.Println()
+	}
+
+	for k, v := range interactiveFlags {
+		fmt.Println(*k, v)
+	}
+	os.Exit(0)
+
 	if *fList {
 		fmt.Printf("Licenses\n\n")
 		for k, v := range license {

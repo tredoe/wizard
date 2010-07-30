@@ -8,7 +8,6 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"template"
@@ -33,46 +32,6 @@ const t_PAGE = "{license}\n{content}"
 type code struct {
 	license string
 	content string
-}
-
-
-// === Utility
-// ===
-
-/* Copy a file from the data directory to the project. */
-func copy(destinationFile, sourceFile string) {
-	src, err := ioutil.ReadFile(sourceFile)
-	if err != nil {
-		log.Exit(err)
-	}
-
-	err = ioutil.WriteFile(*fProjectName+destinationFile, src, _PERM_FILE)
-	if err != nil {
-		log.Exit(err)
-	}
-}
-
-/* Creates a source code file nesting both license and content. */
-func renderCodeFile(license *string, contentTemplate string, tag map[string]string) {
-	contentRender := parseFile(contentTemplate, tag)
-	render := parse(t_PAGE, &code{*license, contentRender})
-
-	ioutil.WriteFile(
-		path.Join(*fProjectName, *fPackageName, path.Base(contentTemplate)),
-		[]byte(render),
-		_PERM_FILE,
-	)
-}
-
-/* Creates single files. */
-func renderFile(contentTemplate string, tag map[string]string) {
-	render := parseFile(contentTemplate, tag)
-
-	ioutil.WriteFile(
-		path.Join(*fProjectName, path.Base(contentTemplate)),
-		[]byte(render),
-		_PERM_FILE,
-	)
 }
 
 
@@ -119,5 +78,32 @@ func parseFile(filename string, data interface{}) string {
 	t.Execute(data, _templateParser)
 
 	return _templateParser.str
+}
+
+
+// === Utility
+// ===
+
+/* Creates a source code file nesting both license and content. */
+func renderCodeFile(license *string, contentTemplate string, tag map[string]string) {
+	contentRender := parseFile(contentTemplate, tag)
+	render := parse(t_PAGE, &code{*license, contentRender})
+
+	ioutil.WriteFile(
+		path.Join(*fProjectName, *fPackageName, path.Base(contentTemplate)),
+		[]byte(render),
+		_PERM_FILE,
+	)
+}
+
+/* Creates single files. */
+func renderFile(contentTemplate string, tag map[string]string) {
+	render := parseFile(contentTemplate, tag)
+
+	ioutil.WriteFile(
+		path.Join(*fProjectName, path.Base(contentTemplate)),
+		[]byte(render),
+		_PERM_FILE,
+	)
 }
 

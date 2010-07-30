@@ -5,6 +5,7 @@ GOFILES=\
 	main.go\
 	metadata.go\
 	template.go\
+	util.go\
 
 include $(GOROOT)/src/Make.cmd
 
