@@ -41,7 +41,7 @@ type code struct {
 
 /* Copy a file from the data directory to the project. */
 func copy(destinationFile, sourceFile string) {
-	src, err := ioutil.ReadFile(dataDir + sourceFile)
+	src, err := ioutil.ReadFile(sourceFile)
 	if err != nil {
 		log.Exit(err)
 	}
@@ -54,7 +54,7 @@ func copy(destinationFile, sourceFile string) {
 
 /* Creates a source code file nesting both license and content. */
 func renderCodeFile(license *string, contentTemplate string, tag map[string]string) {
-	contentRender := parseFile(dataDir+contentTemplate, tag)
+	contentRender := parseFile(contentTemplate, tag)
 	render := parse(t_PAGE, &code{*license, contentRender})
 
 	ioutil.WriteFile(
@@ -66,7 +66,7 @@ func renderCodeFile(license *string, contentTemplate string, tag map[string]stri
 
 /* Creates single files. */
 func renderFile(contentTemplate string, tag map[string]string) {
-	render := parseFile(dataDir+contentTemplate, tag)
+	render := parseFile(contentTemplate, tag)
 
 	ioutil.WriteFile(
 		path.Join(*fProjectName, path.Base(contentTemplate)),

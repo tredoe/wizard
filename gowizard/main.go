@@ -37,9 +37,11 @@ var dataDir = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 var reGo = regexp.MustCompile(`^go`)
 
 var (
-	fDebug = flag.Bool("d", false, "debug mode")
-	fList  = flag.Bool("l", false, "show the list of licenses for the flag `license`")
-	fWeb   = flag.Bool("w", false, "web application")
+	fDebug       = flag.Bool("d", false, "debug mode")
+	fInteractive = flag.Bool("i", false, "interactive mode")
+	fList        = flag.Bool("l", false,
+		"shows the list of licenses for the flag `license`")
+	fWeb = flag.Bool("w", false, "web application")
 )
 
 func checkFlags() {
@@ -106,9 +108,9 @@ func main() {
 	}
 
 	tag := map[string]string{
-		"license":    license[*fLicense],
-		"pkg":        *fPackageName,
 		"project":    *fProjectName,
+		"pkg":        *fPackageName,
+		"license":    license[*fLicense],
 		"headerLine": string(line),
 	}
 
@@ -126,6 +128,9 @@ func main() {
 	if *fDebug {
 		fmt.Printf("Debug\n\n")
 		for k, v := range tag {
+			if k == "headerLine" {
+				continue
+			}
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 		os.Exit(0)
@@ -136,15 +141,15 @@ func main() {
 	os.MkdirAll(path.Join(*fProjectName, *fPackageName), _PERM_DIRECTORY)
 
 	// === Copies the license
-	copy("/LICENSE.txt", fmt.Sprint("/license/", *fLicense, ".txt"))
+	copy("/LICENSE.txt", fmt.Sprint(dataDir, "/license/", *fLicense, ".txt"))
 
 	// === Renders common files
-	renderFile("/tmpl/common/AUTHORS.txt", tag)
-	renderFile("/tmpl/common/README.txt", tag)
+	renderFile(dataDir+"/tmpl/common/AUTHORS.txt", tag)
+	renderFile(dataDir+"/tmpl/common/README.txt", tag)
 
-	// === Renders files code files
+	// === Renders source code files
 	if *fWeb {
-		renderCodeFile(&licenseRender, "/tmpl/web.go/setup.go", tag)
+		renderCodeFile(&licenseRender, dataDir+"/tmpl/web.go/setup.go", tag)
 	} else {
 
 	}
