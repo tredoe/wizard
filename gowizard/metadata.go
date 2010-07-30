@@ -8,10 +8,16 @@ package main
 
 import (
 	"flag"
-	"regexp"
-	"strings"
 )
 
+
+// Licenses available
+var license = map[string]string{
+	"apache": "Apache (version 2.0)",
+	"bsd-2":  "Simplified BSD",
+	"bsd-3":  "New BSD",
+	"cc0":    "Creative Commons CC0 1.0 Universal",
+}
 
 // Metadata flags
 var (
@@ -36,6 +42,9 @@ var (
 
 	fAuthorEmail = flag.String("Author-email", "",
 		"A string containing the author's e-mail address.")
+
+	fLicense = flag.String("License", "bsd-2",
+		"The license covering the package.")
 
 	fPlatform = flag.String("Platform", "",
 		"A comma-separated list of platform specifications, summarizing\n"+
@@ -63,12 +72,12 @@ var (
 The next fields have not been taken:
 
 	Supported-Platform
-	License
 	Requires
 	Provides
 	Obsoletes
 
 The field 'Name' has been substituted by 'Project-name' and 'Package-name'.
+The field 'License' needs a value from the map 'license'.
 
 */
 type metadata_1_1 struct {
@@ -80,6 +89,7 @@ type metadata_1_1 struct {
 	DownloadURL     string "Download-URL"
 	Author          string
 	AuthorEmail     string "Author-email"
+	License         string
 
 	// === Optional
 
@@ -91,30 +101,18 @@ type metadata_1_1 struct {
 }
 
 func newMetadata_1_1(ProjectName, PackageName, Version, Summary, DownloadURL,
-Author, AuthorEmail string) *metadata_1_1 {
-	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
+Author, AuthorEmail, License string) *metadata_1_1 {
 	metadata := new(metadata_1_1)
 
 	metadata.MetadataVersion = "1.1"
+	metadata.ProjectName = ProjectName
+	metadata.PackageName = PackageName
 	metadata.Version = Version
 	metadata.Summary = Summary
 	metadata.DownloadURL = DownloadURL
 	metadata.Author = Author
 	metadata.AuthorEmail = AuthorEmail
-
-	metadata.ProjectName = strings.TrimSpace(ProjectName)
-
-	// The package name is created:
-	// getting the last string after of the dash ('-'), if any,
-	// and removing 'go'. Finally, it's lower cased.
-	if PackageName == "" {
-		packageName := strings.Split(metadata.ProjectName, "-", -1)
-		metadata.PackageName = reGo.ReplaceAllString(
-			strings.ToLower(packageName[len(packageName)-1]), "")
-	} else {
-		metadata.PackageName = strings.ToLower(
-			strings.TrimSpace(metadata.PackageName))
-	}
+	metadata.License = License
 
 	return metadata
 }

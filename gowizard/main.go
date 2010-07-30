@@ -18,21 +18,13 @@ import (
 
 
 // Exit status code if there is any error
-const ERROR = 2
+const _ERROR = 2
 
 // Permissions
 const (
 	_PERM_DIRECTORY = 0755
 	_PERM_FILE      = 0644
 )
-
-// Licenses available
-var license = map[string]string{
-	"apache": "Apache (version 2.0)",
-	"bsd-2":  "Simplified BSD",
-	"bsd-3":  "New BSD",
-	"cc0":    "Creative Commons CC0 1.0 Universal",
-}
 
 // Gets the data directory from `$(GOROOT)/lib/$(TARG)`
 var dataDir = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
@@ -41,29 +33,29 @@ var dataDir = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 // === Flags for the command line
 // ===
 
+// To remove it from the project name
+var reGo = regexp.MustCompile(`^go`)
+
 var (
 	fDebug = flag.Bool("d", false, "debug mode")
 	fList  = flag.Bool("l", false, "show the list of licenses for the flag `license`")
 	fWeb   = flag.Bool("w", false, "web application")
-
-	fLicense = flag.String("license", "bsd-2", "kind of license")
 )
 
 func checkFlags() {
 	usage := func() {
 		fmt.Fprintf(os.Stderr,
 			"Usage: gowizard -Project-name -Version -Summary -Download-URL -Author\n"+
-				"\t\t-Author-email [-Package-name -Platform -Description -Keywords\n"+
-				"\t\t-Home-page -Classifier]\n\n")
+				"\t\t-Author-email -License [-Package-name -Platform -Description\n"+
+				"\t\t-Keywords -Home-page -Classifier]\n\n")
 
 		flag.PrintDefaults()
-		os.Exit(ERROR)
+		os.Exit(_ERROR)
 	}
 	flag.Usage = usage
 	flag.Parse()
 
-	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
-
+	// === Options
 	if *fList {
 		fmt.Printf("Licenses\n\n")
 		for k, v := range license {
@@ -72,14 +64,20 @@ func checkFlags() {
 		os.Exit(0)
 	}
 
+	// === Checks necessary fields
+	if *fProjectName == "" && *fVersion == "" && *fSummary == "" &&
+		*fDownloadURL == "" && *fAuthor == "" && *fAuthorEmail == "" &&
+		*fLicense == "" {
+		usage()
+	}
+
+	// === Checks license
 	*fLicense = strings.ToLower(*fLicense)
 	if _, present := license[*fLicense]; !present {
 		log.Exitf("license unavailable %s", *fLicense)
 	}
 
-	if *fProjectName == "" {
-		usage()
-	}
+	// === Sets names for both project and package
 	*fProjectName = strings.TrimSpace(*fProjectName)
 
 	if *fPackageName == "" {
@@ -124,6 +122,7 @@ func main() {
 		licenseRender = parse(t_LICENSE, tag)
 	}
 
+	// === Shows data on 'tag', if 'fDebug' is set
 	if *fDebug {
 		fmt.Printf("Debug\n\n")
 		for k, v := range tag {
@@ -132,25 +131,24 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Creates directories in lower case
+	// === Creates directories in lower case
 	*fProjectName = strings.ToLower(*fProjectName)
 	os.MkdirAll(path.Join(*fProjectName, *fPackageName), _PERM_DIRECTORY)
 
-	// Copies license
+	// === Copies the license
 	copy("/LICENSE.txt", fmt.Sprint("/license/", *fLicense, ".txt"))
 
 	// === Renders common files
 	renderFile("/tmpl/common/AUTHORS.txt", tag)
 	renderFile("/tmpl/common/README.txt", tag)
 
-	// === Renders files for normal project
-
-	renderCodeFile(&licenseRender, "/tmpl/web.go/setup.go", tag)
-
-	if !*fWeb {
-
+	// === Renders files code files
+	if *fWeb {
+		renderCodeFile(&licenseRender, "/tmpl/web.go/setup.go", tag)
 	} else {
 
 	}
+
+	os.Exit(0)
 }
 
