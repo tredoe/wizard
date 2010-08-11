@@ -45,15 +45,27 @@ var (
 )
 
 // Flags used in interactive mode
-var interactiveFlags = map[*string]string{
-	fProjectName: "Project-name",
-	fPackageName: "Package-name",
-	fVersion:     "Version",
-	fSummary:     "Summary",
-	fDownloadURL: "Download-URL",
-	fAuthor:      "Author",
-	fAuthorEmail: "Author-email",
-	fLicense:     "License",
+var interactiveFlags = map[string]*string{
+	"Project-name": fProjectName,
+	"Package-name": fPackageName,
+	"Version":      fVersion,
+	"Summary":      fSummary,
+	"Download-URL": fDownloadURL,
+	"Author":       fAuthor,
+	"Author-email": fAuthorEmail,
+	"License":      fLicense,
+}
+
+// Sorted flags
+var sortedInteractiveFlags = []string{
+	"Project-name",
+	"Package-name",
+	"Version",
+	"Summary",
+	"Download-URL",
+	"Author",
+	"Author-email",
+	"License",
 }
 
 func checkFlags() {
@@ -71,22 +83,6 @@ func checkFlags() {
 	flag.Parse()
 
 	// === Options
-	if *fInteractive {
-		for k, v := range interactiveFlags {
-			f := flag.Lookup(v)
-
-			fmt.Printf("\n  %v: ", f.Usage)
-			*k = read()
-		}
-
-		fmt.Println()
-	}
-
-	for k, v := range interactiveFlags {
-		fmt.Println(*k, v)
-	}
-	os.Exit(0)
-
 	if *fList {
 		fmt.Printf("Licenses\n\n")
 		for k, v := range license {
@@ -95,9 +91,20 @@ func checkFlags() {
 		os.Exit(0)
 	}
 
+	if *fInteractive {
+		for _, k := range sortedInteractiveFlags {
+			f := flag.Lookup(k)
+
+			fmt.Printf("\n  %s: ", strings.TrimRight(f.Usage, "."))
+			*interactiveFlags[k] = read()
+		}
+
+		fmt.Println()
+	}
+
 	// === Checks necessary fields
-	if *fProjectName == "" && *fVersion == "" && *fSummary == "" &&
-		*fDownloadURL == "" && *fAuthor == "" && *fAuthorEmail == "" &&
+	if *fProjectName == "" || *fVersion == "" || *fSummary == "" ||
+		*fDownloadURL == "" || *fAuthor == "" || *fAuthorEmail == "" ||
 		*fLicense == "" {
 		usage()
 	}
@@ -141,6 +148,7 @@ func main() {
 		"pkg":        *fPackageName,
 		"license":    license[*fLicense],
 		"headerLine": string(line),
+		"author":     fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
 	}
 
 	// === Renders the header
@@ -170,10 +178,12 @@ func main() {
 	os.MkdirAll(path.Join(*fProjectName, *fPackageName), _PERM_DIRECTORY)
 
 	// === Copies the license
-	copy("/LICENSE.txt", fmt.Sprint(dataDir, "/license/", *fLicense, ".txt"))
+	copy(*fProjectName+"/LICENSE.txt",
+		fmt.Sprint(dataDir, "/license/", *fLicense, ".txt"))
 
 	// === Renders common files
 	renderFile(dataDir+"/tmpl/common/AUTHORS.txt", tag)
+	renderFile(dataDir+"/tmpl/common/CONTRIBUTORS.txt", tag)
 	renderFile(dataDir+"/tmpl/common/README.txt", tag)
 
 	// === Renders source code files
