@@ -175,7 +175,7 @@ func main() {
 		//"summary":           *fSummary,
 		"author":            fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
 		"license":           license[*fLicense],
-		"projectNameHeader": string(projectNameHeader),
+		"_projectNameHeader": string(projectNameHeader),
 	}
 
 	// === Renders the header
