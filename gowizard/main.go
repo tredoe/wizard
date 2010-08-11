@@ -84,7 +84,10 @@ func checkFlags() {
 
 	// === Options
 	if *fList {
-		fmt.Printf("\n  Licenses\n  --------\n")
+		fmt.Printf(`
+  Licenses
+  --------
+`)
 		for k, v := range license {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
@@ -92,7 +95,10 @@ func checkFlags() {
 	}
 
 	if *fInteractive {
-		fmt.Printf("\n  Interactive\n  -----------\n")
+		fmt.Printf(`
+  Interactive
+  -----------
+`)
 
 		for i, k := range sortedInteractiveFlags {
 			f := flag.Lookup(k)
@@ -157,17 +163,19 @@ func main() {
 	checkFlags()
 
 	// === Tags to pass to the templates
-	line := make([]byte, len(*fProjectName))
-	for i, _ := range line {
-		line[i] = '='
+	projectNameHeader := make([]byte, len(*fProjectName))
+	for i, _ := range projectNameHeader {
+		projectNameHeader[i] = '='
 	}
 
 	tag := map[string]string{
-		"project":    *fProjectName,
-		"pkg":        *fPackageName,
-		"license":    license[*fLicense],
-		"headerLine": string(line),
-		"author":     fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
+		"projectName":       *fProjectName,
+		"packageName":       *fPackageName,
+		//"version":           *fVersion,
+		//"summary":           *fSummary,
+		"author":            fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
+		"license":           license[*fLicense],
+		"projectNameHeader": string(projectNameHeader),
 	}
 
 	// === Renders the header
@@ -182,9 +190,12 @@ func main() {
 
 	// === Shows data on 'tag', if 'fDebug' is set
 	if *fDebug {
-		fmt.Printf("\n  Debug\n  -----\n")
+		fmt.Printf(`
+  Debug
+  -----
+`)
 		for k, v := range tag {
-			if k == "headerLine" {
+			if k[0] == '_' {
 				continue
 			}
 			fmt.Printf("  %s: %s\n", k, v)

@@ -1,4 +1,4 @@
-{{headerLine}}
-{{project}}
-{{headerLine}}
+{{projectNameHeader}}
+{{projectName}}
+{{projectNameHeader}}
 
