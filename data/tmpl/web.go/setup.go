@@ -4,13 +4,6 @@ import (
 	"log"
 )
 
-/*var App = Application {
-	name:    "{{packageName}}",
-	version: "{{version}}",
-	summary: "{{summary}}",
-	license: "{{license}}",
-}*/
-
 
 /* `env` should be 'development', 'test' or 'production'. */
 func Setup(env string) {

@@ -169,12 +169,10 @@ func main() {
 	}
 
 	tag := map[string]string{
-		"projectName": *fProjectName,
-		"packageName": *fPackageName,
-		//"version":           *fVersion,
-		//"summary":           *fSummary,
-		"author":            fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
-		"license":           license[*fLicense],
+		"projectName":        *fProjectName,
+		"packageName":        *fPackageName,
+		"author":             fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
+		"license":            license[*fLicense],
 		"_projectNameHeader": string(projectNameHeader),
 	}
 
