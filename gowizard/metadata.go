@@ -17,14 +17,6 @@ import (
 
 const _FILE_NAME = "Metadata"
 
-// Licenses available
-var license = map[string]string{
-	"apache": "Apache (version 2.0)",
-	"bsd-2":  "Simplified BSD",
-	"bsd-3":  "New BSD",
-	"cc0":    "Creative Commons CC0 1.0 Universal",
-}
-
 // Metadata flags
 var (
 	fProjectName = flag.String("Project-name", "",
@@ -85,6 +77,7 @@ The next fields have not been taken:
 The field 'Name' has been substituted by 'Project-name' and 'Package-name'.
 The field 'License' needs a value from the map 'license'.
 
+For 'Classifier' see on http://pypi.python.org/pypi?%3Aaction=list_classifiers
 */
 type metadata_1_1 struct {
 	MetadataVersion string "Metadata-Version" // Version of the file format

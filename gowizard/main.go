@@ -39,13 +39,32 @@ var reGo = regexp.MustCompile(`^go`)
 var (
 	fDebug       = flag.Bool("d", false, "debug mode")
 	fInteractive = flag.Bool("i", false, "interactive mode")
-	fList        = flag.Bool("l", false,
+	fListLicense = flag.Bool("ll", false,
 		"shows the list of licenses for the flag `license`")
-	fWeb = flag.Bool("w", false, "web application")
+	fListApp = flag.Bool("la", false,
+		"shows the list of application types for the flag `app`")
+
+	fApp = flag.String("app", "pkg", "The application type.")
 )
+
+// Available application types
+var listApp = map[string]string{
+	"cmd":    "command line",
+	"pkg":    "package",
+	"web.go": "web environment",
+}
+
+// Licenses available
+var listLicense = map[string]string{
+	"apache": "Apache (version 2.0)",
+	"bsd-2":  "Simplified BSD",
+	"bsd-3":  "New BSD",
+	"cc0":    "Creative Commons CC0 1.0 Universal",
+}
 
 // Flags used in interactive mode
 var interactiveFlags = map[string]*string{
+	"app":          fApp,
 	"Project-name": fProjectName,
 	"Package-name": fPackageName,
 	"Version":      fVersion,
@@ -58,6 +77,7 @@ var interactiveFlags = map[string]*string{
 
 // Sorted flags
 var sortedInteractiveFlags = []string{
+	"app",
 	"Project-name",
 	"Package-name",
 	"Version",
@@ -70,10 +90,12 @@ var sortedInteractiveFlags = []string{
 
 func checkFlags() {
 	usage := func() {
-		fmt.Fprintf(os.Stderr,
-			"Usage: gowizard -Project-name -Version -Summary -Download-URL -Author\n"+
-				"\t\t-Author-email -License [-Package-name -Platform -Description\n"+
-				"\t\t-Keywords -Home-page -Classifier]\n\n")
+		fmt.Fprintf(os.Stderr, `
+Usage: gowizard -app -Project-name -Version -Summary -Download-URL
+	-Author -Author-email -License [-Package-name -Platform -Description
+	-Keywords -Home-page -Classifier]
+
+`)
 
 		flag.PrintDefaults()
 		os.Exit(_ERROR)
@@ -83,12 +105,25 @@ func checkFlags() {
 	flag.Parse()
 
 	// === Options
-	if *fList {
+	// ===
+
+	if *fListApp {
+		fmt.Printf(`
+  Applications
+  ------------
+`)
+		for k, v := range listApp {
+			fmt.Printf("  %s: %s\n", k, v)
+		}
+		//os.Exit(0)
+	}
+
+	if *fListLicense {
 		fmt.Printf(`
   Licenses
   --------
 `)
-		for k, v := range license {
+		for k, v := range listLicense {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 		//os.Exit(0)
@@ -105,11 +140,11 @@ func checkFlags() {
 			fmt.Printf("  %s", strings.TrimRight(f.Usage, "."))
 
 			switch i {
-			case 1: // Package-name
+			case 0, 8: // app, License
+				fmt.Printf(" [%s]", f.Value)
+			case 2: // Package-name
 				setNames()
 				fmt.Printf(" [%s]", *fPackageName)
-			case 7: // License
-				fmt.Printf(" [%s]", f.Value)
 			}
 
 			fmt.Print(": ")
@@ -133,8 +168,14 @@ func checkFlags() {
 
 	// === Checks license
 	*fLicense = strings.ToLower(*fLicense)
-	if _, present := license[*fLicense]; !present {
+	if _, present := listLicense[*fLicense]; !present {
 		log.Exitf("license unavailable %s", *fLicense)
+	}
+
+	// === Checks application type
+	*fApp = strings.ToLower(*fApp)
+	if _, present := listApp[*fApp]; !present {
+		log.Exitf("unavailable application type %s", *fApp)
 	}
 
 	return
@@ -172,7 +213,7 @@ func main() {
 		"projectName":        *fProjectName,
 		"packageName":        *fPackageName,
 		"author":             fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
-		"license":            license[*fLicense],
+		"license":            listLicense[*fLicense],
 		"_projectNameHeader": string(projectNameHeader),
 	}
 
@@ -220,10 +261,15 @@ func main() {
 	metadata.writeJSON(*fProjectName)
 
 	// === Renders source code files
-	if *fWeb {
+	switch *fApp {
+	case "pkg":
+		renderCodeFile(&licenseRender, dataDir+"/tmpl/pkg/main.go", tag)
+		renderCodeFile(&licenseRender, dataDir+"/tmpl/pkg/Makefile", tag)
+	case "cmd":
+		renderCodeFile(&licenseRender, dataDir+"/tmpl/cmd/main.go", tag)
+		renderCodeFile(&licenseRender, dataDir+"/tmpl/cmd/Makefile", tag)
+	case "web.go":
 		renderCodeFile(&licenseRender, dataDir+"/tmpl/web.go/setup.go", tag)
-	} else {
-
 	}
 
 	os.Exit(0)
