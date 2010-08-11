@@ -62,16 +62,10 @@ func parse(str string, data interface{}) string {
 func parseFile(filename string, data interface{}) string {
 	_templateParser := new(templateParser)
 
-	// === Gets the content of filename
-	b, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic("gowizard.parseFile error: " + err.String())
-	}
-
 	t := template.New(nil)
 	t.SetDelims("{{", "}}")
 
-	if err := t.Parse(string(b)); err != nil {
+	if err := t.ParseFile(filename); err != nil {
 		panic(err)
 	}
 
