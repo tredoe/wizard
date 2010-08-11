@@ -7,7 +7,6 @@ package main
 import (
 	"bufio"
 	"io/ioutil"
-	"json"
 	"log"
 	"os"
 	"strings"

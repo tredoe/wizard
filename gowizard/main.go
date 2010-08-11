@@ -169,8 +169,8 @@ func main() {
 	}
 
 	tag := map[string]string{
-		"projectName":       *fProjectName,
-		"packageName":       *fPackageName,
+		"projectName": *fProjectName,
+		"packageName": *fPackageName,
 		//"version":           *fVersion,
 		//"summary":           *fSummary,
 		"author":            fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
@@ -215,6 +215,11 @@ func main() {
 	renderFile(dataDir+"/tmpl/common/AUTHORS.txt", tag)
 	renderFile(dataDir+"/tmpl/common/CONTRIBUTORS.txt", tag)
 	renderFile(dataDir+"/tmpl/common/README.txt", tag)
+
+	// === Creates Metadata file
+	metadata := newMetadata_1_1(*fProjectName, *fPackageName, *fVersion,
+		*fSummary, *fDownloadURL, *fAuthor, *fAuthorEmail, tag["license"])
+	metadata.writeJSON(*fProjectName)
 
 	// === Renders source code files
 	if *fWeb {

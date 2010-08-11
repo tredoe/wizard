@@ -8,8 +8,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"io/ioutil"
+	"json"
+	"log"
 )
 
+
+const _FILE_NAME = "Metadata"
 
 // Licenses available
 var license = map[string]string{
@@ -115,5 +121,21 @@ Author, AuthorEmail, License string) *metadata_1_1 {
 	metadata.License = License
 
 	return metadata
+}
+
+/* Serializes to its equivalent JSON representation and write it to file
+`_FILE_NAME` in directory `dir`.
+*/
+func (self *metadata_1_1) writeJSON(dir string) {
+	filePath := fmt.Sprint(dir, "/", _FILE_NAME)
+
+	bytesOutput, err := json.MarshalIndent(self, " ", "   ")
+	if err != nil {
+		log.Exit(err)
+	}
+
+	if err := ioutil.WriteFile(filePath, bytesOutput, _PERM_FILE); err != nil {
+		log.Exit(err)
+	}
 }
 

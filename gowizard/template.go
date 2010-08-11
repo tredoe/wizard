@@ -8,6 +8,7 @@ package main
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"template"
@@ -66,7 +67,7 @@ func parseFile(filename string, data interface{}) string {
 	t.SetDelims("{{", "}}")
 
 	if err := t.ParseFile(filename); err != nil {
-		panic(err)
+		log.Exit(err)
 	}
 
 	t.Execute(data, _templateParser)
