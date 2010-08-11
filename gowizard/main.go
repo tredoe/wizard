@@ -84,22 +84,38 @@ func checkFlags() {
 
 	// === Options
 	if *fList {
-		fmt.Printf("Licenses\n\n")
+		fmt.Printf("\n  Licenses\n  --------\n")
 		for k, v := range license {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
-		os.Exit(0)
+		//os.Exit(0)
 	}
 
 	if *fInteractive {
-		for _, k := range sortedInteractiveFlags {
-			f := flag.Lookup(k)
+		fmt.Printf("\n  Interactive\n  -----------\n")
 
-			fmt.Printf("\n  %s: ", strings.TrimRight(f.Usage, "."))
-			*interactiveFlags[k] = read()
+		for i, k := range sortedInteractiveFlags {
+			f := flag.Lookup(k)
+			fmt.Printf("  %s", strings.TrimRight(f.Usage, "."))
+
+			switch i {
+			case 1: // Package-name
+				setNames()
+				fmt.Printf(" [%s]", *fPackageName)
+			case 7: // License
+				fmt.Printf(" [%s]", f.Value)
+			}
+
+			fmt.Print(": ")
+
+			if input := read(); input != "" {
+				*interactiveFlags[k] = input
+			}
 		}
 
 		fmt.Println()
+	} else {
+		setNames()
 	}
 
 	// === Checks necessary fields
@@ -115,7 +131,12 @@ func checkFlags() {
 		log.Exitf("license unavailable %s", *fLicense)
 	}
 
-	// === Sets names for both project and package
+	return
+}
+
+/* Sets names for both project and package. */
+func setNames() {
+
 	*fProjectName = strings.TrimSpace(*fProjectName)
 
 	if *fPackageName == "" {
@@ -127,8 +148,6 @@ func checkFlags() {
 	} else {
 		*fPackageName = strings.ToLower(strings.TrimSpace(*fPackageName))
 	}
-
-	return
 }
 
 
@@ -163,7 +182,7 @@ func main() {
 
 	// === Shows data on 'tag', if 'fDebug' is set
 	if *fDebug {
-		fmt.Printf("Debug\n\n")
+		fmt.Printf("\n  Debug\n  -----\n")
 		for k, v := range tag {
 			if k == "headerLine" {
 				continue
