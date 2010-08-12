@@ -85,9 +85,9 @@ func renderCodeFile(license *string, contentTemplate string, tag map[string]stri
 	render := parse(t_PAGE, &code{*license, contentRender})
 
 	ioutil.WriteFile(
-		path.Join(*fProjectName, *fPackageName, path.Base(contentTemplate)),
+		path.Join(cfg.ProjectName, cfg.PackageName, path.Base(contentTemplate)),
 		[]byte(render),
-		_PERM_FILE,
+		PERM_FILE,
 	)
 }
 
@@ -96,9 +96,9 @@ func renderFile(contentTemplate string, tag map[string]string) {
 	render := parseFile(contentTemplate, tag)
 
 	ioutil.WriteFile(
-		path.Join(*fProjectName, path.Base(contentTemplate)),
+		path.Join(cfg.ProjectName, path.Base(contentTemplate)),
 		[]byte(render),
-		_PERM_FILE,
+		PERM_FILE,
 	)
 }
 

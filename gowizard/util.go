@@ -20,7 +20,7 @@ func copy(destinationFile, sourceFile string) {
 		log.Exit(err)
 	}
 
-	err = ioutil.WriteFile(destinationFile, src, _PERM_FILE)
+	err = ioutil.WriteFile(destinationFile, src, PERM_FILE)
 	if err != nil {
 		log.Exit(err)
 	}
