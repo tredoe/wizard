@@ -8,10 +8,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"json"
 	"log"
+	"path"
 )
 
 
@@ -120,7 +120,7 @@ Author, AuthorEmail, License string) *metadata_1_1 {
 `_FILE_NAME` in directory `dir`.
 */
 func (self *metadata_1_1) writeJSON(dir string) {
-	filePath := fmt.Sprint(dir, "/", _FILE_NAME)
+	filePath := path.Join(dir, _FILE_NAME)
 
 	bytesOutput, err := json.MarshalIndent(self, " ", "   ")
 	if err != nil {

@@ -248,7 +248,7 @@ func main() {
 
 	// === Copies the license
 	copy(*fProjectName+"/LICENSE.txt",
-		fmt.Sprint(dataDir, "/license/", *fLicense, ".txt"))
+		path.Join(dataDir, "license", *fLicense+".txt"))
 
 	// === Renders common files
 	renderFile(dataDir+"/tmpl/common/AUTHORS.txt", tag)
