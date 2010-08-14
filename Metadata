@@ -1,0 +1,19 @@
+# Created by goWizard
+[default]
+author=John Mac
+download-url=
+application-type=cmd
+metadata-version=1.1
+version=
+application-name=gowizard
+project-name=gowizard
+summary=
+license=bsd-2
+author-email=charles.beck@sent.com
+
+[optional]
+keywords=
+home-page=
+description=
+platform=
+
