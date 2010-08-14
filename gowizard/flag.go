@@ -54,6 +54,9 @@ func loadMetadata() (*metadata, map[string]string) {
 		fLicense = flag.String("License", "bsd-2",
 			"The license covering the package.")
 
+		fOrganization = flag.String("Organization", "",
+			"The name of the organization. Necessary if you choose 'bsd-3' license.")
+
 		/*fPlatform = flag.String("Platform", "",
 			"A comma-separated list of platform specifications, summarizing\n"+
 				"\tthe operating systems supported by the package which are not listed\n"+
@@ -93,6 +96,7 @@ func loadMetadata() (*metadata, map[string]string) {
 		"Author":           fAuthor,
 		"Author-email":     fAuthorEmail,
 		"License":          fLicense,
+		"Organization":     fOrganization,
 	}
 
 	// Sorted flags for interactive mode
@@ -103,6 +107,7 @@ func loadMetadata() (*metadata, map[string]string) {
 		"Author",
 		"Author-email",
 		"License",
+		"Organization",
 	}
 
 	// === Parses the flags
@@ -110,7 +115,7 @@ func loadMetadata() (*metadata, map[string]string) {
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
 Usage: gowizard -Project-name -Author -Author-email
-	[-License -Application-type -Application-name]
+	[-Application-type -Application-name -License -Organization]
 
 `)
 		flag.PrintDefaults()
@@ -178,6 +183,10 @@ Usage: gowizard -Project-name -Author -Author-email
   -----------
 `)
 		for _, k := range sortedInteractiveFlags {
+			if k == "Organization" && *fLicense != "bsd-3" {
+				continue
+			}
+
 			f := flag.Lookup(k)
 			fmt.Printf("  %s", strings.TrimRight(f.Usage, "."))
 
@@ -190,7 +199,6 @@ Usage: gowizard -Project-name -Author -Author-email
 			}
 
 			fmt.Print(": ")
-
 			if input := read(); input != "" {
 				*interactiveFlags[k] = input
 			}
@@ -234,6 +242,15 @@ Usage: gowizard -Project-name -Author -Author-email
 		"full_author":      fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
 		"license":          listLicense[*fLicense],
 		"_project_header":  string(projectHeader),
+	}
+
+	if *fLicense == "bsd-3" {
+		if *fOrganization == "" {
+			fmt.Fprintf(os.Stderr,
+				"With license 'bsd-3', it is necessary the flag `Organization`\n")
+			usage()
+		}
+		tag["organization"] = *fOrganization
 	}
 
 	// === Shows data on 'tag', if 'fDebug' is set

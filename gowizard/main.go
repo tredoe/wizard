@@ -46,33 +46,41 @@ func main() {
 
 	// Gets the data directory from `$(GOROOT)/lib/$(TARG)`
 	dirData := path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
+
 	projectName := cfg.ProjectName // Stores the name before of change it
-
 	cfg.ProjectName = strings.ToLower(cfg.ProjectName)
-	os.MkdirAll(path.Join(cfg.ProjectName, cfg.ApplicationName), PERM_DIRECTORY)
 
-	// === Copies the license
-	copy(cfg.ProjectName+"/LICENSE.txt",
-		path.Join(dirData, "license", cfg.License+".txt"))
+	dirApp := path.Join(cfg.ProjectName, cfg.ApplicationName)
+	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
-	// === Renders common files
-	renderFile(dirData+"/tmpl/common/AUTHORS.txt", tag)
-	renderFile(dirData+"/tmpl/common/CONTRIBUTORS.txt", tag)
-	renderFile(dirData+"/tmpl/common/README.rst", tag)
-
-	// === Renders source code files
+	// === Renders application files
 	switch cfg.ApplicationType {
 	case "pkg":
-		renderCodeFile(&licenseRender, dirData+"/tmpl/pkg/main.go", tag)
-		renderCodeFile(&licenseRender, dirData+"/tmpl/pkg/Makefile", tag)
+		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/pkg/main.go", tag)
+		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/pkg/Makefile", tag)
 	case "cmd":
-		renderCodeFile(&licenseRender, dirData+"/tmpl/cmd/main.go", tag)
-		renderCodeFile(&licenseRender, dirData+"/tmpl/cmd/Makefile", tag)
+		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/cmd/main.go", tag)
+		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/cmd/Makefile", tag)
 	case "web.go":
-		renderCodeFile(&licenseRender, dirData+"/tmpl/web.go/setup.go", tag)
+		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/web.go/setup.go", tag)
 	}
 
-	// === Creates Metadata file
+	// === Renders common files
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS.txt", tag)
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS.txt", tag)
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.rst", tag)
+
+	// === Adds license file
+	switch cfg.License {
+	case "bsd-3":
+		renderNewFile(cfg.ProjectName+"/LICENSE.txt",
+			dirData+"/license/bsd-3.txt", tag)
+	default:
+		copy(cfg.ProjectName+"/LICENSE.txt",
+			path.Join(dirData, "license", cfg.License+".txt"))
+	}
+
+	// === Creates file Metadata
 	cfg.ProjectName = projectName
 	cfg.WriteINI(strings.ToLower(projectName))
 

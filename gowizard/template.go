@@ -19,12 +19,12 @@ import (
 
 // License headers
 const (
-	t_LICENSE     = `// Copyright {year}, The '{project_name}' Authors.  All rights reserved.
+	t_LICENSE     = `// Copyright {year}, The "{project_name}" Authors.  All rights reserved.
 // Use of this source code is governed by the {license} License
 // that can be found in the LICENSE file.
 `
 	t_LICENSE_CC0 = `// To the extent possible under law, Authors have waived all copyright and
-// related or neighboring rights to '{project_name}'.
+// related or neighboring rights to "{project_name}".
 `
 )
 
@@ -79,26 +79,31 @@ func parseFile(filename string, data interface{}) string {
 // === Utility
 // ===
 
-/* Creates a source code file nesting both license and content. */
-func renderCodeFile(license *string, contentTemplate string, tag map[string]string) {
-	contentRender := parseFile(contentTemplate, tag)
-	render := parse(t_PAGE, &code{*license, contentRender})
+/* Renders a source code file nesting both license and content. */
+func renderCodeFile(license *string, destination, template string, tag map[string]string) {
+	renderContent := parseFile(template, tag)
+	render := parse(t_PAGE, &code{*license, renderContent})
 
 	ioutil.WriteFile(
-		path.Join(cfg.ProjectName, cfg.ApplicationName, path.Base(contentTemplate)),
+		path.Join(destination, path.Base(template)),
 		[]byte(render),
 		PERM_FILE,
 	)
 }
 
-/* Creates single files. */
-func renderFile(contentTemplate string, tag map[string]string) {
-	render := parseFile(contentTemplate, tag)
+/* Base to rendering single files. */
+func _renderFile(destination, template string, tag map[string]string) {
+	render := parseFile(template, tag)
+	ioutil.WriteFile(destination, []byte(render), PERM_FILE)
+}
 
-	ioutil.WriteFile(
-		path.Join(cfg.ProjectName, path.Base(contentTemplate)),
-		[]byte(render),
-		PERM_FILE,
-	)
+/* Renders a single file. */
+func renderFile(destination, template string, tag map[string]string) {
+	_renderFile(path.Join(destination, path.Base(template)), template, tag)
+}
+
+/* Renders a single file, but uses a new name. */
+func renderNewFile(destination, template string, tag map[string]string) {
+	_renderFile(destination, template, tag)
 }
 
