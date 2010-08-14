@@ -34,9 +34,6 @@ func main() {
 
 	cfg, tag = loadMetadata()
 
-	// Gets the data directory from `$(GOROOT)/lib/$(TARG)`
-	dirData := path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
-
 	// === Renders the header
 	if strings.HasPrefix(cfg.License, "cc0") {
 		licenseRender = parse(t_LICENSE_CC0, tag)
@@ -46,7 +43,11 @@ func main() {
 	}
 
 	// === Creates directories in lower case
+
+	// Gets the data directory from `$(GOROOT)/lib/$(TARG)`
+	dirData := path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 	projectName := cfg.ProjectName // Stores the name before of change it
+
 	cfg.ProjectName = strings.ToLower(cfg.ProjectName)
 	os.MkdirAll(path.Join(cfg.ProjectName, cfg.ApplicationName), PERM_DIRECTORY)
 
@@ -57,7 +58,7 @@ func main() {
 	// === Renders common files
 	renderFile(dirData+"/tmpl/common/AUTHORS.txt", tag)
 	renderFile(dirData+"/tmpl/common/CONTRIBUTORS.txt", tag)
-	renderFile(dirData+"/tmpl/common/README.txt", tag)
+	renderFile(dirData+"/tmpl/common/README.rst", tag)
 
 	// === Renders source code files
 	switch cfg.ApplicationType {
