@@ -8,7 +8,6 @@ package main
 
 import (
 	"io/ioutil"
-	"json"
 	"log"
 	"path"
 	"reflect"
@@ -89,22 +88,6 @@ AuthorEmail, License string, file *conf.ConfigFile) *metadata {
 	metadata.file = file
 
 	return metadata
-}
-
-/* Serializes to its equivalent JSON representation and write it to file
-`_FILE_NAME` in directory `dir`.
-*/
-func (self *metadata) WriteJSON(dir string) {
-	filePath := path.Join(dir, _FILE_NAME)
-
-	bytesOutput, err := json.MarshalIndent(self, " ", "   ")
-	if err != nil {
-		log.Exit(err)
-	}
-
-	if err := ioutil.WriteFile(filePath, bytesOutput, PERM_FILE); err != nil {
-		log.Exit(err)
-	}
 }
 
 /* Serializes to INI format and write it to file `_FILE_NAME` in directory `dir`.
