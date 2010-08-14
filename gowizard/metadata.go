@@ -7,7 +7,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"path"
 	"reflect"

@@ -1,3 +1,7 @@
+// Copyright 2010, The 'goWizard' Authors.  All rights reserved.
+// Use of this source code is governed by the Simplified BSD License
+// that can be found in the LICENSE file.
+
 include $(GOROOT)/src/Make.$(GOARCH)
 
 TARG=gowizard
