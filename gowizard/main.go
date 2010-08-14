@@ -10,9 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	//"log"
-
-	//conf "goconf.googlecode.com/hg"
 )
 
 
@@ -25,9 +22,6 @@ const (
 	PERM_FILE      = 0644
 )
 
-// Gets the data directory from `$(GOROOT)/lib/$(TARG)`
-var dataDir = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
-
 // Metadata to build the new project
 var cfg *metadata
 
@@ -35,13 +29,15 @@ var cfg *metadata
 // === Main program execution
 
 func main() {
+	var licenseRender string
 	var tag map[string]string
 
 	cfg, tag = loadMetadata()
 
-	// === Renders the header
-	var licenseRender string
+	// Gets the data directory from `$(GOROOT)/lib/$(TARG)`
+	dirData := path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 
+	// === Renders the header
 	if strings.HasPrefix(cfg.License, "cc0") {
 		licenseRender = parse(t_LICENSE_CC0, tag)
 	} else {
@@ -50,32 +46,34 @@ func main() {
 	}
 
 	// === Creates directories in lower case
+	projectName := cfg.ProjectName // Stores the name before of change it
 	cfg.ProjectName = strings.ToLower(cfg.ProjectName)
 	os.MkdirAll(path.Join(cfg.ProjectName, cfg.ApplicationName), PERM_DIRECTORY)
 
 	// === Copies the license
 	copy(cfg.ProjectName+"/LICENSE.txt",
-		path.Join(dataDir, "license", cfg.License+".txt"))
+		path.Join(dirData, "license", cfg.License+".txt"))
 
 	// === Renders common files
-	renderFile(dataDir+"/tmpl/common/AUTHORS.txt", tag)
-	renderFile(dataDir+"/tmpl/common/CONTRIBUTORS.txt", tag)
-	renderFile(dataDir+"/tmpl/common/README.txt", tag)
-
-	// === Creates Metadata file
-	cfg.WriteINI(cfg.ProjectName)
+	renderFile(dirData+"/tmpl/common/AUTHORS.txt", tag)
+	renderFile(dirData+"/tmpl/common/CONTRIBUTORS.txt", tag)
+	renderFile(dirData+"/tmpl/common/README.txt", tag)
 
 	// === Renders source code files
 	switch cfg.ApplicationType {
 	case "pkg":
-		renderCodeFile(&licenseRender, dataDir+"/tmpl/pkg/main.go", tag)
-		renderCodeFile(&licenseRender, dataDir+"/tmpl/pkg/Makefile", tag)
+		renderCodeFile(&licenseRender, dirData+"/tmpl/pkg/main.go", tag)
+		renderCodeFile(&licenseRender, dirData+"/tmpl/pkg/Makefile", tag)
 	case "cmd":
-		renderCodeFile(&licenseRender, dataDir+"/tmpl/cmd/main.go", tag)
-		renderCodeFile(&licenseRender, dataDir+"/tmpl/cmd/Makefile", tag)
+		renderCodeFile(&licenseRender, dirData+"/tmpl/cmd/main.go", tag)
+		renderCodeFile(&licenseRender, dirData+"/tmpl/cmd/Makefile", tag)
 	case "web.go":
-		renderCodeFile(&licenseRender, dataDir+"/tmpl/web.go/setup.go", tag)
+		renderCodeFile(&licenseRender, dirData+"/tmpl/web.go/setup.go", tag)
 	}
+
+	// === Creates Metadata file
+	cfg.ProjectName = projectName
+	cfg.WriteINI(strings.ToLower(projectName))
 
 	os.Exit(0)
 }
