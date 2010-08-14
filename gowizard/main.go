@@ -42,7 +42,7 @@ func main() {
 	// === Renders the header
 	var licenseRender string
 
-	if cfg.License == "cc0" {
+	if strings.HasPrefix(cfg.License, "cc0") {
 		licenseRender = parse(t_LICENSE_CC0, tag)
 	} else {
 		tag["year"] = strconv.Itoa64(time.LocalTime().Year)

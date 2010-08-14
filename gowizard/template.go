@@ -17,7 +17,7 @@ import (
 
 // === Template and data to build source code files
 
-// License licenses
+// License headers
 const (
 	t_LICENSE     = `// Copyright {year}, The '{project_name}' Authors.  All rights reserved.
 // Use of this source code is governed by the {license} License

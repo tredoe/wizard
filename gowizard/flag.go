@@ -80,7 +80,7 @@ func loadMetadata() (*metadata, map[string]string) {
 		fDebug       = flag.Bool("d", false, "debug mode")
 		fInteractive = flag.Bool("i", false, "interactive mode")
 		fListLicense = flag.Bool("ll", false,
-			"shows the list of licenses for the flag `license`")
+			"shows the list of licenses for the flag `License`")
 		fListApp = flag.Bool("la", false,
 			"shows the list of application types for the flag `Application-type`")
 	)
@@ -105,27 +105,12 @@ func loadMetadata() (*metadata, map[string]string) {
 		"License",
 	}
 
-	// Available Application types
-	var listApp = map[string]string{
-		"cmd":    "command line",
-		"pkg":    "package",
-		"web.go": "web environment",
-	}
-
-	// Available licenses
-	var listLicense = map[string]string{
-		"apache": "Apache (version 2.0)",
-		"bsd-2":  "Simplified BSD",
-		"bsd-3":  "New BSD",
-		"cc0":    "Creative Commons CC0 1.0 Universal",
-	}
-
 	// === Parses the flags
 	// ===
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Application-type -Project-name -Author -Author-email -License
-	[-Application-name]
+Usage: gowizard -Project-name -Author -Author-email
+	[-License -Application-type -Application-name]
 
 `)
 		flag.PrintDefaults()
@@ -173,6 +158,7 @@ Usage: gowizard -Application-type -Project-name -Author -Author-email -License
 		for k, v := range listApp {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
+		os.Exit(0)
 	}
 
 	if *fListLicense {
@@ -183,6 +169,7 @@ Usage: gowizard -Application-type -Project-name -Author -Author-email -License
 		for k, v := range listLicense {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
+		os.Exit(0)
 	}
 
 	if *fInteractive {

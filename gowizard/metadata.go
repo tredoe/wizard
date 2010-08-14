@@ -19,6 +19,21 @@ import (
 
 const _FILE_NAME = "Metadata"
 
+// Available application types
+var listApp = map[string]string{
+	"cmd":    "command line",
+	"pkg":    "package",
+	"web.go": "web environment",
+}
+
+// Available licenses
+var listLicense = map[string]string{
+	"apache-2": "Apache (version 2.0)",
+	"bsd-2":    "Simplified BSD",
+	"bsd-3":    "New BSD",
+	"cc0-1":    "Creative Commons CC0 1.0 Universal",
+}
+
 
 /* v1.1 http://www.python.org/dev/peps/pep-0314/
 
