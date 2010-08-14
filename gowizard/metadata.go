@@ -26,10 +26,12 @@ var listApp = map[string]string{
 
 // Available licenses
 var listLicense = map[string]string{
-	"apache-2": "Apache (version 2.0)",
-	"bsd-2":    "Simplified BSD",
-	"bsd-3":    "New BSD",
+	"apache-2": "Apache License (version 2.0)",
+	"bsd-2":    "Simplified BSD License",
+	"bsd-3":    "New BSD License",
 	"cc0-1":    "Creative Commons CC0 1.0 Universal",
+	"gpl-3":    "GNU GPL (version 3)",
+	"agpl-3":   "GNU AGPL (version 3)",
 }
 
 

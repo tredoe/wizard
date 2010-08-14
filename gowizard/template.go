@@ -20,7 +20,7 @@ import (
 // License headers
 const (
 	t_LICENSE     = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
-{comment} Use of this source code is governed by the {license} License
+{comment} Use of this source code is governed by the {license}
 {comment} that can be found in the LICENSE file.
 `
 	t_LICENSE_CC0 = `{comment} To the extent possible under law, Authors have waived all copyright and
