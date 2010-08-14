@@ -87,9 +87,9 @@ func loadMetadata() (*metadata, map[string]string) {
 
 	// Flags used on interactive mode
 	var interactiveFlags = map[string]*string{
+		"Application-type": fApplicationType,
 		"Project-name":     fProjectName,
 		"Application-name": fApplicationName,
-		"Application-type": fApplicationType,
 		"Author":           fAuthor,
 		"Author-email":     fAuthorEmail,
 		"License":          fLicense,
@@ -97,9 +97,9 @@ func loadMetadata() (*metadata, map[string]string) {
 
 	// Sorted flags for interactive mode
 	var sortedInteractiveFlags = []string{
+		"Application-type",
 		"Project-name",
 		"Application-name",
-		"Application-type",
 		"Author",
 		"Author-email",
 		"License",
@@ -124,7 +124,8 @@ func loadMetadata() (*metadata, map[string]string) {
 	// ===
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Application-type -Project-name -Author -Author-email -License [-Package-name]
+Usage: gowizard -Application-type -Project-name -Author -Author-email -License
+	[-Application-name]
 
 `)
 		flag.PrintDefaults()
@@ -139,14 +140,25 @@ Usage: gowizard -Application-type -Project-name -Author -Author-email -License [
 		reGo := regexp.MustCompile(`^go`) // To remove it from the project name
 		*fProjectName = strings.TrimSpace(*fProjectName)
 
-		if *fApplicationName == "" {
-			// The package name is created:
-			// getting the last string after of the dash ('-'), if any,
-			// and removing 'go'. Finally, it's lower cased.
-			pkg := strings.Split(*fProjectName, "-", -1)
-			*fApplicationName = reGo.ReplaceAllString(strings.ToLower(pkg[len(pkg)-1]), "")
-		} else {
-			*fApplicationName = strings.ToLower(strings.TrimSpace(*fApplicationName))
+		switch *fApplicationType {
+		// The name of a tool for the command line is usually named as
+		// the project name.
+		case "cmd":
+			if *fApplicationName == "" {
+				*fApplicationName = strings.ToLower(*fProjectName)
+			}
+		default:
+			if *fApplicationName == "" {
+				// The package name is created:
+				// getting the last string after of the dash ('-'), if any,
+				// and removing 'go'. Finally, it's lower cased.
+				pkg := strings.Split(*fProjectName, "-", -1)
+				*fApplicationName = reGo.ReplaceAllString(
+					strings.ToLower(pkg[len(pkg)-1]), "")
+			} else {
+				*fApplicationName = strings.ToLower(
+					strings.TrimSpace(*fApplicationName))
+			}
 		}
 	}
 
