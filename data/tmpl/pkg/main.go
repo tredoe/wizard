@@ -1,11 +1,11 @@
-package {{packageName}}
+package {{application_name}}
 
 import (
 
 )
 
 
-func _() {
+func () {
 
 }
 

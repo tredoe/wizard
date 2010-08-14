@@ -19,12 +19,12 @@ import (
 
 // License licenses
 const (
-	t_LICENSE     = `// Copyright {year}, The '{projectName}' Authors.  All rights reserved.
+	t_LICENSE     = `// Copyright {year}, The '{project_name}' Authors.  All rights reserved.
 // Use of this source code is governed by the {license} License
 // that can be found in the LICENSE file.
 `
 	t_LICENSE_CC0 = `// To the extent possible under law, Authors have waived all copyright and
-// related or neighboring rights to '{projectName}'.
+// related or neighboring rights to '{project_name}'.
 `
 )
 
@@ -85,7 +85,7 @@ func renderCodeFile(license *string, contentTemplate string, tag map[string]stri
 	render := parse(t_PAGE, &code{*license, contentRender})
 
 	ioutil.WriteFile(
-		path.Join(cfg.ProjectName, cfg.PackageName, path.Base(contentTemplate)),
+		path.Join(cfg.ProjectName, cfg.ApplicationName, path.Base(contentTemplate)),
 		[]byte(render),
 		PERM_FILE,
 	)

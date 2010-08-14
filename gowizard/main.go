@@ -10,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	//"log"
+
+	//conf "goconf.googlecode.com/hg"
 )
 
 
@@ -48,7 +51,7 @@ func main() {
 
 	// === Creates directories in lower case
 	cfg.ProjectName = strings.ToLower(cfg.ProjectName)
-	os.MkdirAll(path.Join(cfg.ProjectName, cfg.PackageName), PERM_DIRECTORY)
+	os.MkdirAll(path.Join(cfg.ProjectName, cfg.ApplicationName), PERM_DIRECTORY)
 
 	// === Copies the license
 	copy(cfg.ProjectName+"/LICENSE.txt",
@@ -61,10 +64,11 @@ func main() {
 
 	// === Creates Metadata file
 	cfg.License = tag["license"]
-	cfg.writeJSON(cfg.ProjectName)
+	//cfg.WriteJSON(cfg.ProjectName)
+	cfg.WriteINI(cfg.ProjectName)
 
 	// === Renders source code files
-	switch *fApp {
+	switch cfg.ApplicationType {
 	case "pkg":
 		renderCodeFile(&licenseRender, dataDir+"/tmpl/pkg/main.go", tag)
 		renderCodeFile(&licenseRender, dataDir+"/tmpl/pkg/Makefile", tag)
@@ -77,4 +81,16 @@ func main() {
 
 	os.Exit(0)
 }
+
+/*func ini() {
+	var file *conf.ConfigFile
+
+	if *fUpdate {
+		if file, err := conf.ReadConfigFile(_FILE_NAME); err != nil {
+			log.Exit(err)
+		}
+	} else {
+		file = conf.NewConfigFile()
+	}
+}*/
 

@@ -11,10 +11,12 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	conf "goconf.googlecode.com/hg"
 )
 
 // Global flag
-var fApp = flag.String("app", "pkg", "The application type.")
+var fUpdate = flag.Bool("u", false, "Updates metadata")
 
 
 func loadMetadata() (*metadata, map[string]string) {
@@ -27,10 +29,13 @@ func loadMetadata() (*metadata, map[string]string) {
 		fProjectName = flag.String("Project-name", "",
 			"The name of the project.")
 
-		fPackageName = flag.String("Package-name", "",
+		fApplicationName = flag.String("Application-name", "",
 			"The name of the package.")
 
-		fVersion = flag.String("Version", "",
+		fApplicationType = flag.String("Application-type", "pkg",
+			"The application type.")
+
+		/*fVersion = flag.String("Version", "",
 			"A string containing the package's version number.")
 
 		fSummary = flag.String("Summary", "",
@@ -38,7 +43,7 @@ func loadMetadata() (*metadata, map[string]string) {
 
 		fDownloadURL = flag.String("Download-URL", "",
 			"A string containing the URL from which this version of the\n"+
-				"\tpackage can be downloaded.")
+				"\tpackage can be downloaded.")*/
 
 		fAuthor = flag.String("Author", "",
 			"A string containing the author's name at a minimum.")
@@ -49,7 +54,7 @@ func loadMetadata() (*metadata, map[string]string) {
 		fLicense = flag.String("License", "bsd-2",
 			"The license covering the package.")
 
-		fPlatform = flag.String("Platform", "",
+		/*fPlatform = flag.String("Platform", "",
 			"A comma-separated list of platform specifications, summarizing\n"+
 				"\tthe operating systems supported by the package which are not listed\n"+
 				"\tin the \"Operating System\" Trove classifiers.")
@@ -67,7 +72,7 @@ func loadMetadata() (*metadata, map[string]string) {
 
 		fClassifier = flag.String("Classifier", "",
 			"Each entry is a string giving a single classification value\n"+
-				"\tfor the package.")
+				"\tfor the package.")*/
 	)
 
 	// Generic flags
@@ -77,30 +82,24 @@ func loadMetadata() (*metadata, map[string]string) {
 		fListLicense = flag.Bool("ll", false,
 			"shows the list of licenses for the flag `license`")
 		fListApp = flag.Bool("la", false,
-			"shows the list of application types for the flag `app`")
+			"shows the list of application types for the flag `Application-type`")
 	)
 
-	// Flags used in interactive mode
+	// Flags used on interactive mode
 	var interactiveFlags = map[string]*string{
-		"app":          fApp,
-		"Project-name": fProjectName,
-		"Package-name": fPackageName,
-		"Version":      fVersion,
-		"Summary":      fSummary,
-		"Download-URL": fDownloadURL,
-		"Author":       fAuthor,
-		"Author-email": fAuthorEmail,
-		"License":      fLicense,
+		"Project-name":     fProjectName,
+		"Application-name": fApplicationName,
+		"Application-type": fApplicationType,
+		"Author":           fAuthor,
+		"Author-email":     fAuthorEmail,
+		"License":          fLicense,
 	}
 
 	// Sorted flags for interactive mode
 	var sortedInteractiveFlags = []string{
-		"app",
 		"Project-name",
-		"Package-name",
-		"Version",
-		"Summary",
-		"Download-URL",
+		"Application-name",
+		"Application-type",
 		"Author",
 		"Author-email",
 		"License",
@@ -125,9 +124,7 @@ func loadMetadata() (*metadata, map[string]string) {
 	// ===
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
-Usage: gowizard -app -Project-name -Version -Summary -Download-URL
-	-Author -Author-email -License [-Package-name -Platform -Description
-	-Keywords -Home-page -Classifier]
+Usage: gowizard -Application-type -Project-name -Author -Author-email -License [-Package-name]
 
 `)
 		flag.PrintDefaults()
@@ -142,14 +139,14 @@ Usage: gowizard -app -Project-name -Version -Summary -Download-URL
 		reGo := regexp.MustCompile(`^go`) // To remove it from the project name
 		*fProjectName = strings.TrimSpace(*fProjectName)
 
-		if *fPackageName == "" {
+		if *fApplicationName == "" {
 			// The package name is created:
 			// getting the last string after of the dash ('-'), if any,
 			// and removing 'go'. Finally, it's lower cased.
 			pkg := strings.Split(*fProjectName, "-", -1)
-			*fPackageName = reGo.ReplaceAllString(strings.ToLower(pkg[len(pkg)-1]), "")
+			*fApplicationName = reGo.ReplaceAllString(strings.ToLower(pkg[len(pkg)-1]), "")
 		} else {
-			*fPackageName = strings.ToLower(strings.TrimSpace(*fPackageName))
+			*fApplicationName = strings.ToLower(strings.TrimSpace(*fApplicationName))
 		}
 	}
 
@@ -181,16 +178,16 @@ Usage: gowizard -app -Project-name -Version -Summary -Download-URL
   Interactive
   -----------
 `)
-		for i, k := range sortedInteractiveFlags {
+		for _, k := range sortedInteractiveFlags {
 			f := flag.Lookup(k)
 			fmt.Printf("  %s", strings.TrimRight(f.Usage, "."))
 
-			switch i {
-			case 0, 8: // app, License
+			switch k {
+			case "Application-type", "License":
 				fmt.Printf(" [%s]", f.Value)
-			case 2: // Package-name
+			case "Application-name":
 				setNames()
-				fmt.Printf(" [%s]", *fPackageName)
+				fmt.Printf(" [%s]", *fApplicationName)
 			}
 
 			fmt.Print(": ")
@@ -209,8 +206,7 @@ Usage: gowizard -app -Project-name -Version -Summary -Download-URL
 	// ===
 
 	// Necessary fields
-	if *fProjectName == "" || *fVersion == "" || *fSummary == "" ||
-		*fDownloadURL == "" || *fAuthor == "" || *fAuthorEmail == "" ||
+	if *fProjectName == "" || *fAuthor == "" || *fAuthorEmail == "" ||
 		*fLicense == "" {
 		usage()
 	}
@@ -222,24 +218,24 @@ Usage: gowizard -app -Project-name -Version -Summary -Download-URL
 	}
 
 	// Application type
-	*fApp = strings.ToLower(*fApp)
-	if _, present := listApp[*fApp]; !present {
-		log.Exitf("unavailable application type %s", *fApp)
+	*fApplicationType = strings.ToLower(*fApplicationType)
+	if _, present := listApp[*fApplicationType]; !present {
+		log.Exitf("unavailable application type %s", *fApplicationType)
 	}
 
 	// === Adds the tags to pass to the templates
 	// ===
-	projectNameHeader := make([]byte, len(*fProjectName))
-	for i, _ := range projectNameHeader {
-		projectNameHeader[i] = '='
+	projectHeader := make([]byte, len(*fProjectName))
+	for i, _ := range projectHeader {
+		projectHeader[i] = '='
 	}
 
 	tag := map[string]string{
-		"projectName":        *fProjectName,
-		"packageName":        *fPackageName,
-		"author":             fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
-		"license":            listLicense[*fLicense],
-		"_projectNameHeader": string(projectNameHeader),
+		"project_name":     *fProjectName,
+		"application_name": *fApplicationName,
+		"full_author":      fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
+		"license":          listLicense[*fLicense],
+		"_project_header":  string(projectHeader),
 	}
 
 	// === Shows data on 'tag', if 'fDebug' is set
@@ -259,11 +255,19 @@ Usage: gowizard -app -Project-name -Version -Summary -Download-URL
 
 	// ===
 
-	classifier := strings.Split(*fClassifier, ",", -1)
+	var file *conf.ConfigFile
+	var err os.Error
 
-	return NewMetadata(*fProjectName, *fPackageName, *fVersion,
-		*fSummary, *fDownloadURL, *fAuthor, *fAuthorEmail, *fLicense,
-		*fPlatform, *fDescription, *fKeywords, *fHomePage, classifier),
+	if *fUpdate {
+		if file, err = conf.ReadConfigFile(_FILE_NAME); err != nil {
+			log.Exit(err)
+		}
+	} else {
+		file = conf.NewConfigFile()
+	}
+
+	return NewMetadata(*fProjectName, *fApplicationName, *fApplicationType,
+		*fAuthor, *fAuthorEmail, *fLicense, file),
 		tag
 }
 

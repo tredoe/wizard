@@ -11,6 +11,9 @@ import (
 	"json"
 	"log"
 	"path"
+	"reflect"
+
+	conf "goconf.googlecode.com/hg"
 )
 
 
@@ -26,15 +29,18 @@ The next fields have not been taken:
 	Provides
 	Obsoletes
 
-The field 'Name' has been substituted by 'Project-name' and 'Package-name'.
+The field 'Name' has been substituted by 'Project-name' and 'Application-name'.
 The field 'License' needs a value from the map 'license'.
+
+It has been added 'Application-type'.
 
 For 'Classifier' see on http://pypi.python.org/pypi?%3Aaction=list_classifiers
 */
 type metadata struct {
 	MetadataVersion string "Metadata-Version" // Version of the file format
 	ProjectName     string "Project-name"
-	PackageName     string "Package-name"
+	ApplicationName string "Application-name"
+	ApplicationType string "Application-type"
 	Version         string
 	Summary         string
 	DownloadURL     string "Download-URL"
@@ -43,34 +49,29 @@ type metadata struct {
 	License         string
 
 	// === Optional
-
 	Platform    string
 	Description string
 	Keywords    string
 	HomePage    string "Home-page"
 	Classifier  []string
+
+	// Config file
+	file *conf.ConfigFile
 }
 
-func NewMetadata(ProjectName, PackageName, Version, Summary, DownloadURL,
-Author, AuthorEmail, License, Platform, Description, Keywords, HomePage string,
-Classifier []string) *metadata {
+func NewMetadata(ProjectName, ApplicationName, ApplicationType, Author,
+AuthorEmail, License string, file *conf.ConfigFile) *metadata {
 	metadata := new(metadata)
 
 	metadata.MetadataVersion = "1.1"
 	metadata.ProjectName = ProjectName
-	metadata.PackageName = PackageName
-	metadata.Version = Version
-	metadata.Summary = Summary
-	metadata.DownloadURL = DownloadURL
+	metadata.ApplicationName = ApplicationName
+	metadata.ApplicationType = ApplicationType
 	metadata.Author = Author
 	metadata.AuthorEmail = AuthorEmail
 	metadata.License = License
 
-	metadata.Platform = Platform
-	metadata.Description = Description
-	metadata.Keywords = Keywords
-	metadata.HomePage = HomePage
-	metadata.Classifier = Classifier
+	metadata.file = file
 
 	return metadata
 }
@@ -78,7 +79,7 @@ Classifier []string) *metadata {
 /* Serializes to its equivalent JSON representation and write it to file
 `_FILE_NAME` in directory `dir`.
 */
-func (self *metadata) writeJSON(dir string) {
+func (self *metadata) WriteJSON(dir string) {
 	filePath := path.Join(dir, _FILE_NAME)
 
 	bytesOutput, err := json.MarshalIndent(self, " ", "   ")
@@ -91,8 +92,71 @@ func (self *metadata) writeJSON(dir string) {
 	}
 }
 
+func (self *metadata) WriteINI(dir string) {
+	name := getTag(self)
+
+	value := []string{
+		self.MetadataVersion,
+		self.ProjectName,
+		self.ApplicationName,
+		self.ApplicationType,
+		self.Version,
+		self.Summary,
+		self.DownloadURL,
+		self.Author,
+		self.AuthorEmail,
+		self.License,
+	}
+
+	optional := []string{
+		self.Platform,
+		self.Description,
+		self.Keywords,
+		self.HomePage,
+		//self.Classifier,
+	}
+
+	for i := 0; i < len(value); i++ {
+		self.file.AddOption(conf.DefaultSection, name[i], value[i])
+	}
+
+	for i := 0; i < len(optional); i++ {
+		self.file.AddOption("optional", name[i+len(value)], optional[i])
+	}
+
+	filePath := path.Join(dir, _FILE_NAME)
+	if err := self.file.WriteConfigFile(filePath, PERM_FILE, "Created by goWizard"); err != nil {
+		log.Exit(err)
+	}
+}
 
 func ReadMetadata() {
 
+}
+
+
+// === Utility
+// ===
+
+/* Gets the tags of a struct, if any. */
+func getTag(i interface{}) (name []string) {
+	switch v := reflect.NewValue(i).(type) {
+	case *reflect.PtrValue:
+		t := v.Elem().Type().(*reflect.StructType)
+		num := t.NumField()
+		name = make([]string, num)
+
+		for i := 0; i < num; i++ {
+			field := t.Field(i)
+
+			if f := field.Tag; f != "" {
+				name[i] = f
+			} else {
+				name[i] = field.Name
+			}
+		}
+	}
+
+	return name
 }
 
