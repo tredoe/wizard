@@ -29,18 +29,27 @@ var cfg *metadata
 // === Main program execution
 
 func main() {
-	var licenseRender string
+	var licenseCode, licenseMakefile string
 	var tag map[string]string
 
 	cfg, tag = loadMetadata()
 
 	// === Renders the header
 	if strings.HasPrefix(cfg.License, "cc0") {
-		licenseRender = parse(t_LICENSE_CC0, tag)
+		tag["comment"] = "//"
+		licenseCode = parse(t_LICENSE_CC0, tag)
+		tag["comment"] = "#"
+		licenseMakefile = parse(t_LICENSE_CC0, tag)
 	} else {
 		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
-		licenseRender = parse(t_LICENSE, tag)
+
+		tag["comment"] = "//"
+		licenseCode = parse(t_LICENSE, tag)
+		tag["comment"] = "#"
+		licenseMakefile = parse(t_LICENSE, tag)
 	}
+	// This tag is not used anymore.
+	tag["comment"] = "", false
 
 	// === Creates directories in lower case
 
@@ -56,13 +65,13 @@ func main() {
 	// === Renders application files
 	switch cfg.ApplicationType {
 	case "pkg":
-		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/pkg/main.go", tag)
-		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/pkg/Makefile", tag)
+		renderCodeFile(&licenseCode, dirApp, dirData+"/tmpl/pkg/main.go", tag)
+		renderCodeFile(&licenseMakefile, dirApp, dirData+"/tmpl/pkg/Makefile", tag)
 	case "cmd":
-		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/cmd/main.go", tag)
-		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/cmd/Makefile", tag)
+		renderCodeFile(&licenseCode, dirApp, dirData+"/tmpl/cmd/main.go", tag)
+		renderCodeFile(&licenseMakefile, dirApp, dirData+"/tmpl/cmd/Makefile", tag)
 	case "web.go":
-		renderCodeFile(&licenseRender, dirApp, dirData+"/tmpl/web.go/setup.go", tag)
+		renderCodeFile(&licenseCode, dirApp, dirData+"/tmpl/web.go/setup.go", tag)
 	}
 
 	// === Renders common files

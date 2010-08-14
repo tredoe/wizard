@@ -19,12 +19,12 @@ import (
 
 // License headers
 const (
-	t_LICENSE     = `// Copyright {year}, The "{project_name}" Authors.  All rights reserved.
-// Use of this source code is governed by the {license} License
-// that can be found in the LICENSE file.
+	t_LICENSE     = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
+{comment} Use of this source code is governed by the {license} License
+{comment} that can be found in the LICENSE file.
 `
-	t_LICENSE_CC0 = `// To the extent possible under law, Authors have waived all copyright and
-// related or neighboring rights to "{project_name}".
+	t_LICENSE_CC0 = `{comment} To the extent possible under law, Authors have waived all copyright and
+{comment} related or neighboring rights to "{project_name}".
 `
 )
 
