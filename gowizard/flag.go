@@ -205,8 +205,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	// ===
 
 	// Necessary fields
-	if *fProjectName == "" || *fAuthor == "" || *fAuthorEmail == "" ||
-		*fLicense == "" {
+	if *fProjectName == "" || *fAuthor == "" || *fAuthorEmail == "" {
 		usage()
 	}
 
@@ -252,6 +251,7 @@ Usage: gowizard -Project-name -Author -Author-email
 		os.Exit(0)
 	}
 
+	// === Gets `conf.ConfigFile`
 	// ===
 
 	var file *conf.ConfigFile
@@ -264,6 +264,8 @@ Usage: gowizard -Project-name -Author -Author-email
 	} else {
 		file = conf.NewConfigFile()
 	}
+
+	// ===
 
 	return NewMetadata(*fProjectName, *fApplicationName, *fApplicationType,
 		*fAuthor, *fAuthorEmail, *fLicense, file),

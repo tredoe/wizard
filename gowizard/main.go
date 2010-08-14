@@ -63,8 +63,6 @@ func main() {
 	renderFile(dataDir+"/tmpl/common/README.txt", tag)
 
 	// === Creates Metadata file
-	cfg.License = tag["license"]
-	//cfg.WriteJSON(cfg.ProjectName)
 	cfg.WriteINI(cfg.ProjectName)
 
 	// === Renders source code files
@@ -81,16 +79,4 @@ func main() {
 
 	os.Exit(0)
 }
-
-/*func ini() {
-	var file *conf.ConfigFile
-
-	if *fUpdate {
-		if file, err := conf.ReadConfigFile(_FILE_NAME); err != nil {
-			log.Exit(err)
-		}
-	} else {
-		file = conf.NewConfigFile()
-	}
-}*/
 

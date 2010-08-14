@@ -107,6 +107,8 @@ func (self *metadata) WriteJSON(dir string) {
 	}
 }
 
+/* Serializes to INI format and write it to file `_FILE_NAME` in directory `dir`.
+*/
 func (self *metadata) WriteINI(dir string) {
 	name := getTag(self)
 
