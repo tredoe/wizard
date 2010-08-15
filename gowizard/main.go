@@ -53,15 +53,15 @@ func main() {
 		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/cmd/main.go", tag)
 		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/cmd/main_test.go", tag)
 	case "web.go":
-		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/pkg/Makefile", tag)
+		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/web.go/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/web.go/setup.go", tag)
 		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main.go", tag)
 		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main_test.go", tag)
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/web.go/setup.go", tag)
 	}
 
 	// === Renders common files
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS.txt", tag)
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS.txt", tag)
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS", tag)
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS", tag)
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.rst", tag)
 
 	// === Adds license file
@@ -69,10 +69,10 @@ func main() {
 	case "none":
 		break
 	case "bsd-3":
-		renderNewFile(cfg.ProjectName+"/LICENSE.txt",
-			dirData+"/license/bsd-3.txt", tag)
+		renderNewFile(cfg.ProjectName+"/LICENSE", dirData+"/license/bsd-3.txt",
+			tag)
 	default:
-		copy(cfg.ProjectName+"/LICENSE.txt",
+		copy(cfg.ProjectName+"/LICENSE",
 			path.Join(dirData, "license", cfg.License+".txt"))
 	}
 
