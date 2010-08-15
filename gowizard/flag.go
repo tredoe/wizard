@@ -106,7 +106,9 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
 Usage: gowizard -Project-name -Author -Author-email
-	[-Application-type -Application-name -License -org]
+       gowizard -Project-name -Author [-Author-email] -org
+
+	[-Application-type -Application-name -License]
 
 `)
 		flag.PrintDefaults()
@@ -212,21 +214,28 @@ Usage: gowizard -Project-name -Author -Author-email
 	// === Checks
 	// ===
 
-	// Necessary fields
-	if *fProjectName == "" || *fAuthor == "" || *fAuthorEmail == "" {
+	// === Necessary fields
+	if *fProjectName == "" || *fAuthor == "" {
 		usage()
 	}
-
-	// License
-	*fLicense = strings.ToLower(*fLicense)
-	if _, present := listLicense[*fLicense]; !present {
-		log.Exitf("license unavailable %s", *fLicense)
+	if *fAuthorEmail == "" && ! *fIsOrganization {
+		log.Exit("The email address is required for people")
 	}
 
-	// Application type
+	// === License
+	*fLicense = strings.ToLower(*fLicense)
+	if _, present := listLicense[*fLicense]; !present {
+		log.Exitf("Unavailable license: '%s'", *fLicense)
+	}
+
+	if *fLicense == "bsd-3" && ! *fIsOrganization {
+		log.Exit("The license 'bsd-3' requires an organization as author")
+	}
+
+	// === Application type
 	*fApplicationType = strings.ToLower(*fApplicationType)
 	if _, present := listApp[*fApplicationType]; !present {
-		log.Exitf("unavailable application type %s", *fApplicationType)
+		log.Exitf("Unavailable application type: '%s'", *fApplicationType)
 	}
 
 	// === Adds the tags to pass to the templates
@@ -308,17 +317,6 @@ Usage: gowizard -Project-name -Author -Author-email
 		"makefile": headerMakefile,
 		"code":     headerCode,
 	}
-
-	// **********
-
-	/*if *fLicense == "bsd-3" {
-		if *fOrganization == "" {
-			fmt.Fprintf(os.Stderr,
-				"With license 'bsd-3', it is necessary the flag `Organization`\n")
-			usage()
-		}
-		tag["organization"] = *fOrganization
-	}*/
 
 	// === Gets `conf.ConfigFile`
 	// ===
