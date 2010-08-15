@@ -64,6 +64,8 @@ func main() {
 	case "bsd-3":
 		renderNewFile(cfg.ProjectName+"/LICENSE.txt",
 			dirData+"/license/bsd-3.txt", tag)
+	case "none":
+		break
 	default:
 		copy(cfg.ProjectName+"/LICENSE.txt",
 			path.Join(dirData, "license", cfg.License+".txt"))

@@ -31,7 +31,8 @@ const (
 {comment} (either version {version} of the License, or "at your option" any later version)
 {comment} that can be found in the LICENSE file.
 `
-	t_LICENSE_NONE = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.`
+	t_LICENSE_NONE = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
+`
 )
 
 const t_PAGE = "{header}\n{content}"
