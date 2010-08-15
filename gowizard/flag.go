@@ -245,10 +245,19 @@ Usage: gowizard -Project-name -Author -Author-email
 		projectHeader[i] = '='
 	}
 
+	var org string
+	if *fIsOrganization {
+		org = "ok"
+	} else {
+		org = ""
+	}
+
 	tag = map[string]string{
+		"is_organization":  org,
 		"project_name":     *fProjectName,
 		"application_name": *fApplicationName,
-		"full_author":      fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
+		"author":           *fAuthor,
+		"author_email":     *fAuthorEmail,
 		"_project_header":  string(projectHeader),
 	}
 

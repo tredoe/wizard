@@ -8,5 +8,5 @@
 #
 # Please keep the list sorted.
 
-{{full_author}}
+{{author}}{{.section author_email}} <{{@}}>{{.end}}
 
