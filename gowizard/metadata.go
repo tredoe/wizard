@@ -127,7 +127,7 @@ func (self *metadata) WriteINI(dir string) {
 	}
 
 	filePath := path.Join(dir, _FILE_NAME)
-	if err := self.file.WriteConfigFile(filePath, PERM_FILE, "Created by gowizard"); err != nil {
+	if err := self.file.WriteConfigFile(filePath, PERM_FILE, "Created by gowizard\n"); err != nil {
 		log.Exit(err)
 	}
 }

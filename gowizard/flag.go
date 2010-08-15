@@ -56,9 +56,6 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		fLicense = flag.String("License", "bsd-2",
 			"The license covering the package.")
 
-		fOrganization = flag.String("Organization", "",
-			"The name of the organization. Necessary if you choose 'bsd-3' license.")
-
 		/*fPlatform = flag.String("Platform", "",
 			"A comma-separated list of platform specifications, summarizing\n"+
 				"\tthe operating systems supported by the package which are not listed\n"+
@@ -84,32 +81,24 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 	var (
 		fDebug       = flag.Bool("d", false, "debug mode")
 		fInteractive = flag.Bool("i", false, "interactive mode")
+
 		fListLicense = flag.Bool("ll", false,
 			"shows the list of licenses for the flag `License`")
 		fListApp = flag.Bool("la", false,
 			"shows the list of application types for the flag `Application-type`")
+
+		fIsOrganization = flag.Bool("org", false,
+			"Does the author is an organization?")
 	)
 
-	// Flags used on interactive mode
-	var interactiveFlags = map[string]*string{
-		"Application-type": fApplicationType,
-		"Project-name":     fProjectName,
-		"Application-name": fApplicationName,
-		"Author":           fAuthor,
-		"Author-email":     fAuthorEmail,
-		"License":          fLicense,
-		"Organization":     fOrganization,
-	}
-
 	// Sorted flags for interactive mode
-	var sortedInteractiveFlags = []string{
+	var interactiveFlags = []string{
 		"Application-type",
 		"Project-name",
 		"Application-name",
 		"Author",
 		"Author-email",
 		"License",
-		"Organization",
 	}
 
 	// === Parses the flags
@@ -117,7 +106,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
 Usage: gowizard -Project-name -Author -Author-email
-	[-Application-type -Application-name -License -Organization]
+	[-Application-type -Application-name -License -org]
 
 `)
 		flag.PrintDefaults()
@@ -184,12 +173,21 @@ Usage: gowizard -Project-name -Author -Author-email
   Interactive
   -----------
 `)
-		for _, k := range sortedInteractiveFlags {
-			if k == "Organization" && *fLicense != "bsd-3" {
-				continue
-			}
+		// === fIsOrganization
+		f := flag.Lookup("org")
+		fmt.Printf("  %s (yes/no) [no] ", f.Usage)
 
-			f := flag.Lookup(k)
+		switch strings.ToLower(read()) {
+		case "yes":
+			*fIsOrganization = true
+		default:
+			*fIsOrganization = false
+		}
+		fmt.Println()
+
+		// === Flags for Metadata
+		for _, k := range interactiveFlags {
+			f = flag.Lookup(k)
 			fmt.Printf("  %s", strings.TrimRight(f.Usage, "."))
 
 			switch k {
@@ -202,7 +200,7 @@ Usage: gowizard -Project-name -Author -Author-email
 
 			fmt.Print(": ")
 			if input := read(); input != "" {
-				*interactiveFlags[k] = input
+				flag.Set(k, input)
 			}
 		}
 
@@ -313,14 +311,14 @@ Usage: gowizard -Project-name -Author -Author-email
 
 	// **********
 
-	if *fLicense == "bsd-3" {
+	/*if *fLicense == "bsd-3" {
 		if *fOrganization == "" {
 			fmt.Fprintf(os.Stderr,
 				"With license 'bsd-3', it is necessary the flag `Organization`\n")
 			usage()
 		}
 		tag["organization"] = *fOrganization
-	}
+	}*/
 
 	// === Gets `conf.ConfigFile`
 	// ===
