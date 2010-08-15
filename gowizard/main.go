@@ -45,12 +45,17 @@ func main() {
 	// === Renders application files
 	switch cfg.ApplicationType {
 	case "pkg":
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main.go", tag)
 		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/pkg/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main.go", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main_test.go", tag)
 	case "cmd":
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/cmd/main.go", tag)
 		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/cmd/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/cmd/main.go", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/cmd/main_test.go", tag)
 	case "web.go":
+		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/pkg/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main.go", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main_test.go", tag)
 		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/web.go/setup.go", tag)
 	}
 
@@ -61,11 +66,11 @@ func main() {
 
 	// === Adds license file
 	switch cfg.License {
+	case "none":
+		break
 	case "bsd-3":
 		renderNewFile(cfg.ProjectName+"/LICENSE.txt",
 			dirData+"/license/bsd-3.txt", tag)
-	case "none":
-		break
 	default:
 		copy(cfg.ProjectName+"/LICENSE.txt",
 			path.Join(dirData, "license", cfg.License+".txt"))
