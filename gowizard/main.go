@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -63,6 +64,10 @@ func main() {
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS", tag)
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS", tag)
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.rst", tag)
+
+	if tag["is_organization"] != "" {
+		fmt.Println("\n  * Update the file CONTRIBUTORS\n")
+	}
 
 	// === Adds license file
 	switch cfg.License {

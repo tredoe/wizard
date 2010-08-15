@@ -75,6 +75,7 @@ type metadata struct {
 	file *conf.ConfigFile
 }
 
+/* Creates a new metadata with the basic fields to build the project. */
 func NewMetadata(ProjectName, ApplicationName, ApplicationType, Author,
 AuthorEmail, License string, file *conf.ConfigFile) *metadata {
 	metadata := new(metadata)
@@ -92,42 +93,63 @@ AuthorEmail, License string, file *conf.ConfigFile) *metadata {
 	return metadata
 }
 
-/* Serializes to INI format and write it to file `_FILE_NAME` in directory `dir`.
-*/
-func (self *metadata) WriteINI(dir string) {
-	name := getTag(self)
+/* Gets the structs that represent this type. */
+func (self *metadata) getStruct() (strType *reflect.StructType, strValue *reflect.StructValue) {
+	v := reflect.NewValue(self).(*reflect.PtrValue)
 
-	value := []string{
-		self.MetadataVersion,
-		self.ProjectName,
-		self.ApplicationName,
-		self.ApplicationType,
-		self.Version,
-		self.Summary,
-		self.DownloadURL,
-		self.Author,
-		self.AuthorEmail,
-		self.License,
+	strType = v.Elem().Type().(*reflect.StructType)
+	strValue = v.Elem().(*reflect.StructValue)
+
+	return
+}
+
+/* Serializes to INI format and write it to file `_FILE_NAME` in directory `dir`.
+ */
+func (self *metadata) WriteINI(dir string) {
+	header := "Created by gowizard\n"
+	strType, strValue := self.getStruct()
+
+	default_ := []string{
+		"MetadataVersion",
+		"ProjectName",
+		"ApplicationName",
+		"License",
+	}
+
+	base := []string{
+		"ApplicationType",
+		"Version",
+		"Summary",
+		"DownloadURL",
+		"Author",
+		"AuthorEmail",
 	}
 
 	optional := []string{
-		self.Platform,
-		self.Description,
-		self.Keywords,
-		self.HomePage,
-		//self.Classifier,
+		"Platform",
+		"Description",
+		"Keywords",
+		"HomePage",
+		//"Classifier",
 	}
 
-	for i := 0; i < len(value); i++ {
-		self.file.AddOption(conf.DefaultSection, name[i], value[i])
+	for i := 0; i < len(default_); i++ {
+		name, value := getName_Value(strType, strValue, default_[i])
+		self.file.AddOption(conf.DefaultSection, name, value)
+	}
+
+	for i := 0; i < len(base); i++ {
+		name, value := getName_Value(strType, strValue, base[i])
+		self.file.AddOption("base", name, value)
 	}
 
 	for i := 0; i < len(optional); i++ {
-		self.file.AddOption("optional", name[i+len(value)], optional[i])
+		name, value := getName_Value(strType, strValue, optional[i])
+		self.file.AddOption("optional", name, value)
 	}
 
 	filePath := path.Join(dir, _FILE_NAME)
-	if err := self.file.WriteConfigFile(filePath, PERM_FILE, "Created by gowizard\n"); err != nil {
+	if err := self.file.WriteConfigFile(filePath, PERM_FILE, header); err != nil {
 		log.Exit(err)
 	}
 }
@@ -140,25 +162,21 @@ func ReadMetadata() {
 // === Utility
 // ===
 
-/* Gets the tags of a struct, if any. */
-func getTag(i interface{}) (name []string) {
-	switch v := reflect.NewValue(i).(type) {
-	case *reflect.PtrValue:
-		t := v.Elem().Type().(*reflect.StructType)
-		num := t.NumField()
-		name = make([]string, num)
+//type metadataType *reflect.StructType
 
-		for i := 0; i < num; i++ {
-			field := t.Field(i)
+/* Gets the tag or field name and its value, given the field name. */
+func getName_Value(t *reflect.StructType, v *reflect.StructValue, fieldName string) (name, value string) {
+	field, _ := t.FieldByName(fieldName)
+	value_ := v.FieldByName(fieldName)
 
-			if f := field.Tag; f != "" {
-				name[i] = f
-			} else {
-				name[i] = field.Name
-			}
-		}
+	value = value_.(*reflect.StringValue).Get()
+
+	if tag := field.Tag; tag != "" {
+		name = tag
+	} else {
+		name = field.Name
 	}
 
-	return name
+	return
 }
 
