@@ -19,19 +19,25 @@ import (
 
 // License headers
 const (
-	t_LICENSE     = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
+	t_LICENSE      = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
 {comment} Use of this source code is governed by the {license}
 {comment} that can be found in the LICENSE file.
 `
-	t_LICENSE_CC0 = `{comment} To the extent possible under law, Authors have waived all copyright and
+	t_LICENSE_CC0  = `{comment} To the extent possible under law, Authors have waived all copyright and
 {comment} related or neighboring rights to "{project_name}".
 `
+	t_LICENSE_GNU  = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
+{comment} Use of this source code is governed by the {license}
+{comment} (either version {version} of the License, or "at your option" any later version)
+{comment} that can be found in the LICENSE file.
+`
+	t_LICENSE_NONE = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.`
 )
 
-const t_PAGE = "{license}\n{content}"
+const t_PAGE = "{header}\n{content}"
 
 type code struct {
-	license string
+	header  string
 	content string
 }
 
@@ -79,10 +85,10 @@ func parseFile(filename string, data interface{}) string {
 // === Utility
 // ===
 
-/* Renders a source code file nesting both license and content. */
-func renderCodeFile(license *string, destination, template string, tag map[string]string) {
+/* Renders a source code file nesting both header and content. */
+func renderCodeFile(header string, destination, template string, tag map[string]string) {
 	renderContent := parseFile(template, tag)
-	render := parse(t_PAGE, &code{*license, renderContent})
+	render := parse(t_PAGE, &code{header, renderContent})
 
 	ioutil.WriteFile(
 		path.Join(destination, path.Base(template)),

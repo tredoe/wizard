@@ -11,15 +11,18 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"strconv"
+	"time"
 
 	conf "goconf.googlecode.com/hg"
 )
 
 // Global flag
 var fUpdate = flag.Bool("u", false, "Updates metadata")
+var fDebug = flag.Bool("d", false, "debug mode")
 
 
-func loadMetadata() (*metadata, map[string]string) {
+func loadMetadata() (data *metadata, header, tag map[string]string) {
 
 	// === Flags for the command line
 	// ===
@@ -80,7 +83,6 @@ func loadMetadata() (*metadata, map[string]string) {
 
 	// Generic flags
 	var (
-		fDebug       = flag.Bool("d", false, "debug mode")
 		fInteractive = flag.Bool("i", false, "interactive mode")
 		fListLicense = flag.Bool("ll", false,
 			"shows the list of licenses for the flag `License`")
@@ -236,13 +238,62 @@ Usage: gowizard -Project-name -Author -Author-email
 		projectHeader[i] = '='
 	}
 
-	tag := map[string]string{
+	tag = map[string]string{
 		"project_name":     *fProjectName,
 		"application_name": *fApplicationName,
 		"full_author":      fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
 		"license":          listLicense[*fLicense],
 		"_project_header":  string(projectHeader),
 	}
+
+	// === Renders headers
+	// ===
+	var headerMakefile, headerCode string
+	tag["year"] = strconv.Itoa64(time.LocalTime().Year)
+
+	if strings.HasPrefix(*fLicense, "gpl") || strings.HasPrefix(*fLicense, "agpl") {
+		tag["version"] = strings.Split(*fLicense, "-", -1)[1]
+
+		tag["comment"] = "#"
+		headerMakefile = parse(t_LICENSE_GNU, tag)
+
+		tag["comment"] = "//"
+		headerCode = parse(t_LICENSE_GNU, tag)
+
+	} else if strings.HasPrefix(*fLicense, "cc0") {
+		tag["comment"] = "#"
+		headerMakefile = parse(t_LICENSE_CC0, tag)
+
+		tag["comment"] = "//"
+		headerCode = parse(t_LICENSE_CC0, tag)
+
+	} else if *fLicense == "none" {
+		tag["comment"] = "#"
+		headerMakefile = parse(t_LICENSE_NONE, tag)
+
+		tag["comment"] = "//"
+		headerCode = parse(t_LICENSE_NONE, tag)
+
+	} else {
+		tag["comment"] = "#"
+		headerMakefile = parse(t_LICENSE, tag)
+
+		tag["comment"] = "//"
+		headerCode = parse(t_LICENSE, tag)
+	}
+
+	// These tags are not used anymore.
+	for _, t := range []string {"comment", "version", "year"} {
+		tag[t] = "", false
+	}
+
+	header = map[string]string{
+		"makefile": headerMakefile,
+		"code":     headerCode,
+	}
+
+
+	// **********
 
 	if *fLicense == "bsd-3" {
 		if *fOrganization == "" {
@@ -251,21 +302,6 @@ Usage: gowizard -Project-name -Author -Author-email
 			usage()
 		}
 		tag["organization"] = *fOrganization
-	}
-
-	// === Shows data on 'tag', if 'fDebug' is set
-	if *fDebug {
-		fmt.Printf(`
-  Debug
-  -----
-`)
-		for k, v := range tag {
-			if k[0] == '_' {
-				continue
-			}
-			fmt.Printf("  %s: %s\n", k, v)
-		}
-		os.Exit(0)
 	}
 
 	// === Gets `conf.ConfigFile`
@@ -284,8 +320,18 @@ Usage: gowizard -Project-name -Author -Author-email
 
 	// ===
 
-	return NewMetadata(*fProjectName, *fApplicationName, *fApplicationType,
-		*fAuthor, *fAuthorEmail, *fLicense, file),
-		tag
+	data = NewMetadata(*fProjectName, *fApplicationName, *fApplicationType,
+		*fAuthor, *fAuthorEmail, *fLicense, file)
+
+	return data, header, tag
 }
+
+/* TODO
+
+Update
+	"project_name"
+	"application_name"
+	"license"
+
+*/
 

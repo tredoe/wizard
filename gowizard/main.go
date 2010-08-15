@@ -5,11 +5,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
-	"strconv"
 	"strings"
-	"time"
 )
 
 
@@ -29,27 +28,25 @@ var cfg *metadata
 // === Main program execution
 
 func main() {
-	var licenseCode, licenseMakefile string
-	var tag map[string]string
+	var header, tag map[string]string
 
-	cfg, tag = loadMetadata()
+	cfg, header, tag = loadMetadata()
 
-	// === Renders the header
-	if strings.HasPrefix(cfg.License, "cc0") {
-		tag["comment"] = "//"
-		licenseCode = parse(t_LICENSE_CC0, tag)
-		tag["comment"] = "#"
-		licenseMakefile = parse(t_LICENSE_CC0, tag)
-	} else {
-		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
-
-		tag["comment"] = "//"
-		licenseCode = parse(t_LICENSE, tag)
-		tag["comment"] = "#"
-		licenseMakefile = parse(t_LICENSE, tag)
+	// === Shows data on 'tag' and license header, if 'fDebug' is set
+	if *fDebug {
+		fmt.Printf(`
+  Debug
+  -----
+`)
+		for k, v := range tag {
+			if k[0] == '_' {
+				continue
+			}
+			fmt.Printf("  %s: %s\n", k, v)
+		}
+		fmt.Printf("\n  header:\n%s\n", header["code"])
+		os.Exit(0)
 	}
-	// This tag is not used anymore.
-	tag["comment"] = "", false
 
 	// === Creates directories in lower case
 
@@ -65,13 +62,13 @@ func main() {
 	// === Renders application files
 	switch cfg.ApplicationType {
 	case "pkg":
-		renderCodeFile(&licenseCode, dirApp, dirData+"/tmpl/pkg/main.go", tag)
-		renderCodeFile(&licenseMakefile, dirApp, dirData+"/tmpl/pkg/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main.go", tag)
+		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/pkg/Makefile", tag)
 	case "cmd":
-		renderCodeFile(&licenseCode, dirApp, dirData+"/tmpl/cmd/main.go", tag)
-		renderCodeFile(&licenseMakefile, dirApp, dirData+"/tmpl/cmd/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/cmd/main.go", tag)
+		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/cmd/Makefile", tag)
 	case "web.go":
-		renderCodeFile(&licenseCode, dirApp, dirData+"/tmpl/web.go/setup.go", tag)
+		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/web.go/setup.go", tag)
 	}
 
 	// === Renders common files
