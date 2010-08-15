@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -31,22 +30,6 @@ func main() {
 	var header, tag map[string]string
 
 	cfg, header, tag = loadMetadata()
-
-	// === Shows data on 'tag' and license header, if 'fDebug' is set
-	if *fDebug {
-		fmt.Printf(`
-  Debug
-  -----
-`)
-		for k, v := range tag {
-			if k[0] == '_' {
-				continue
-			}
-			fmt.Printf("  %s: %s\n", k, v)
-		}
-		fmt.Printf("\n  header:\n%s\n", header["code"])
-		os.Exit(0)
-	}
 
 	// === Creates directories in lower case
 

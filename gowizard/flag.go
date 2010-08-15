@@ -19,7 +19,6 @@ import (
 
 // Global flag
 var fUpdate = flag.Bool("u", false, "Updates metadata")
-var fDebug = flag.Bool("d", false, "debug mode")
 
 
 func loadMetadata() (data *metadata, header, tag map[string]string) {
@@ -83,6 +82,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 
 	// Generic flags
 	var (
+		fDebug       = flag.Bool("d", false, "debug mode")
 		fInteractive = flag.Bool("i", false, "interactive mode")
 		fListLicense = flag.Bool("ll", false,
 			"shows the list of licenses for the flag `License`")
@@ -242,13 +242,14 @@ Usage: gowizard -Project-name -Author -Author-email
 		"project_name":     *fProjectName,
 		"application_name": *fApplicationName,
 		"full_author":      fmt.Sprint(*fAuthor, " <", *fAuthorEmail, ">"),
-		"license":          listLicense[*fLicense],
 		"_project_header":  string(projectHeader),
 	}
 
 	// === Renders headers
 	// ===
 	var headerMakefile, headerCode string
+
+	tag["license"] = listLicense[*fLicense]
 	tag["year"] = strconv.Itoa64(time.LocalTime().Year)
 
 	if strings.HasPrefix(*fLicense, "gpl") || strings.HasPrefix(*fLicense, "agpl") {
@@ -283,15 +284,32 @@ Usage: gowizard -Project-name -Author -Author-email
 	}
 
 	// These tags are not used anymore.
-	for _, t := range []string {"comment", "version", "year"} {
+	for _, t := range []string{"comment", "license", "version", "year"} {
 		tag[t] = "", false
 	}
 
+	// === Shows data on 'tag' and license header, if 'fDebug' is set
+	if *fDebug {
+		fmt.Printf(`
+  Debug
+  -----
+`)
+		for k, v := range tag {
+			if k[0] == '_' {
+				continue
+			}
+			fmt.Printf("  %s: %s\n", k, v)
+		}
+		fmt.Printf("\n  header:\n%s\n", headerCode)
+		os.Exit(0)
+	}
+
+	// === Adds the headers
+	// ===
 	header = map[string]string{
 		"makefile": headerMakefile,
 		"code":     headerCode,
 	}
-
 
 	// **********
 
