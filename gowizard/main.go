@@ -65,10 +65,6 @@ func main() {
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS", tag)
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.rst", tag)
 
-	if tag["is_organization"] != "" {
-		fmt.Println("\n  * Update the file CONTRIBUTORS\n")
-	}
-
 	// === Adds license file
 	switch cfg.License {
 	case "none":
@@ -84,6 +80,12 @@ func main() {
 	// === Creates file Metadata
 	cfg.ProjectName = projectName
 	cfg.WriteINI(strings.ToLower(projectName))
+
+	// === Prints messages
+	if tag["is_organization"] != "" {
+		fmt.Print("\n  * Update the file CONTRIBUTORS")
+	}
+	fmt.Println("\n  * Warning: don't edit section 'default' in file Metadata\n")
 
 	os.Exit(0)
 }

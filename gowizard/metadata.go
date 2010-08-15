@@ -93,21 +93,13 @@ AuthorEmail, License string, file *conf.ConfigFile) *metadata {
 	return metadata
 }
 
-/* Gets the structs that represent this type. */
-func (self *metadata) getStruct() (strType *reflect.StructType, strValue *reflect.StructValue) {
-	v := reflect.NewValue(self).(*reflect.PtrValue)
-
-	strType = v.Elem().Type().(*reflect.StructType)
-	strValue = v.Elem().(*reflect.StructValue)
-
-	return
-}
-
 /* Serializes to INI format and write it to file `_FILE_NAME` in directory `dir`.
  */
 func (self *metadata) WriteINI(dir string) {
+	var name, value string
+
 	header := "Created by gowizard\n"
-	strType, strValue := self.getStruct()
+	reflectMetadata := self.getStruct()
 
 	default_ := []string{
 		"MetadataVersion",
@@ -134,17 +126,17 @@ func (self *metadata) WriteINI(dir string) {
 	}
 
 	for i := 0; i < len(default_); i++ {
-		name, value := getName_Value(strType, strValue, default_[i])
+		name, value = reflectMetadata.getName_Value(default_[i])
 		self.file.AddOption(conf.DefaultSection, name, value)
 	}
 
 	for i := 0; i < len(base); i++ {
-		name, value := getName_Value(strType, strValue, base[i])
+		name, value = reflectMetadata.getName_Value(base[i])
 		self.file.AddOption("base", name, value)
 	}
 
 	for i := 0; i < len(optional); i++ {
-		name, value := getName_Value(strType, strValue, optional[i])
+		name, value = reflectMetadata.getName_Value(optional[i])
 		self.file.AddOption("optional", name, value)
 	}
 
@@ -159,15 +151,29 @@ func ReadMetadata() {
 }
 
 
-// === Utility
+// === Reflection
 // ===
 
-//type metadataType *reflect.StructType
+// To handle the reflection of a struct
+type reflectStruct struct {
+	strType  *reflect.StructType
+	strValue *reflect.StructValue
+}
+
+/* Gets the structs that represent the type 'metadata'. */
+func (self *metadata) getStruct() *reflectStruct {
+	v := reflect.NewValue(self).(*reflect.PtrValue)
+
+	strType := v.Elem().Type().(*reflect.StructType)
+	strValue := v.Elem().(*reflect.StructValue)
+
+	return &reflectStruct{strType, strValue}
+}
 
 /* Gets the tag or field name and its value, given the field name. */
-func getName_Value(t *reflect.StructType, v *reflect.StructValue, fieldName string) (name, value string) {
-	field, _ := t.FieldByName(fieldName)
-	value_ := v.FieldByName(fieldName)
+func (self *reflectStruct) getName_Value(fieldName string) (name, value string) {
+	field, _ := self.strType.FieldByName(fieldName)
+	value_ := self.strValue.FieldByName(fieldName)
 
 	value = value_.(*reflect.StringValue).Get()
 
