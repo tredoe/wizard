@@ -5,36 +5,23 @@
 package main
 
 import (
-	"bufio"
 	"io/ioutil"
-	"log"
 	"os"
-	"strings"
 )
 
 
-/* Copy a file from the data directory to the project. */
-func copy(destinationFile, sourceFile string) {
-	src, err := ioutil.ReadFile(sourceFile)
+/* Copies a file from source one to destination one. */
+func CopyFile(destination, source string) os.Error {
+	src, err := ioutil.ReadFile(source)
 	if err != nil {
-		log.Exit(err)
+		return err
 	}
 
-	err = ioutil.WriteFile(destinationFile, src, PERM_FILE)
+	err = ioutil.WriteFile(destination, src, PERM_FILE)
 	if err != nil {
-		log.Exit(err)
-	}
-}
-
-/* Reads the standard input until Return is pressed. */
-func read() string {
-	stdin := bufio.NewReader(os.Stdin)
-
-	input, err := stdin.ReadString('\n')
-	if err != nil {
-		log.Exit(err)
+		return err
 	}
 
-	return strings.TrimRight(input, "\n")
+	return nil
 }
 

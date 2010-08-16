@@ -147,7 +147,13 @@ func (self *metadata) WriteINI(dir string) {
 }
 
 func ReadMetadata() {
+	file, err := conf.ReadConfigFile(_FILE_NAME)
+	if err != nil {
+		log.Exit(err)
+	}
 
+	s := file.GetSections()
+	println(s)
 }
 
 

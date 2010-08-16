@@ -18,7 +18,7 @@ import (
 )
 
 // Global flag
-var fUpdate = flag.Bool("u", false, "Updates metadata")
+var fUpdate = flag.Bool("U", false, "Updates metadata.")
 
 
 func loadMetadata() (data *metadata, header, tag map[string]string) {
@@ -79,13 +79,13 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 
 	// Generic flags
 	var (
-		fDebug       = flag.Bool("d", false, "debug mode")
-		fInteractive = flag.Bool("i", false, "interactive mode")
+		fDebug       = flag.Bool("d", false, "Debug mode")
+		fInteractive = flag.Bool("i", false, "Interactive mode")
 
 		fListLicense = flag.Bool("ll", false,
-			"shows the list of licenses for the flag `License`")
+			"Shows the list of licenses for the flag 'License'")
 		fListApp = flag.Bool("la", false,
-			"shows the list of application types for the flag `Application-type`")
+			"Shows the list of application types for the flag 'Application-type'")
 
 		fIsOrganization = flag.Bool("org", false,
 			"Does the author is an organization?")
@@ -107,8 +107,9 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		fmt.Fprintf(os.Stderr, `
 Usage: gowizard -Project-name -Author -Author-email
        gowizard -Project-name -Author [-Author-email] -org
-
 	[-Application-type -Application-name -License]
+
+       gowizard -U [-ProjectName -ApplicationName -License]
 
 `)
 		flag.PrintDefaults()
@@ -176,34 +177,43 @@ Usage: gowizard -Project-name -Author -Author-email
   -----------
 `)
 		// === fIsOrganization
-		f := flag.Lookup("org")
-		fmt.Printf("  %s (yes/no) [no] ", f.Usage)
+		var err os.Error
 
-		switch strings.ToLower(read()) {
-		case "yes":
-			*fIsOrganization = true
-		default:
-			*fIsOrganization = false
+		f := flag.Lookup("org")
+		OptPrompt.Indent = "  "
+
+		*fIsOrganization, err = PromptBool(f.Usage)
+		if err != nil {
+			log.Exit(err)
 		}
-		fmt.Println()
 
 		// === Flags for Metadata
+		var input string
+
 		for _, k := range interactiveFlags {
 			f = flag.Lookup(k)
-			fmt.Printf("  %s", strings.TrimRight(f.Usage, "."))
+			text := strings.TrimRight(f.Usage, ".")
 
 			switch k {
 			case "Application-type", "License":
-				fmt.Printf(" [%s]", f.Value)
+				input, err = Prompt(text, f.Value.String())
 			case "Application-name":
 				setNames()
-				fmt.Printf(" [%s]", *fApplicationName)
+				input, err = Prompt(text, *fApplicationName)
+			case "Author-email":
+				if *fIsOrganization {
+					input, err = Prompt(text, "")
+				} else {
+					input, err = RepeatPrompt(text)
+				}
+			default:
+				input, err = RepeatPrompt(text)
 			}
 
-			fmt.Print(": ")
-			if input := read(); input != "" {
-				flag.Set(k, input)
+			if err != nil {
+				log.Exit(err)
 			}
+			flag.Set(k, input)
 		}
 
 		fmt.Println()
@@ -357,4 +367,5 @@ Update
 	"license"
 
 */
+
 

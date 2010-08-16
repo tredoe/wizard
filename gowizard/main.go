@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -73,8 +74,10 @@ func main() {
 		renderNewFile(cfg.ProjectName+"/LICENSE", dirData+"/license/bsd-3.txt",
 			tag)
 	default:
-		copy(cfg.ProjectName+"/LICENSE",
-			path.Join(dirData, "license", cfg.License+".txt"))
+		if err := CopyFile(cfg.ProjectName+"/LICENSE",
+			path.Join(dirData, "license", cfg.License+".txt")); err != nil {
+				log.Exit(err)
+			}
 	}
 
 	// === Creates file Metadata
