@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kless/go-readline/readline"
 	conf "goconf.googlecode.com/hg"
 )
 
@@ -180,9 +181,9 @@ Usage: gowizard -Project-name -Author -Author-email
 		var err os.Error
 
 		f := flag.Lookup("org")
-		OptPrompt.Indent = "  "
+		readline.OptPrompt.Indent = "  "
 
-		*fIsOrganization, err = PromptBool(f.Usage)
+		*fIsOrganization, err = readline.PromptBool(f.Usage)
 		if err != nil {
 			log.Exit(err)
 		}
@@ -196,18 +197,18 @@ Usage: gowizard -Project-name -Author -Author-email
 
 			switch k {
 			case "Application-type", "License":
-				input, err = Prompt(text, f.Value.String())
+				input, err = readline.Prompt(text, f.Value.String())
 			case "Application-name":
 				setNames()
-				input, err = Prompt(text, *fApplicationName)
+				input, err = readline.Prompt(text, *fApplicationName)
 			case "Author-email":
 				if *fIsOrganization {
-					input, err = Prompt(text, "")
+					input, err = readline.Prompt(text, "")
 				} else {
-					input, err = RepeatPrompt(text)
+					input, err = readline.RepeatPrompt(text)
 				}
 			default:
-				input, err = RepeatPrompt(text)
+				input, err = readline.RepeatPrompt(text)
 			}
 
 			if err != nil {
