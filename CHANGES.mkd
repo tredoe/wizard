@@ -1,0 +1,14 @@
+##### Notice
+
+*This file documents the changes in the **gowizard** versions listed
+below.*
+
+*Items should be added to this file as:*
+
+	### v1.0, 2010-01-20
+
+	- Description. [Contributor]
+
+***
+
+
