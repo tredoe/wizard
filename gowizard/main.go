@@ -66,7 +66,7 @@ func main() {
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CHANGES.mkd", tag)
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.mkd", tag)
 
-	if license := strings.Split(cfg.License, "-", -1)[0]; license == "cc0" {
+	if strings.HasPrefix(cfg.License, "cc0") {
 		isCC0 = true
 		renderNewFile(cfg.ProjectName+"/AUTHORS.mkd",
 			dirData+"/tmpl/common/AUTHORS-cc0.mkd", tag)

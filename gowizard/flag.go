@@ -229,7 +229,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	if *fProjectName == "" || *fAuthor == "" {
 		usage()
 	}
-	if *fAuthorEmail == "" && ! *fIsOrganization {
+	if *fAuthorEmail == "" && !*fIsOrganization {
 		log.Exit("The email address is required for people")
 	}
 
@@ -239,7 +239,7 @@ Usage: gowizard -Project-name -Author -Author-email
 		log.Exitf("Unavailable license: '%s'", *fLicense)
 	}
 
-	if *fLicense == "bsd-3" && ! *fIsOrganization {
+	if *fLicense == "bsd-3" && !*fIsOrganization {
 		log.Exit("The license 'bsd-3' requires an organization as author")
 	}
 
@@ -272,48 +272,8 @@ Usage: gowizard -Project-name -Author -Author-email
 		"_project_header":  string(projectHeader),
 	}
 
-	// === Renders headers
-	// ===
-	var headerMakefile, headerCode string
-
-	tag["license"] = listLicense[*fLicense]
-	tag["year"] = strconv.Itoa64(time.LocalTime().Year)
-
-	if strings.HasPrefix(*fLicense, "gpl") || strings.HasPrefix(*fLicense, "agpl") {
-		tag["version"] = strings.Split(*fLicense, "-", -1)[1]
-
-		tag["comment"] = "#"
-		headerMakefile = parse(t_LICENSE_GNU, tag)
-
-		tag["comment"] = "//"
-		headerCode = parse(t_LICENSE_GNU, tag)
-
-	} else if strings.HasPrefix(*fLicense, "cc0") {
-		tag["comment"] = "#"
-		headerMakefile = parse(t_LICENSE_CC0, tag)
-
-		tag["comment"] = "//"
-		headerCode = parse(t_LICENSE_CC0, tag)
-
-	} else if *fLicense == "none" {
-		tag["comment"] = "#"
-		headerMakefile = parse(t_LICENSE_NONE, tag)
-
-		tag["comment"] = "//"
-		headerCode = parse(t_LICENSE_NONE, tag)
-
-	} else {
-		tag["comment"] = "#"
-		headerMakefile = parse(t_LICENSE, tag)
-
-		tag["comment"] = "//"
-		headerCode = parse(t_LICENSE, tag)
-	}
-
-	// These tags are not used anymore.
-	for _, t := range []string{"comment", "license", "version", "year"} {
-		tag[t] = "", false
-	}
+	// === Adds the headers
+	header = renderHeader(fProjectName, fLicense)
 
 	// === Shows data on 'tag' and license header, if 'fDebug' is set
 	if *fDebug {
@@ -327,15 +287,8 @@ Usage: gowizard -Project-name -Author -Author-email
 			}
 			fmt.Printf("  %s: %s\n", k, v)
 		}
-		fmt.Printf("\n  header:\n%s\n", headerCode)
+		fmt.Printf("\n  header:\n%s\n", header["code"])
 		os.Exit(0)
-	}
-
-	// === Adds the headers
-	// ===
-	header = map[string]string{
-		"makefile": headerMakefile,
-		"code":     headerCode,
 	}
 
 	// === Gets `conf.ConfigFile`
@@ -360,6 +313,62 @@ Usage: gowizard -Project-name -Author -Author-email
 	return data, header, tag
 }
 
+/* Renders the headers of source code files according to the license. */
+func renderHeader(fProjectName, fLicense *string) map[string]string {
+	const (
+		COMMENT_CODE     = "//"
+		COMMENT_MAKEFILE = "#"
+	)
+
+	var header, headerMakefile, headerCode string
+
+	tag := map[string]string{
+		"license":      listLicense[*fLicense],
+		"project_name": *fProjectName,
+		"year":         strconv.Itoa64(time.LocalTime().Year),
+	}
+
+	if strings.HasPrefix(*fLicense, "gpl") || strings.HasPrefix(*fLicense, "agpl") {
+		tag["version"] = strings.Split(*fLicense, "-", -1)[1]
+		header = t_COPYRIGHT + t_LICENSE_GNU
+
+		tag["comment"] = "#"
+		headerMakefile = parse(header, tag)
+
+		tag["comment"] = COMMENT_CODE
+		headerCode = parse(header, tag)
+
+	} else if strings.HasPrefix(*fLicense, "cc0") {
+		tag["comment"] = COMMENT_MAKEFILE
+		headerMakefile = parse(t_LICENSE_CC0, tag)
+
+		tag["comment"] = COMMENT_CODE
+		headerCode = parse(t_LICENSE_CC0, tag)
+
+	} else if *fLicense == "none" {
+		tag["comment"] = COMMENT_MAKEFILE
+		headerMakefile = parse(t_COPYRIGHT, tag)
+
+		tag["comment"] = COMMENT_CODE
+		headerCode = parse(t_COPYRIGHT, tag)
+
+	} else {
+		header = t_COPYRIGHT + t_LICENSE
+
+		tag["comment"] = COMMENT_MAKEFILE
+		headerMakefile = parse(header, tag)
+
+		tag["comment"] = COMMENT_CODE
+		headerCode = parse(header, tag)
+	}
+
+	return map[string]string{
+		"makefile": headerMakefile,
+		"code":     headerCode,
+	}
+}
+
+
 /* TODO
 
 Update
@@ -368,5 +377,4 @@ Update
 	"license"
 
 */
-
 

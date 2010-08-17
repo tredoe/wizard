@@ -19,19 +19,19 @@ import (
 
 // License headers
 const (
-	t_LICENSE      = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
+	t_COPYRIGHT = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.`
+
+	t_LICENSE      = `
 {comment} Use of this source code is governed by the {license}
 {comment} that can be found in the LICENSE file.
 `
 	t_LICENSE_CC0  = `{comment} To the extent possible under law, Authors have waived all copyright and
 {comment} related or neighboring rights to "{project_name}".
 `
-	t_LICENSE_GNU  = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
+	t_LICENSE_GNU  = `
 {comment} Use of this source code is governed by the {license}
 {comment} (either version {version} of the License, or "at your option" any later version)
 {comment} that can be found in the LICENSE file.
-`
-	t_LICENSE_NONE = `{comment} Copyright {year}, The "{project_name}" Authors.  All rights reserved.
 `
 )
 
