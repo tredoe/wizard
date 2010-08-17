@@ -291,10 +291,16 @@ Usage: gowizard -Project-name -Author -Author-email
 		os.Exit(0)
 	}
 
-	// === Gets `conf.ConfigFile`
 	// ===
 
-	var file *conf.ConfigFile
+	data = NewMetadata(*fProjectName, *fApplicationName, *fApplicationType,
+		*fAuthor, *fAuthorEmail, *fLicense, config())
+
+	return data, header, tag
+}
+
+/* Returns the INI configuration file. */
+func config() (file *conf.ConfigFile) {
 	var err os.Error
 
 	if *fUpdate {
@@ -305,12 +311,7 @@ Usage: gowizard -Project-name -Author -Author-email
 		file = conf.NewConfigFile()
 	}
 
-	// ===
-
-	data = NewMetadata(*fProjectName, *fApplicationName, *fApplicationType,
-		*fAuthor, *fAuthorEmail, *fLicense, file)
-
-	return data, header, tag
+	return
 }
 
 /* Renders the headers of source code files according to the license. */
