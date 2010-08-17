@@ -30,6 +30,7 @@ var cfg *metadata
 
 func main() {
 	var header, tag map[string]string
+	var isCC0 bool // Is CC0 license ?
 
 	cfg, header, tag = loadMetadata()
 
@@ -62,10 +63,17 @@ func main() {
 	}
 
 	// === Renders common files
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS.mkd", tag)
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CHANGES.mkd", tag)
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS.mkd", tag)
 	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.mkd", tag)
+
+	if license := strings.Split(cfg.License, "-", -1)[0]; license == "cc0" {
+		isCC0 = true
+		renderNewFile(cfg.ProjectName+"/AUTHORS.mkd",
+			dirData+"/tmpl/common/AUTHORS-cc0.mkd", tag)
+	} else {
+		renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS.mkd", tag)
+		renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS.mkd", tag)
+	}
 
 	// === Adds license file
 	switch cfg.License {
@@ -77,8 +85,8 @@ func main() {
 	default:
 		if err := CopyFile(cfg.ProjectName+"/LICENSE",
 			path.Join(dirData, "license", cfg.License+".txt")); err != nil {
-				log.Exit(err)
-			}
+			log.Exit(err)
+		}
 	}
 
 	// === Creates file Metadata
@@ -87,7 +95,11 @@ func main() {
 
 	// === Prints messages
 	if tag["is_organization"] != "" {
-		fmt.Print("\n  * Update the file CONTRIBUTORS")
+		if isCC0 {
+			fmt.Print("\n  * Update the file AUTHORS")
+		} else {
+			fmt.Print("\n  * Update the file CONTRIBUTORS")
+		}
 	}
 	fmt.Println("\n  * Warning: don't edit section 'default' in file Metadata\n")
 
