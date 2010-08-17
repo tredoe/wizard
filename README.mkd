@@ -8,8 +8,7 @@ it has a simple syntax and it is easy to read in its raw form.
 
 Here you have some comparisons with another markup languages:
 
-- [Compare and contrast the lightweight markup languages]
-(http://stackoverflow.com/questions/659227/compare-and-contrast-the-lightweight-markup-languages-textile-markdown-and-res)
+- [Compare and contrast the lightweight markup languages](http://stackoverflow.com/questions/659227/compare-and-contrast-the-lightweight-markup-languages-textile-markdown-and-res)
 - [Lightweight markup language](http://en.wikipedia.org/wiki/Lightweight_markup_language)
 
 And their syntax guides:

@@ -62,9 +62,10 @@ func main() {
 	}
 
 	// === Renders common files
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS", tag)
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS", tag)
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.rst", tag)
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS.mkd", tag)
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CHANGES.mkd", tag)
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS.mkd", tag)
+	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.mkd", tag)
 
 	// === Adds license file
 	switch cfg.License {
