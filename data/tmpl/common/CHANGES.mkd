@@ -1,18 +1,18 @@
 ##### Notice
 
-*This file documents the changes in the **{{project_name}}** versions listed
+*This file documents the changes in the ***{{project_name}}*** versions listed
 below.*
 
 *Items should be added to this file as:*
 
     ### YYYY-MM-DD  Author
 
-    - *myfile.ext (myfunction):* My additional changes made to myfile.ext.
+    + *myfile.ext (myfunction):* My additional changes made to myfile.ext.
 
-    - *myfile.ext (unrelated_change):* My changes made to myfile.ext but
+    + *myfile.ext (unrelated_change):* My changes made to myfile.ext but
     completely unrelated to the above.
 
-    - *anotherfile.ext (somefunction):* More changes.
+    + *anotherfile.ext (somefunction):* More changes.
 
 ***
 

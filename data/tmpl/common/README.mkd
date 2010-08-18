@@ -35,7 +35,7 @@ Read *LICENSE* file.
 
 ## Credits and acknowledgments
 
-For credits, read *AUTHORS* {{.section is_cc0}}file{{.or}}, *CONTRIBUTORS*
+For credits, read *AUTHORS* {{.section is_cc0}}file{{.or}}and *CONTRIBUTORS*
 files{{.end}}.
 
 ## ChangeLog

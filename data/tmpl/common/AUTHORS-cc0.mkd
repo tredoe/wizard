@@ -1,6 +1,6 @@
 ##### Notice
 
-*This is the official list of **{{project_name}}** authors.*
+*This is the official list of ***{{project_name}}*** authors.*
 
 *Names should be added to this file as:*
 
