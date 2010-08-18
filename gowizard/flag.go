@@ -39,12 +39,12 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 			"The application type.")
 
 		/*fVersion = flag.String("Version", "",
-			"A string containing the package's version number.")
+			"A string containing the package's version number.")*/
 
 		fSummary = flag.String("Summary", "",
 			"A one-line summary of what the package does.")
 
-		fDownloadURL = flag.String("Download-URL", "",
+		/*fDownloadURL = flag.String("Download-URL", "",
 			"A string containing the URL from which this version of the\n"+
 				"\tpackage can be downloaded.")*/
 
@@ -97,6 +97,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		"Application-type",
 		"Project-name",
 		"Application-name",
+		"Summary",
 		"Author",
 		"Author-email",
 		"License",
