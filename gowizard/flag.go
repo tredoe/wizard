@@ -39,7 +39,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 			"The application type.")
 
 		/*fVersion = flag.String("Version", "",
-			"A string containing the package's version number.")*/
+			"A string containing the package's version number.")
 
 		fSummary = flag.String("Summary", "",
 			"A one-line summary of what the package does.")
@@ -97,7 +97,6 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		"Application-type",
 		"Project-name",
 		"Application-name",
-		"Summary",
 		"Author",
 		"Author-email",
 		"License",
@@ -107,11 +106,11 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 	// ===
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Project-name -Summary -Author -Author-email
-       gowizard -Project-name -Summary -Author [-Author-email] -org
+Usage: gowizard -Project-name -Author -Author-email
+       gowizard -Project-name -Author [-Author-email] -org
 	[-Application-type -Application-name -License]
 
-       gowizard -u [-ProjectName -ApplicationName -Summary -License]
+       gowizard -u [-ProjectName -ApplicationName -License]
 
 `)
 		flag.PrintDefaults()
@@ -227,7 +226,7 @@ Usage: gowizard -Project-name -Summary -Author -Author-email
 	// ===
 
 	// === Necessary fields
-	if *fProjectName == "" || *fAuthor == "" || *fSummary == "" {
+	if *fProjectName == "" || *fAuthor == "" {
 		usage()
 	}
 	if *fAuthorEmail == "" && !*fIsOrganization {
@@ -271,7 +270,6 @@ Usage: gowizard -Project-name -Summary -Author -Author-email
 		"is_organization":  org,
 		"license":          listLicense[*fLicense],
 		"project_name":     *fProjectName,
-		"summary":          *fSummary,
 		"_project_header":  string(projectHeader),
 	}
 
