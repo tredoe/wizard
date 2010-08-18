@@ -107,11 +107,11 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 	// ===
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Project-name -Author -Author-email
-       gowizard -Project-name -Author [-Author-email] -org
+Usage: gowizard -Project-name -Summary -Author -Author-email
+       gowizard -Project-name -Summary -Author [-Author-email] -org
 	[-Application-type -Application-name -License]
 
-       gowizard -u [-ProjectName -ApplicationName -License]
+       gowizard -u [-ProjectName -ApplicationName -Summary -License]
 
 `)
 		flag.PrintDefaults()
@@ -227,7 +227,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	// ===
 
 	// === Necessary fields
-	if *fProjectName == "" || *fAuthor == "" {
+	if *fProjectName == "" || *fAuthor == "" || *fSummary == "" {
 		usage()
 	}
 	if *fAuthorEmail == "" && !*fIsOrganization {
@@ -265,12 +265,13 @@ Usage: gowizard -Project-name -Author -Author-email
 	}
 
 	tag = map[string]string{
-		"is_organization":  org,
-		"project_name":     *fProjectName,
 		"application_name": *fApplicationName,
 		"author":           *fAuthor,
 		"author_email":     *fAuthorEmail,
+		"is_organization":  org,
 		"license":          listLicense[*fLicense],
+		"project_name":     *fProjectName,
+		"summary":          *fSummary,
 		"_project_header":  string(projectHeader),
 	}
 
