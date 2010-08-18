@@ -45,46 +45,56 @@ func main() {
 	dirApp := path.Join(cfg.ProjectName, cfg.ApplicationName)
 	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
+	// Templates base directory
+	dirTmpl := dirData+"/tmpl/pkg"
+
 	// === Renders application files
 	switch cfg.ApplicationType {
 	case "pkg":
-		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/pkg/Makefile", tag)
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main.go", tag)
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main_test.go", tag)
-	case "cmd":
-		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/cmd/Makefile", tag)
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/cmd/main.go", tag)
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/cmd/main_test.go", tag)
+		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
 	case "web.go":
-		renderCodeFile(header["makefile"], dirApp, dirData+"/tmpl/web.go/Makefile", tag)
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/web.go/setup.go", tag)
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main.go", tag)
-		renderCodeFile(header["code"], dirApp, dirData+"/tmpl/pkg/main_test.go", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
+
+		dirTmpl = dirData+"/tmpl/web.go"
+		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/setup.go", tag)
+	case "cmd":
+		dirTmpl = dirData+"/tmpl/cmd"
+		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
 	}
 
 	// === Renders common files
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/CHANGES.mkd", tag)
-	renderFile(cfg.ProjectName, dirData+"/tmpl/common/README.mkd", tag)
+	dirTmpl = dirData+"/tmpl/common"
+
+	renderFile(cfg.ProjectName, dirTmpl+"/CHANGES.mkd", tag)
+	renderFile(cfg.ProjectName, dirTmpl+"/README.mkd", tag)
 
 	if strings.HasPrefix(cfg.License, "cc0") {
 		isCC0 = true
 		renderNewFile(cfg.ProjectName+"/AUTHORS.mkd",
-			dirData+"/tmpl/common/AUTHORS-cc0.mkd", tag)
+			dirTmpl+"/AUTHORS-cc0.mkd", tag)
 	} else {
-		renderFile(cfg.ProjectName, dirData+"/tmpl/common/AUTHORS.mkd", tag)
-		renderFile(cfg.ProjectName, dirData+"/tmpl/common/CONTRIBUTORS.mkd", tag)
+		renderFile(cfg.ProjectName, dirTmpl+"/AUTHORS.mkd", tag)
+		renderFile(cfg.ProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
 	}
 
 	// === Adds license file
+	dirTmpl = dirData+"/license"
+
 	switch cfg.License {
 	case "none":
 		break
 	case "bsd-3":
-		renderNewFile(cfg.ProjectName+"/LICENSE", dirData+"/license/bsd-3.txt",
+		renderNewFile(cfg.ProjectName+"/LICENSE", dirTmpl+"/bsd-3.txt",
 			tag)
 	default:
 		if err := CopyFile(cfg.ProjectName+"/LICENSE",
-			path.Join(dirData, "license", cfg.License+".txt")); err != nil {
+			path.Join(dirTmpl, cfg.License+".txt")); err != nil {
 			log.Exit(err)
 		}
 	}

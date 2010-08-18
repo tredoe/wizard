@@ -19,7 +19,7 @@ import (
 )
 
 // Global flag
-var fUpdate = flag.Bool("U", false, "Updates metadata.")
+var fUpdate = flag.Bool("u", false, "Updates metadata")
 
 
 func loadMetadata() (data *metadata, header, tag map[string]string) {
@@ -110,7 +110,7 @@ Usage: gowizard -Project-name -Author -Author-email
        gowizard -Project-name -Author [-Author-email] -org
 	[-Application-type -Application-name -License]
 
-       gowizard -U [-ProjectName -ApplicationName -License]
+       gowizard -u [-ProjectName -ApplicationName -License]
 
 `)
 		flag.PrintDefaults()
