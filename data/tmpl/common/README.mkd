@@ -1,24 +1,44 @@
 {{project_name}}
 {{_project_header}}
 
+{{summary}}
 
+[ Describe the project ]
 
 ## Installation
 
+{{.section is_cmd}}{{.or}}    $ [sudo -E] goinstall {{.end}}
 
+## Configuration
+
+[ Instructions to configure the program, if any ]
 
 ## Operating instructions
 
+[ Instructions to run the program ]
 
-
-## Copyright and licensing information
+## Copyright and licensing
 
 {{copyright}}
 
 {{license}}
 
-Read the LICENSE file.
+Read *LICENSE* file.
 
 ## Contact
 
+[ Contact information for the distributor or programmer ]
+
+## Known bugs
+
+[ Known bugs and instructions on reporting new ones ]
+
+## Credits and acknowledgments
+
+For credits, read *AUTHORS* {{.section is_cc0}}file{{.or}}, *CONTRIBUTORS*
+files{{.end}}.
+
+## ChangeLog
+
+Read *CHANGES* file.
 

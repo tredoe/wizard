@@ -1,7 +1,9 @@
 gowizard
 ========
 
-## Text files syntax
+Tool to create Go projects skeleton.
+
+### Text files syntax
 
 The text file templates are written using the Markdown markup language since
 it has a simple syntax and it is easy to read in its raw form.

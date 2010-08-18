@@ -105,13 +105,13 @@ func (self *metadata) WriteINI(dir string) {
 		"MetadataVersion",
 		"ProjectName",
 		"ApplicationName",
+		"Summary",
 		"License",
 	}
 
 	base := []string{
 		"ApplicationType",
 		"Version",
-		"Summary", // !!! Should be in default_?
 		"DownloadURL",
 		"Author",
 		"AuthorEmail",

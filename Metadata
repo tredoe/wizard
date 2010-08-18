@@ -8,7 +8,7 @@ metadata-version=1.1
 version=0.9
 application-name=gowizard
 project-name=gowizard
-summary=Tool to create Go projects skeleton
+summary=Tool to create Go projects skeleton.
 license=bsd-2
 author-email=charles.beck@sent.com
 
