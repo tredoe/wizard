@@ -269,11 +269,12 @@ Usage: gowizard -Project-name -Author -Author-email
 		"application_name": *fApplicationName,
 		"author":           *fAuthor,
 		"author_email":     *fAuthorEmail,
+		"license":          listLicense[*fLicense],
 		"_project_header":  string(projectHeader),
 	}
 
 	// === Adds the headers
-	header = renderHeader(fProjectName, fLicense)
+	header = renderHeader(tag, fLicense)
 
 	// === Shows data on 'tag' and license header, if 'fDebug' is set
 	if *fDebug {
@@ -315,7 +316,7 @@ func config() (file *conf.ConfigFile) {
 }
 
 /* Renders the headers of source code files according to the license. */
-func renderHeader(fProjectName, fLicense *string) map[string]string {
+func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 	const (
 		COMMENT_CODE     = "//"
 		COMMENT_MAKEFILE = "#"
@@ -323,11 +324,7 @@ func renderHeader(fProjectName, fLicense *string) map[string]string {
 
 	var header, headerMakefile, headerCode string
 
-	tag := map[string]string{
-		"license":      listLicense[*fLicense],
-		"project_name": *fProjectName,
-		"year":         strconv.Itoa64(time.LocalTime().Year),
-	}
+	tag["year"] = strconv.Itoa64(time.LocalTime().Year)
 
 	if strings.HasPrefix(*fLicense, "gpl") || strings.HasPrefix(*fLicense, "agpl") {
 		tag["version"] = strings.Split(*fLicense, "-", -1)[1]
@@ -361,6 +358,11 @@ func renderHeader(fProjectName, fLicense *string) map[string]string {
 
 		tag["comment"] = COMMENT_CODE
 		headerCode = parse(header, tag)
+	}
+
+	 // These tags are not used anymore.
+	for _, t := range []string{"comment", "version", "year"} {
+		tag[t] = "", false
 	}
 
 	return map[string]string{
