@@ -45,6 +45,12 @@ The next fields have not been taken:
 	Provides
 	Obsoletes
 
+Neither the next ones because they are only useful on Python since they are
+added to pages on packages index:
+
+	Description
+	Classifier
+
 The field 'Name' has been substituted by 'Project-name' and 'Application-name'.
 The field 'License' needs a value from the map 'license'.
 
@@ -66,10 +72,10 @@ type metadata struct {
 
 	// === Optional
 	Platform    string
-	Description string
+	//Description string
 	Keywords    string
 	HomePage    string "Home-page"
-	Classifier  []string
+	//Classifier  []string
 
 	// Config file
 	file *conf.ConfigFile
@@ -119,7 +125,7 @@ func (self *metadata) WriteINI(dir string) {
 
 	optional := []string{
 		"Platform",
-		"Description",
+		//"Description",
 		"Keywords",
 		"HomePage",
 		//"Classifier",
