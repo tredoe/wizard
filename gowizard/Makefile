@@ -18,3 +18,8 @@ data:
 	[ -d $(GOROOT)/lib/$(TARG) ] || mkdir $(GOROOT)/lib/$(TARG)
 	cp -R ../data/* $(GOROOT)/lib/$(TARG)/
 
+install: install-default data clean
+
+install-default:
+	mv $(TARG) $(GOBIN)/$(TARG)
+

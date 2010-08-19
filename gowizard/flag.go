@@ -323,59 +323,62 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 	)
 
 	var header, headerMakefile, headerCode string
-	var isGnu bool
 
 	tag["year"] = strconv.Itoa64(time.LocalTime().Year)
+	licenseName := strings.Split(*fLicense, "-", -1)[0]
 
-	if strings.HasPrefix(*fLicense, "gpl") || strings.HasPrefix(*fLicense, "agpl") {
-		isGnu = true
+	switch licenseName {
+	case "apache":
+		header = fmt.Sprint(t_COPYRIGHT, t_APACHE)
 
-		tag["version"] = strings.Split(*fLicense, "-", -1)[1]
-		header = fmt.Sprint(t_COPYRIGHT, t_LICENSE_LINE_1, t_VERSION_GNU,
-			t_LICENSE_LAST_LINE)
-
-		tag["comment"] = "#"
+		tag["comment"] = COMMENT_MAKEFILE
 		headerMakefile = parse(header, tag)
 
 		tag["comment"] = COMMENT_CODE
 		headerCode = parse(header, tag)
+	case "bsd":
+		header = fmt.Sprint(t_COPYRIGHT, t_BSD)
 
-	} else if strings.HasPrefix(*fLicense, "cc0") {
 		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(t_LICENSE_CC0, tag)
+		headerMakefile = parse(header, tag)
 
 		tag["comment"] = COMMENT_CODE
-		headerCode = parse(t_LICENSE_CC0, tag)
+		headerCode = parse(header, tag)
+	case "cc0":
+		tag["comment"] = COMMENT_MAKEFILE
+		headerMakefile = parse(t_CC0, tag)
 
-	} else if *fLicense == "none" {
+		tag["comment"] = COMMENT_CODE
+		headerCode = parse(t_CC0, tag)
+	case "gpl", "agpl":
+		header = fmt.Sprint(t_COPYRIGHT, t_GNU)
+		if licenseName == "agpl" {
+			tag["Affero"] = "Affero"
+		} else {
+			tag["Affero"] = ""
+		}
+
+		tag["comment"] = COMMENT_MAKEFILE
+		headerMakefile = parse(header, tag)
+
+		tag["comment"] = COMMENT_CODE
+		headerCode = parse(header, tag)
+	case "none":
 		tag["comment"] = COMMENT_MAKEFILE
 		headerMakefile = parse(t_COPYRIGHT, tag)
 
 		tag["comment"] = COMMENT_CODE
 		headerCode = parse(t_COPYRIGHT, tag)
-
-	} else {
-		header = fmt.Sprint(t_COPYRIGHT, t_LICENSE_LINE_1, t_LICENSE_LAST_LINE)
-
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
 	}
 
-	// === Now, it's needed without comments to be passed to the README template.
-	tag["comment"] = "", false
+	// Tag to render copyright in README.
+	tag["comment"] = ""
 	tag["copyright"] = parse(t_COPYRIGHT, tag)
 
-	// Adds the version to GNU licenses.
-	if isGnu {
-		header = fmt.Sprint(tag["license"], t_VERSION_GNU)
-		tag["license"] = parse(header, tag)
+	// These tags are not used anymore.
+	for _, t := range []string{"Affero", "comment", "year"} {
+		tag[t] = "", false
 	}
-
-	 // This tag is not used anymore.
-	tag["year"] = "", false
 
 	return map[string]string{
 		"makefile": headerMakefile,

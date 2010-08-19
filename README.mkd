@@ -1,11 +1,14 @@
 gowizard
 ========
 
-Tool to create skeleton of Go projects.
+## Installation
 
-## Templates
+    $ git clone git://github.com/kless/gowizard.git
+    $ cd gowizard/gowizard && sudo -E make install ; cd -
 
-### Text files syntax
+### Templates
+
+#### Text files syntax
 
 The text file templates are written using the Markdown markup language since
 it has a simple syntax and it is easy to read in its raw form.
@@ -25,7 +28,7 @@ And syntax guides:
 [1]: http://stackoverflow.com/questions/659227/compare-and-contrast-the-lightweight-markup-languages-textile-markdown-and-res
 [2]: http://en.wikipedia.org/wiki/Lightweight_markup_language
 
-### Content of text templates
+#### Content of text templates
 
 *README* is based on:
 
@@ -57,9 +60,18 @@ choose which have been approved by *The Open Source Initiative (OSI)* are:
 In addition, it has been added a license like public domain but valid in
 whatever country:
 
-+ [Creative Commons CC0, 1.0 Universal][9]
++ [Creative Commons CC0, version 1.0 Universal][9]
 
 To know more about *CC0* read [here][10].
+
+
+[4]:  http://www.zdnet.com/blog/burnette/google-says-no-to-license-proliferation/192
+[5]:  http://opensource.org/licenses/bsd-license.php
+[6]:  http://www.apache.org/licenses/LICENSE-2.0.html
+[7]:  http://www.gnu.org/licenses/gpl.html
+[8]:  http://www.gnu.org/licenses/agpl.html
+[9]:  http://creativecommons.org/publicdomain/zero/1.0/
+[10]: http://creativecommons.org/about/cc0
 
 #### Discarded licenses
 
@@ -77,13 +89,6 @@ The [MIT/X11 License][11] has not been added since it is equivalent to the
 > [Why are the class libraries licensed under the MIT X11 license?][12]
 
 
-[4]: http://www.zdnet.com/blog/burnette/google-says-no-to-license-proliferation/192
-[5]: http://opensource.org/licenses/bsd-license.php
-[6]: http://www.apache.org/licenses/LICENSE-2.0.html
-[7]: http://www.gnu.org/licenses/gpl.html
-[8]: http://www.gnu.org/licenses/agpl.html
-[9]: http://creativecommons.org/publicdomain/zero/1.0/
-[10]: http://creativecommons.org/about/cc0
 [11]: http://opensource.org/licenses/mit-license.html
 [12]: http://www.mono-project.com/Licensing
 

@@ -1,8 +1,6 @@
 {{project_name}}
 {{_project_header}}
 
-{{summary}}
-
 [ Describe the project ]
 
 ## Installation
