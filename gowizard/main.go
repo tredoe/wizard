@@ -81,7 +81,7 @@ func main() {
 		renderFile(cfg.ProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
 	}
 
-	// Adds file related to VCS
+	// === Adds file related to VCS
 	if tag["vcs"] != "" && tag["vcs"] != "n" {
 		var fileIgnore string
 
