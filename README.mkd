@@ -1,11 +1,6 @@
 gowizard
 ========
 
-## Installation
-
-    $ git clone git://github.com/kless/gowizard.git
-    $ cd gowizard/gowizard && sudo -E make install ; cd -
-
 ### Templates
 
 #### Text files syntax
@@ -91,4 +86,45 @@ The [MIT/X11 License][11] has not been added since it is equivalent to the
 
 [11]: http://opensource.org/licenses/mit-license.html
 [12]: http://www.mono-project.com/Licensing
+
+**************************************
+
+<< Describe the project >>
+
+## Installation
+
+    $ git clone git://github.com/kless/gowizard.git
+    $ cd gowizard/gowizard && sudo -E make install ; cd -
+
+## Configuration
+
+<< Instructions to configure the program, if any >>
+
+## Operating instructions
+
+<< Instructions to run the program >>
+
+## Copyright and licensing
+
+*Copyright 2010  The "gowizard" Authors*
+See *AUTHORS* and *CONTRIBUTORS* files.
+
+Licensed under *Simplified BSD License*.
+See *LICENSE* file.
+
+## Contact
+
+<< Contact information for the distributor or programmer >>
+
+## Known bugs
+
+<< Known bugs and instructions on reporting new ones >>
+
+## Credits and acknowledgments
+
+For credits, see *AUTHORS* and *CONTRIBUTORS* files.
+
+## ChangeLog
+
+See *CHANGES* file.
 

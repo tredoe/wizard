@@ -5,9 +5,14 @@ below.*
 
 *Items should be added to this file as:*
 
-	### v1.0, 2010-01-20
+    ### YYYY-MM-DD  Author
 
-	- Description. [Contributor]
+    + *myfile.ext (myfunction):* My additional changes made to myfile.ext.
+
+    + *myfile.ext (unrelated_change):* My changes made to myfile.ext but
+    completely unrelated to the above.
+
+    + *anotherfile.ext (somefunction):* More changes.
 
 ***
 

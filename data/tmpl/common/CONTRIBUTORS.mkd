@@ -17,7 +17,7 @@ because the organization holds the copyright.*
 
 ### Initial author
 
-{{.section is_organization}}{{.or}}{{author}} <{{author_email}}>{{.end}}
+{{.section author_is_org}}{{.or}}{{author}} <{{author_email}}>{{.end}}
 
 ### Maintainer
 
