@@ -251,27 +251,42 @@ Usage: gowizard -Project-name -Author -Author-email
 
 	// === Adds the tags to pass to the templates
 	// ===
-	projectHeader := make([]byte, len(*fProjectName))
-	for i, _ := range projectHeader {
-		projectHeader[i] = '='
-	}
-
-	var org string
-	if *fIsOrganization {
-		org = "ok"
-	} else {
-		org = ""
-	}
+	var value string
 
 	tag = map[string]string{
 		"application_name": *fApplicationName,
 		"author":           *fAuthor,
 		"author_email":     *fAuthorEmail,
-		"is_organization":  org,
 		"license":          listLicense[*fLicense],
 		"project_name":     *fProjectName,
-		"_project_header":  string(projectHeader),
 	}
+
+	projectHeader := make([]byte, len(*fProjectName))
+	for i, _ := range projectHeader {
+		projectHeader[i] = '='
+	}
+	tag["_project_header"] = string(projectHeader)
+
+	if *fIsOrganization {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["is_organization"] = value
+
+	if *fApplicationType != "cmd" {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["app_not_cmd"] = value
+
+	if strings.HasPrefix(*fLicense, "cc0" ) {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["license_is_cc0"] = value
 
 	// === Adds the headers
 	header = renderHeader(tag, fLicense)
@@ -371,7 +386,7 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 		headerCode = parse(t_COPYRIGHT, tag)
 	}
 
-	// Tag to render copyright in README.
+	// Tag to render the copyright in README.
 	tag["comment"] = ""
 	tag["copyright"] = parse(t_COPYRIGHT, tag)
 

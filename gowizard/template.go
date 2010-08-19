@@ -26,9 +26,9 @@ const (
 {comment} Use of this source code is governed by the {license}
 {comment} that can be found in the LICENSE file.
 {comment}
-{comment} This software is distributed on an "AS IS" BASIS, WITHOUT
-{comment} WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-{comment} See the License for more details.
+{comment} This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+{comment} OR CONDITIONS OF ANY KIND, either express or implied. See the
+{comment} License for more details.
 `
 
 	t_APACHE = `
