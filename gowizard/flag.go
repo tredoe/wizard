@@ -87,9 +87,13 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 			"Shows the list of licenses for the flag 'License'")
 		fListApp = flag.Bool("la", false,
 			"Shows the list of application types for the flag 'Application-type'")
+		fListVCS = flag.Bool("lv", false,
+			"Shows the list of version control systems")
 
-		fIsOrganization = flag.Bool("org", false,
+		fAuthorIsOrg = flag.Bool("org", false,
 			"Does the author is an organization?")
+
+		fVCS = flag.String("vcs", "", "Version control system")
 	)
 
 	// Sorted flags for interactive mode
@@ -100,6 +104,13 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		"Author",
 		"Author-email",
 		"License",
+		"vcs",
+	}
+
+	// Available version control systems
+	var listVCS = map[string]string{
+		"git": "Git",
+		"hg":  "Mercurial",
 	}
 
 	// === Parses the flags
@@ -108,7 +119,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		fmt.Fprintf(os.Stderr, `
 Usage: gowizard -Project-name -Author -Author-email
        gowizard -Project-name -Author [-Author-email] -org
-	[-Application-type -Application-name -License]
+	[-Application-type -Application-name -License -vcs]
 
        gowizard -u [-ProjectName -ApplicationName -License]
 
@@ -172,18 +183,29 @@ Usage: gowizard -Project-name -Author -Author-email
 		os.Exit(0)
 	}
 
+	if *fListVCS {
+		fmt.Printf(`
+  Version control systems
+  -----------------------
+`)
+		for k, v := range listVCS {
+			fmt.Printf("  %s: %s\n", k, v)
+		}
+		os.Exit(0)
+	}
+
 	if *fInteractive {
 		fmt.Printf(`
   Interactive
   -----------
 `)
-		// === fIsOrganization
+		// === fAuthorIsOrg
 		var err os.Error
 
 		f := flag.Lookup("org")
 		readline.OptPrompt.Indent = "  "
 
-		*fIsOrganization, err = readline.PromptBool(f.Usage)
+		*fAuthorIsOrg, err = readline.PromptBool(f.Usage)
 		if err != nil {
 			log.Exit(err)
 		}
@@ -202,11 +224,13 @@ Usage: gowizard -Project-name -Author -Author-email
 				setNames()
 				input, err = readline.Prompt(text, *fApplicationName)
 			case "Author-email":
-				if *fIsOrganization {
+				if *fAuthorIsOrg {
 					input, err = readline.Prompt(text, "")
 				} else {
 					input, err = readline.RepeatPrompt(text)
 				}
+			case "vcs":
+				input, err = readline.Prompt(text, "N")
 			default:
 				input, err = readline.RepeatPrompt(text)
 			}
@@ -229,7 +253,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	if *fProjectName == "" || *fAuthor == "" {
 		usage()
 	}
-	if *fAuthorEmail == "" && !*fIsOrganization {
+	if *fAuthorEmail == "" && !*fAuthorIsOrg {
 		log.Exit("The email address is required for people")
 	}
 
@@ -239,7 +263,7 @@ Usage: gowizard -Project-name -Author -Author-email
 		log.Exitf("Unavailable license: '%s'", *fLicense)
 	}
 
-	if *fLicense == "bsd-3" && !*fIsOrganization {
+	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
 		log.Exit("The license 'bsd-3' requires an organization as author")
 	}
 
@@ -247,6 +271,14 @@ Usage: gowizard -Project-name -Author -Author-email
 	*fApplicationType = strings.ToLower(*fApplicationType)
 	if _, present := listApp[*fApplicationType]; !present {
 		log.Exitf("Unavailable application type: '%s'", *fApplicationType)
+	}
+
+	// === VCS
+	*fVCS = strings.ToLower(*fVCS)
+	if *fVCS != "" && *fVCS != "n" {
+		if _, present := listVCS[*fVCS]; !present {
+			log.Exitf("Unavailable version control system: '%s'", *fVCS)
+		}
 	}
 
 	// === Adds the tags to pass to the templates
@@ -259,6 +291,7 @@ Usage: gowizard -Project-name -Author -Author-email
 		"author_email":     *fAuthorEmail,
 		"license":          listLicense[*fLicense],
 		"project_name":     *fProjectName,
+		"vcs":              *fVCS,
 	}
 
 	projectHeader := make([]byte, len(*fProjectName))
@@ -267,21 +300,21 @@ Usage: gowizard -Project-name -Author -Author-email
 	}
 	tag["_project_header"] = string(projectHeader)
 
-	if *fIsOrganization {
+	if *fAuthorIsOrg {
 		value = "ok"
 	} else {
 		value = ""
 	}
-	tag["is_organization"] = value
+	tag["author_is_org"] = value
 
-	if *fApplicationType != "cmd" {
+	if *fApplicationType == "pkg" {
 		value = "ok"
 	} else {
 		value = ""
 	}
-	tag["app_not_cmd"] = value
+	tag["app_is_pkg"] = value
 
-	if strings.HasPrefix(*fLicense, "cc0" ) {
+	if strings.HasPrefix(*fLicense, "cc0") {
 		value = "ok"
 	} else {
 		value = ""

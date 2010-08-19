@@ -71,10 +71,10 @@ type metadata struct {
 	License         string
 
 	// === Optional
-	Platform    string
+	Platform string
 	//Description string
-	Keywords    string
-	HomePage    string "Home-page"
+	Keywords string
+	HomePage string "Home-page"
 	//Classifier  []string
 
 	// Config file

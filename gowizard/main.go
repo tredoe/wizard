@@ -30,7 +30,6 @@ var cfg *metadata
 
 func main() {
 	var header, tag map[string]string
-	var isCC0 bool // Is CC0 license ?
 
 	cfg, header, tag = loadMetadata()
 
@@ -46,7 +45,7 @@ func main() {
 	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
 	// Templates base directory
-	dirTmpl := dirData+"/tmpl/pkg"
+	dirTmpl := dirData + "/tmpl/pkg"
 
 	// === Renders application files
 	switch cfg.ApplicationType {
@@ -58,24 +57,23 @@ func main() {
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
 
-		dirTmpl = dirData+"/tmpl/web.go"
+		dirTmpl = dirData + "/tmpl/web.go"
 		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/setup.go", tag)
 	case "cmd":
-		dirTmpl = dirData+"/tmpl/cmd"
+		dirTmpl = dirData + "/tmpl/cmd"
 		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
 	}
 
 	// === Renders common files
-	dirTmpl = dirData+"/tmpl/common"
+	dirTmpl = dirData + "/tmpl/common"
 
 	renderFile(cfg.ProjectName, dirTmpl+"/CHANGES.mkd", tag)
 	renderFile(cfg.ProjectName, dirTmpl+"/README.mkd", tag)
 
 	if strings.HasPrefix(cfg.License, "cc0") {
-		isCC0 = true
 		renderNewFile(cfg.ProjectName+"/AUTHORS.mkd",
 			dirTmpl+"/AUTHORS-cc0.mkd", tag)
 	} else {
@@ -83,8 +81,25 @@ func main() {
 		renderFile(cfg.ProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
 	}
 
+	// Adds file related to VCS
+	if tag["vcs"] != "" && tag["vcs"] != "n" {
+		var fileIgnore string
+
+		switch tag["vcs"] {
+		case "git":
+			fileIgnore = "gitignore"
+		case "hg":
+			fileIgnore = "hgignore"
+		}
+
+		if err := CopyFile(path.Join(cfg.ProjectName, "."+fileIgnore),
+			path.Join(dirTmpl, fileIgnore)); err != nil {
+			log.Exit(err)
+		}
+	}
+
 	// === Adds license file
-	dirTmpl = dirData+"/license"
+	dirTmpl = dirData + "/license"
 
 	switch cfg.License {
 	case "none":
@@ -104,8 +119,8 @@ func main() {
 	cfg.WriteINI(strings.ToLower(projectName))
 
 	// === Prints messages
-	if tag["is_organization"] != "" {
-		if isCC0 {
+	if tag["author_is_org"] != "" {
+		if tag["license_is_cc0"] != "" {
 			fmt.Print("\n  * Update the file AUTHORS")
 		} else {
 			fmt.Print("\n  * Update the file CONTRIBUTORS")

@@ -5,7 +5,7 @@
 
 ## Installation
 
-{{.section app_not_cmd}}<< Instructions to install >>{{.or}}    $ [sudo -E] goinstall << download URL >>{{.end}}
+{{.section app_is_pkg}}    $ [sudo -E] goinstall << download URL >>{{.or}}<< Instructions to install >>{{.end}}
 
 ## Configuration
 
