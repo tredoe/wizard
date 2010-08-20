@@ -256,7 +256,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	// === License
 	*fLicense = strings.ToLower(*fLicense)
 	if _, present := listLicense[*fLicense]; !present {
-		log.Exitf("Unavailable license: '%s'", *fLicense)
+		log.Exitf("Unavailable license: %q", *fLicense)
 	}
 
 	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
@@ -266,14 +266,14 @@ Usage: gowizard -Project-name -Author -Author-email
 	// === Application type
 	*fApplicationType = strings.ToLower(*fApplicationType)
 	if _, present := listApp[*fApplicationType]; !present {
-		log.Exitf("Unavailable application type: '%s'", *fApplicationType)
+		log.Exitf("Unavailable application type: %q", *fApplicationType)
 	}
 
 	// === VCS
 	*fVCS = strings.ToLower(*fVCS)
 	if *fVCS != "none" {
 		if _, present := listVCS[*fVCS]; !present {
-			log.Exitf("Unavailable version control system: '%s'", *fVCS)
+			log.Exitf("Unavailable version control system: %q", *fVCS)
 		}
 	}
 
