@@ -98,7 +98,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		fAuthorIsOrg = flag.Bool("org", false,
 			"Does the author is an organization?")
 
-		fVCS = flag.String("vcs", "", "Version control system")
+		fVCS = flag.String("vcs", "none", "Version control system")
 	)
 
 	// Sorted flags for interactive mode
@@ -223,7 +223,7 @@ Usage: gowizard -Project-name -Author -Author-email
 				*fAuthorIsOrg, err = readline.PromptBool(text)
 			case "vcs":
 				input, err = readline.PromptChoice(text, arrayKeys(listVCS),
-					"none")
+					f.Value.String())
 			default:
 				input, err = readline.RepeatPrompt(text)
 			}
