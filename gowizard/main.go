@@ -87,7 +87,7 @@ func main() {
 	}
 
 	// === Adds file related to VCS
-	if tag["vcs"] != "" && tag["vcs"] != "n" {
+	if tag["vcs"] != "none" {
 		var fileIgnore string
 
 		switch tag["vcs"] {

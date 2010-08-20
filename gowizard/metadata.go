@@ -107,8 +107,6 @@ AuthorEmail, License string, file *conf.ConfigFile) *metadata {
 /* Serializes to INI format and write it to file `_FILE_NAME` in directory `dir`.
  */
 func (self *metadata) WriteINI(dir string) {
-	var name, value string
-
 	header := "Created by gowizard\n"
 	reflectMetadata := self.getStruct()
 
@@ -137,17 +135,17 @@ func (self *metadata) WriteINI(dir string) {
 	}
 
 	for i := 0; i < len(default_); i++ {
-		name, value = reflectMetadata.getName_Value(default_[i])
+		name, value := reflectMetadata.getName_Value(default_[i])
 		self.file.AddOption(conf.DefaultSection, name, value)
 	}
 
 	for i := 0; i < len(base); i++ {
-		name, value = reflectMetadata.getName_Value(base[i])
+		name, value := reflectMetadata.getName_Value(base[i])
 		self.file.AddOption("base", name, value)
 	}
 
 	for i := 0; i < len(optional); i++ {
-		name, value = reflectMetadata.getName_Value(optional[i])
+		name, value := reflectMetadata.getName_Value(optional[i])
 		self.file.AddOption("optional", name, value)
 	}
 

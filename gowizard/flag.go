@@ -103,6 +103,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 
 	// Sorted flags for interactive mode
 	var interactiveFlags = []string{
+		"org",
 		"Application-type",
 		"Project-name",
 		"Application-name",
@@ -114,8 +115,9 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 
 	// Available version control systems
 	var listVCS = map[string]string{
-		"git": "Git",
-		"hg":  "Mercurial",
+		"git":  "Git",
+		"hg":   "Mercurial",
+		"none": "other/none",
 	}
 
 	// === Parses the flags
@@ -167,10 +169,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	// ===
 
 	if *fListApp {
-		fmt.Printf(`
-  Applications
-  ------------
-`)
+		fmt.Println("  = Application types\n")
 		for k, v := range listApp {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
@@ -178,10 +177,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	}
 
 	if *fListLicense {
-		fmt.Printf(`
-  Licenses
-  --------
-`)
+		fmt.Println("  = Licenses\n")
 		for k, v := range listLicense {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
@@ -189,10 +185,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	}
 
 	if *fListVCS {
-		fmt.Printf(`
-  Version control systems
-  -----------------------
-`)
+		fmt.Println("  = Version control systems\n")
 		for k, v := range listVCS {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
@@ -200,42 +193,37 @@ Usage: gowizard -Project-name -Author -Author-email
 	}
 
 	if *fInteractive {
-		fmt.Printf(`
-  Interactive
-  -----------
-`)
-		// === fAuthorIsOrg
+		var input string
 		var err os.Error
 
-		f := flag.Lookup("org")
+		fmt.Println("  = Interactive\n")
 		readline.OptPrompt.Indent = "  "
 
-		*fAuthorIsOrg, err = readline.PromptBool(f.Usage)
-		if err != nil {
-			log.Exit(err)
-		}
-
-		// === Flags for Metadata
-		var input string
-
 		for _, k := range interactiveFlags {
-			f = flag.Lookup(k)
-			text := strings.TrimRight(f.Usage, ".")
+			f := flag.Lookup(k)
+			text := fmt.Sprintf("+ %s", strings.TrimRight(f.Usage, "."))
 
 			switch k {
-			case "Application-type", "License":
-				input, err = readline.Prompt(text, f.Value.String())
 			case "Application-name":
 				setNames()
 				input, err = readline.Prompt(text, *fApplicationName)
+			case "Application-type":
+				input, err = readline.PromptChoice(text, arrayKeys(listApp),
+					f.Value.String())
 			case "Author-email":
 				if *fAuthorIsOrg {
 					input, err = readline.Prompt(text, "")
 				} else {
 					input, err = readline.RepeatPrompt(text)
 				}
+			case "License":
+				input, err = readline.PromptChoice(text, arrayKeys(listLicense),
+					f.Value.String())
+			case "org":
+				*fAuthorIsOrg, err = readline.PromptBool(text)
 			case "vcs":
-				input, err = readline.Prompt(text, "N")
+				input, err = readline.PromptChoice(text, arrayKeys(listVCS),
+					"none")
 			default:
 				input, err = readline.RepeatPrompt(text)
 			}
@@ -243,7 +231,10 @@ Usage: gowizard -Project-name -Author -Author-email
 			if err != nil {
 				log.Exit(err)
 			}
-			flag.Set(k, input)
+
+			if k != "org" {
+				flag.Set(k, input)
+			}
 		}
 
 		fmt.Println()
@@ -353,6 +344,19 @@ Usage: gowizard -Project-name -Author -Author-email
 	return data, header, tag
 }
 
+/* Gets an array from the map keys. */
+func arrayKeys(m map[string]string) []string {
+	a := make([]string, len(m))
+
+	i := 0
+	for k, _ := range m {
+		a[i] = k
+		i++
+	}
+
+	return a
+}
+
 /* Returns the INI configuration file. */
 func config() (file *conf.ConfigFile) {
 	var err os.Error
@@ -375,14 +379,14 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 		COMMENT_MAKEFILE = "#"
 	)
 
-	var header, headerMakefile, headerCode string
+	var headerMakefile, headerCode string
 
 	tag["year"] = strconv.Itoa64(time.LocalTime().Year)
 	licenseName := strings.Split(*fLicense, "-", -1)[0]
 
 	switch licenseName {
 	case "apache":
-		header = fmt.Sprint(t_COPYRIGHT, t_APACHE)
+		header := fmt.Sprint(t_COPYRIGHT, t_APACHE)
 
 		tag["comment"] = COMMENT_MAKEFILE
 		headerMakefile = parse(header, tag)
@@ -390,7 +394,7 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 		tag["comment"] = COMMENT_CODE
 		headerCode = parse(header, tag)
 	case "bsd":
-		header = fmt.Sprint(t_COPYRIGHT, t_BSD)
+		header := fmt.Sprint(t_COPYRIGHT, t_BSD)
 
 		tag["comment"] = COMMENT_MAKEFILE
 		headerMakefile = parse(header, tag)
@@ -404,7 +408,7 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 		tag["comment"] = COMMENT_CODE
 		headerCode = parse(t_CC0, tag)
 	case "gpl", "agpl":
-		header = fmt.Sprint(t_COPYRIGHT, t_GNU)
+		header := fmt.Sprint(t_COPYRIGHT, t_GNU)
 		if licenseName == "agpl" {
 			tag["Affero"] = "Affero"
 		} else {
