@@ -271,7 +271,7 @@ Usage: gowizard -Project-name -Author -Author-email
 
 	// === VCS
 	*fVCS = strings.ToLower(*fVCS)
-	if *fVCS != "" && *fVCS != "n" {
+	if *fVCS != "none" {
 		if _, present := listVCS[*fVCS]; !present {
 			log.Exitf("Unavailable version control system: '%s'", *fVCS)
 		}
