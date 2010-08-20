@@ -322,10 +322,8 @@ Usage: gowizard -Project-name -Author -Author-email
 
 	// === Shows data on 'tag' and license header, if 'fDebug' is set
 	if *fDebug {
-		fmt.Printf(`
-  Debug
-  -----
-`)
+		fmt.Println("  = Debug\n")
+
 		for k, v := range tag {
 			if k[0] == '_' {
 				continue
