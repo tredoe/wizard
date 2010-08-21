@@ -4,8 +4,8 @@
 // that can be found in the LICENSE file.
 //
 // This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
-// OR CONDITIONS OF ANY KIND, either express or implied. See the
-// License for more details.
+// OR CONDITIONS OF ANY KIND, either express or implied. See the License
+// for more details.
 
 /* Template returns strings. */
 
@@ -32,8 +32,8 @@ const (
 {comment} that can be found in the LICENSE file.
 {comment}
 {comment} This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
-{comment} OR CONDITIONS OF ANY KIND, either express or implied. See the
-{comment} License for more details.
+{comment} OR CONDITIONS OF ANY KIND, either express or implied. See the License
+{comment} for more details.
 `
 
 	t_APACHE = `
