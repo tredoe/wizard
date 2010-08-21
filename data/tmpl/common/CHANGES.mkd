@@ -1,7 +1,6 @@
 ##### Notice
 
-*This file documents the changes in the ***{{project_name}}*** versions listed
-below.*
+*This file documents the changes in ***{{project_name}}***.*
 
 *Items should be added to this file as:*
 

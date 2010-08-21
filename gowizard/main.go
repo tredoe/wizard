@@ -125,13 +125,17 @@ func main() {
 
 	// === Prints messages
 	if tag["author_is_org"] != "" {
+		fmt.Print(`
+  * The organization has been added as author.
+    Update `)
+
 		if tag["license_is_cc0"] != "" {
-			fmt.Print("\n  * Update the file AUTHORS")
+			fmt.Print("AUTHORS")
 		} else {
-			fmt.Print("\n  * Update the file CONTRIBUTORS")
+			fmt.Print("CONTRIBUTORS")
 		}
+		fmt.Print(" file to add people.\n")
 	}
-	fmt.Println("\n  * Warning: don't edit section 'default' in file Metadata\n")
 
 	os.Exit(0)
 }

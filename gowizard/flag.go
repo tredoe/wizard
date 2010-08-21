@@ -443,13 +443,3 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 	}
 }
 
-
-/* TODO
-
-Update
-	"project_name"
-	"application_name"
-	"license"
-
-*/
-

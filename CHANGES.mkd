@@ -1,7 +1,6 @@
 ##### Notice
 
-*This file documents the changes in the ***gowizard*** versions listed
-below.*
+*This file documents the changes in ***gowizard***.*
 
 *Items should be added to this file as:*
 
