@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kless/go-readline/readline"
+	"github.com/kless/go-readin/readin"
 	conf "goconf.googlecode.com/hg"
 )
 
@@ -197,7 +197,7 @@ Usage: gowizard -Project-name -Author -Author-email
 		var err os.Error
 
 		fmt.Println("  = Interactive\n")
-		readline.OptPrompt.Indent = "  "
+		readin.OptPrompt.Indent = "  "
 
 		for _, k := range interactiveFlags {
 			f := flag.Lookup(k)
@@ -206,26 +206,26 @@ Usage: gowizard -Project-name -Author -Author-email
 			switch k {
 			case "Application-name":
 				setNames()
-				input, err = readline.Prompt(text, *fApplicationName)
+				input, err = readin.Prompt(text, *fApplicationName)
 			case "Application-type":
-				input, err = readline.PromptChoice(text, arrayKeys(listApp),
+				input, err = readin.PromptChoice(text, arrayKeys(listApp),
 					f.Value.String())
 			case "Author-email":
 				if *fAuthorIsOrg {
-					input, err = readline.Prompt(text, "")
+					input, err = readin.Prompt(text, "")
 				} else {
-					input, err = readline.RepeatPrompt(text)
+					input, err = readin.RepeatPrompt(text)
 				}
 			case "License":
-				input, err = readline.PromptChoice(text, arrayKeys(listLicense),
+				input, err = readin.PromptChoice(text, arrayKeys(listLicense),
 					f.Value.String())
 			case "org":
-				*fAuthorIsOrg, err = readline.PromptBool(text)
+				*fAuthorIsOrg, err = readin.PromptBool(text)
 			case "vcs":
-				input, err = readline.PromptChoice(text, arrayKeys(listVCS),
+				input, err = readin.PromptChoice(text, arrayKeys(listVCS),
 					f.Value.String())
 			default:
-				input, err = readline.RepeatPrompt(text)
+				input, err = readin.RepeatPrompt(text)
 			}
 
 			if err != nil {
