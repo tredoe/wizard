@@ -5,7 +5,11 @@
 
 ## Installation
 
-{{.section app_is_pkg}}	$ [sudo -E] goinstall << download URL >>{{.or}}<< Instructions to install >>{{.end}}
+{{.section app_is_pkg}}
+	$ [sudo -E] goinstall << download URL >>
+{{.or}}
+<< Instructions to install >>
+{{.end}}
 
 ## Configuration
 
