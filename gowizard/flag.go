@@ -419,11 +419,13 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 		tag["comment"] = COMMENT_CODE
 		headerCode = parse(header, tag)
 	case "none":
+		header := fmt.Sprint(t_COPYRIGHT, "\n")
+
 		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(t_COPYRIGHT, tag)
+		headerMakefile = parse(header, tag)
 
 		tag["comment"] = COMMENT_CODE
-		headerCode = parse(t_COPYRIGHT, tag)
+		headerCode = parse(header, tag)
 	}
 
 	// Tag to render the copyright in README.
