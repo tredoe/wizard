@@ -15,8 +15,21 @@ import (
 )
 
 
-/* Copies a file from source one to destination one. */
-func CopyFile(destination, source string) os.Error {
+/* Gets an array from map keys. */
+func arrayKeys(m map[string]string) []string {
+	a := make([]string, len(m))
+
+	i := 0
+	for k, _ := range m {
+		a[i] = k
+		i++
+	}
+
+	return a
+}
+
+/* Copies a file from source to destination. */
+func copyFile(destination, source string) os.Error {
 	src, err := ioutil.ReadFile(source)
 	if err != nil {
 		return err
@@ -28,5 +41,20 @@ func CopyFile(destination, source string) os.Error {
 	}
 
 	return nil
+}
+
+/* Returns the INI configuration file. */
+func config() (file *config.ConfigFile) {
+	var err os.Error
+
+	if *fUpdate {
+		if file, err = config.ReadConfigFile(_FILE_NAME); err != nil {
+			log.Exit(err)
+		}
+	} else {
+		file = config.NewConfigFile()
+	}
+
+	return
 }
 

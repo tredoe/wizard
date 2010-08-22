@@ -97,7 +97,7 @@ func main() {
 			fileIgnore = "hgignore"
 		}
 
-		if err := CopyFile(path.Join(cfg.ProjectName, "."+fileIgnore),
+		if err := copyFile(path.Join(cfg.ProjectName, "."+fileIgnore),
 			path.Join(dirTmpl, fileIgnore)); err != nil {
 			log.Exit(err)
 		}
@@ -113,7 +113,7 @@ func main() {
 		renderNewFile(cfg.ProjectName+"/LICENSE", dirTmpl+"/bsd-3.txt",
 			tag)
 	default:
-		if err := CopyFile(cfg.ProjectName+"/LICENSE",
+		if err := copyFile(cfg.ProjectName+"/LICENSE",
 			path.Join(dirTmpl, cfg.License+".txt")); err != nil {
 			log.Exit(err)
 		}

@@ -342,34 +342,6 @@ Usage: gowizard -Project-name -Author -Author-email
 	return data, header, tag
 }
 
-/* Gets an array from the map keys. */
-func arrayKeys(m map[string]string) []string {
-	a := make([]string, len(m))
-
-	i := 0
-	for k, _ := range m {
-		a[i] = k
-		i++
-	}
-
-	return a
-}
-
-/* Returns the INI configuration file. */
-func config() (file *config.ConfigFile) {
-	var err os.Error
-
-	if *fUpdate {
-		if file, err = config.ReadConfigFile(_FILE_NAME); err != nil {
-			log.Exit(err)
-		}
-	} else {
-		file = config.NewConfigFile()
-	}
-
-	return
-}
-
 /* Renders the headers of source code files according to the license. */
 func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 	const (
