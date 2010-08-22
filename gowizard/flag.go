@@ -19,8 +19,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kless/goconfig/config"
 	"github.com/kless/go-readin/readin"
-	conf "goconf.googlecode.com/hg"
 )
 
 // Global flag
@@ -356,15 +356,15 @@ func arrayKeys(m map[string]string) []string {
 }
 
 /* Returns the INI configuration file. */
-func config() (file *conf.ConfigFile) {
+func config() (file *config.ConfigFile) {
 	var err os.Error
 
 	if *fUpdate {
-		if file, err = conf.ReadConfigFile(_FILE_NAME); err != nil {
+		if file, err = config.ReadConfigFile(_FILE_NAME); err != nil {
 			log.Exit(err)
 		}
 	} else {
-		file = conf.NewConfigFile()
+		file = config.NewConfigFile()
 	}
 
 	return

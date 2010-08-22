@@ -16,7 +16,7 @@ import (
 	"path"
 	"reflect"
 
-	conf "goconf.googlecode.com/hg"
+	"github.com/kless/goconfig/config"
 )
 
 
@@ -83,12 +83,12 @@ type metadata struct {
 	//Classifier  []string
 
 	// Config file
-	file *conf.ConfigFile
+	file *config.ConfigFile
 }
 
 /* Creates a new metadata with the basic fields to build the project. */
 func NewMetadata(ProjectName, ApplicationName, ApplicationType, Author,
-AuthorEmail, License string, file *conf.ConfigFile) *metadata {
+AuthorEmail, License string, file *config.ConfigFile) *metadata {
 	metadata := new(metadata)
 
 	metadata.MetadataVersion = "1.1"
@@ -136,7 +136,7 @@ func (self *metadata) WriteINI(dir string) {
 
 	for i := 0; i < len(default_); i++ {
 		name, value := reflectMetadata.getName_Value(default_[i])
-		self.file.AddOption(conf.DefaultSection, name, value)
+		self.file.AddOption(config.DefaultSection, name, value)
 	}
 
 	for i := 0; i < len(base); i++ {
@@ -156,7 +156,7 @@ func (self *metadata) WriteINI(dir string) {
 }
 
 func ReadMetadata() {
-	file, err := conf.ReadConfigFile(_FILE_NAME)
+	file, err := config.ReadConfigFile(_FILE_NAME)
 	if err != nil {
 		log.Exit(err)
 	}
