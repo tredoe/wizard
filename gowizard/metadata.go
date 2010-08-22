@@ -83,12 +83,12 @@ type metadata struct {
 	//Classifier  []string
 
 	// Config file
-	file *config.ConfigFile
+	file *config.File
 }
 
 /* Creates a new metadata with the basic fields to build the project. */
 func NewMetadata(ProjectName, ApplicationName, ApplicationType, Author,
-AuthorEmail, License string, file *config.ConfigFile) *metadata {
+AuthorEmail, License string, file *config.File) *metadata {
 	metadata := new(metadata)
 
 	metadata.MetadataVersion = "1.1"
@@ -135,33 +135,33 @@ func (self *metadata) WriteINI(dir string) {
 	}
 
 	for i := 0; i < len(default_); i++ {
-		name, value := reflectMetadata.getName_Value(default_[i])
-		self.file.AddOption(config.DefaultSection, name, value)
+		name, value := reflectMetadata.name_value(default_[i])
+		self.file.AddOption(config.DEFAULT_SECTION, name, value)
 	}
 
 	for i := 0; i < len(base); i++ {
-		name, value := reflectMetadata.getName_Value(base[i])
+		name, value := reflectMetadata.name_value(base[i])
 		self.file.AddOption("base", name, value)
 	}
 
 	for i := 0; i < len(optional); i++ {
-		name, value := reflectMetadata.getName_Value(optional[i])
+		name, value := reflectMetadata.name_value(optional[i])
 		self.file.AddOption("optional", name, value)
 	}
 
 	filePath := path.Join(dir, _FILE_NAME)
-	if err := self.file.WriteConfigFile(filePath, PERM_FILE, header); err != nil {
+	if err := self.file.WriteFile(filePath, PERM_FILE, header); err != nil {
 		log.Exit(err)
 	}
 }
 
 func ReadMetadata() {
-	file, err := config.ReadConfigFile(_FILE_NAME)
+	file, err := config.ReadFile(_FILE_NAME)
 	if err != nil {
 		log.Exit(err)
 	}
 
-	s := file.GetSections()
+	s := file.Sections()
 	println(s)
 }
 
@@ -186,7 +186,7 @@ func (self *metadata) getStruct() *reflectStruct {
 }
 
 /* Gets the tag or field name and its value, given the field name. */
-func (self *reflectStruct) getName_Value(fieldName string) (name, value string) {
+func (self *reflectStruct) name_value(fieldName string) (name, value string) {
 	field, _ := self.strType.FieldByName(fieldName)
 	value_ := self.strValue.FieldByName(fieldName)
 

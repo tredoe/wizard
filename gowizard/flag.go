@@ -19,7 +19,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kless/goconfig/config"
 	"github.com/kless/go-readin/readin"
 )
 
@@ -337,7 +336,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	// ===
 
 	data = NewMetadata(*fProjectName, *fApplicationName, *fApplicationType,
-		*fAuthor, *fAuthorEmail, *fLicense, config())
+		*fAuthor, *fAuthorEmail, *fLicense, configFile())
 
 	return data, header, tag
 }

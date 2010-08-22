@@ -11,7 +11,10 @@ package main
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
+
+	"github.com/kless/goconfig/config"
 )
 
 
@@ -44,15 +47,15 @@ func copyFile(destination, source string) os.Error {
 }
 
 /* Returns the INI configuration file. */
-func config() (file *config.ConfigFile) {
+func configFile() (file *config.File) {
 	var err os.Error
 
 	if *fUpdate {
-		if file, err = config.ReadConfigFile(_FILE_NAME); err != nil {
+		if file, err = config.ReadFile(_FILE_NAME); err != nil {
 			log.Exit(err)
 		}
 	} else {
-		file = config.NewConfigFile()
+		file = config.NewFile()
 	}
 
 	return
