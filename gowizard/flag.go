@@ -114,9 +114,10 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 
 	// Available version control systems
 	var listVCS = map[string]string{
-		"git":  "Git",
-		"hg":   "Mercurial",
-		"none": "other/none",
+		"git":   "Git",
+		"hg":    "Mercurial",
+		"other": "other VCS",
+		"none":  "none",
 	}
 
 	// === Parses the flags

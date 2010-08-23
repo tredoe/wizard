@@ -75,7 +75,6 @@ func main() {
 	// === Renders common files
 	dirTmpl = dirData + "/tmpl/common"
 
-	renderFile(cfg.ProjectName, dirTmpl+"/CHANGES.mkd", tag)
 	renderFile(cfg.ProjectName, dirTmpl+"/README.mkd", tag)
 
 	if strings.HasPrefix(cfg.License, "cc0") {
@@ -87,20 +86,19 @@ func main() {
 	}
 
 	// === Adds file related to VCS
-	if tag["vcs"] != "none" {
-		var fileIgnore string
+	switch tag["vcs"] {
+		case "other":
+			break
+		// CHANGES is only necessary when is not used a VCS.
+		case "none":
+			renderFile(cfg.ProjectName, dirTmpl+"/CHANGES.mkd", tag)
+		default:
+			fileIgnore := tag["vcs"] + "ignore"
 
-		switch tag["vcs"] {
-		case "git":
-			fileIgnore = "gitignore"
-		case "hg":
-			fileIgnore = "hgignore"
-		}
-
-		if err := copyFile(path.Join(cfg.ProjectName, "."+fileIgnore),
-			path.Join(dirTmpl, fileIgnore)); err != nil {
-			log.Exit(err)
-		}
+			if err := copyFile(path.Join(cfg.ProjectName, "."+fileIgnore),
+				path.Join(dirTmpl, fileIgnore)); err != nil {
+				log.Exit(err)
+			}
 	}
 
 	// === Adds license file

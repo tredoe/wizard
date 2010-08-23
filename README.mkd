@@ -87,7 +87,7 @@ For credits, see AUTHORS and CONTRIBUTORS files.
 
 ## ChangeLog
 
-See CHANGES file.
+See [commit history][3].
 
 
 ## ToDo
@@ -101,4 +101,5 @@ See CHANGES file.
 
 [1]: http://github.com/kless
 [2]: http://github.com/kless/gowizard/issues
+[3]: http://github.com/kless/gowizard/commits/master
 
