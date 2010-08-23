@@ -196,7 +196,7 @@ Usage: gowizard -Project-name -Author -Author-email
 		var err os.Error
 
 		fmt.Println("  = Interactive\n")
-		readin.OptPrompt.Indent = "  "
+		readin.DefaultIndent = "  "
 
 		for _, k := range interactiveFlags {
 			f := flag.Lookup(k)
