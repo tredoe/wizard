@@ -77,7 +77,7 @@ To contact, send e-mail through [github][1].
 
 ## Known bugs
 
-To reporting bugs, please create a new issue [here][2].
+To reporting bugs, please login and create a new issue [here][2].
 
 
 ## Credits and acknowledgments

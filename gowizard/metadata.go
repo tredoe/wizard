@@ -23,7 +23,7 @@ import (
 const _FILE_NAME = "Metadata"
 
 // Available application types
-var listApp = map[string]string{
+var listProject = map[string]string{
 	"cmd":    "command line",
 	"pkg":    "package",
 	"web.go": "web environment",
@@ -59,15 +59,15 @@ added to pages on packages index:
 The field 'Name' has been substituted by 'Project-name' and 'Application-name'.
 The field 'License' needs a value from the map 'license'.
 
-It has been added 'Application-type'.
+It has been added 'Project-type'.
 
 For 'Classifier' see on http://pypi.python.org/pypi?%3Aaction=list_classifiers
 */
 type metadata struct {
 	MetadataVersion string "Metadata-Version" // Version of the file format
+	ProjectType     string "Project-type"
 	ProjectName     string "Project-name"
 	ApplicationName string "Application-name"
-	ApplicationType string "Application-type"
 	Version         string
 	Summary         string
 	DownloadURL     string "Download-URL"
@@ -87,14 +87,14 @@ type metadata struct {
 }
 
 /* Creates a new metadata with the basic fields to build the project. */
-func NewMetadata(ProjectName, ApplicationName, ApplicationType, Author,
+func NewMetadata(ProjectType, ProjectName, ApplicationName, Author,
 AuthorEmail, License string, file *config.File) *metadata {
 	metadata := new(metadata)
 
 	metadata.MetadataVersion = "1.1"
+	metadata.ProjectType = ProjectType
 	metadata.ProjectName = ProjectName
 	metadata.ApplicationName = ApplicationName
-	metadata.ApplicationType = ApplicationType
 	metadata.Author = Author
 	metadata.AuthorEmail = AuthorEmail
 	metadata.License = License
@@ -118,7 +118,7 @@ func (self *metadata) WriteINI(dir string) {
 	}
 
 	base := []string{
-		"ApplicationType",
+		"ProjectType",
 		"Version",
 		"Summary",
 		"DownloadURL",

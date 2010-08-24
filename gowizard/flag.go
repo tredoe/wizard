@@ -39,7 +39,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		fApplicationName = flag.String("Application-name", "",
 			"The name of the package.")
 
-		fApplicationType = flag.String("Application-type", "pkg",
+		fProjecType = flag.String("Project-type", "pkg",
 			"The application type.")
 
 		/*fVersion = flag.String("Version", "",
@@ -89,8 +89,8 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 
 		fListLicense = flag.Bool("ll", false,
 			"Shows the list of licenses for the flag 'License'")
-		fListApp = flag.Bool("la", false,
-			"Shows the list of application types for the flag 'Application-type'")
+		fListProject = flag.Bool("lp", false,
+			"Shows the list of project types for the flag 'Project-type'")
 		fListVCS = flag.Bool("lv", false,
 			"Shows the list of version control systems")
 
@@ -103,7 +103,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 	// Sorted flags for interactive mode
 	var interactiveFlags = []string{
 		"org",
-		"Application-type",
+		"Project-type",
 		"Project-name",
 		"Application-name",
 		"Author",
@@ -126,7 +126,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		fmt.Fprintf(os.Stderr, `
 Usage: gowizard -Project-name -Author -Author-email
        gowizard -Project-name -Author [-Author-email] -org
-	[-Application-type -Application-name -License -vcs]
+	[-Project-type -Application-name -License -vcs]
 
        gowizard -u [-ProjectName -ApplicationName -License]
 
@@ -143,7 +143,7 @@ Usage: gowizard -Project-name -Author -Author-email
 		reGo := regexp.MustCompile(`^go`) // To remove it from the project name
 		*fProjectName = strings.TrimSpace(*fProjectName)
 
-		switch *fApplicationType {
+		switch *fProjecType {
 		// The name of a tool for the command line is usually named as
 		// the project name.
 		case "cmd":
@@ -168,9 +168,9 @@ Usage: gowizard -Project-name -Author -Author-email
 	// === Options
 	// ===
 
-	if *fListApp {
+	if *fListProject {
 		fmt.Println("  = Application types\n")
-		for k, v := range listApp {
+		for k, v := range listProject {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 		os.Exit(0)
@@ -207,8 +207,8 @@ Usage: gowizard -Project-name -Author -Author-email
 			case "Application-name":
 				setNames()
 				input, err = readin.Prompt(text, *fApplicationName)
-			case "Application-type":
-				input, err = readin.PromptChoice(text, arrayKeys(listApp),
+			case "Project-type":
+				input, err = readin.PromptChoice(text, arrayKeys(listProject),
 					f.Value.String())
 			case "Author-email":
 				if *fAuthorIsOrg {
@@ -263,10 +263,10 @@ Usage: gowizard -Project-name -Author -Author-email
 		log.Exit("The license 'bsd-3' requires an organization as author")
 	}
 
-	// === Application type
-	*fApplicationType = strings.ToLower(*fApplicationType)
-	if _, present := listApp[*fApplicationType]; !present {
-		log.Exitf("Unavailable application type: %q", *fApplicationType)
+	// === Project type
+	*fProjecType = strings.ToLower(*fProjecType)
+	if _, present := listProject[*fProjecType]; !present {
+		log.Exitf("Unavailable application type: %q", *fProjecType)
 	}
 
 	// === VCS
@@ -303,12 +303,12 @@ Usage: gowizard -Project-name -Author -Author-email
 	}
 	tag["author_is_org"] = value
 
-	if *fApplicationType == "pkg" {
+	if *fProjecType == "cgo" {
 		value = "ok"
 	} else {
 		value = ""
 	}
-	tag["app_is_pkg"] = value
+	tag["app_is_cgo"] = value
 
 	if strings.HasPrefix(*fLicense, "cc0") {
 		value = "ok"
@@ -336,7 +336,7 @@ Usage: gowizard -Project-name -Author -Author-email
 
 	// ===
 
-	data = NewMetadata(*fProjectName, *fApplicationName, *fApplicationType,
+	data = NewMetadata(*fProjecType, *fProjectName, *fApplicationName,
 		*fAuthor, *fAuthorEmail, *fLicense, configFile())
 
 	return data, header, tag
