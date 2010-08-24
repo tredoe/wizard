@@ -5,7 +5,7 @@ Tired of adding the same files every time you create a new Go project?
 Don't know how to structure it?  
 Don't know how to apply the license?
 
-**gowizard** creates the base for new Go projects since the chosen application
+**gowizard** creates the base for new Go projects since the chosen project
 type, and it adds the license header to source code files.
 
 To know about decisions as markup language and licenses to choose, see
@@ -28,13 +28,13 @@ documentation in directory *doc*.
 
 ## Operating instructions
 
-The required flags to build a new project are *-Project-name*, *-Author* and
-*-Author-email*; this last one is not necessary when the author is an
-organization (*-org*). Another required flags have values by default;
-*-Application-type*, *-Application-name*, *-License* and *-vcs*.
+The required flags to build a new project are *-Project-type*, *-Project-name*,
+*-Author* and *-Author-email*; this last one is not necessary when the author is
+an organization (*-org*). Another required flags have values by default;
+*-Package-name*, *-License* and *-vcs*.
 
-By default, the application name for a command line tool is named as the project
-name. For other types of application, it is removed "go-" from project name.
+By default, the package name for a program (app, tool) is named as the project
+name. For other types of project, it is removed "go-" from project name.
 
 Useful flags:
 
@@ -92,7 +92,7 @@ See [commit history][3].
 
 ## ToDo
 
-+ Update *project_name*, *application_name*, *license*; using flag *-u*.
++ Update *project_name*, *package_name*, *license*; using flag *-u*.
 
 
 ***
