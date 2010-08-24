@@ -33,14 +33,14 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 
 	// Metadata
 	var (
+		fProjecType = flag.String("Project-type", "",
+			"The project type.")
+
 		fProjectName = flag.String("Project-name", "",
 			"The name of the project.")
 
-		fApplicationName = flag.String("Application-name", "",
+		fPackageName = flag.String("Package-name", "",
 			"The name of the package.")
-
-		fProjecType = flag.String("Project-type", "pkg",
-			"The application type.")
 
 		/*fVersion = flag.String("Version", "",
 			"A string containing the package's version number.")
@@ -105,7 +105,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		"org",
 		"Project-type",
 		"Project-name",
-		"Application-name",
+		"Package-name",
 		"Author",
 		"Author-email",
 		"License",
@@ -124,11 +124,11 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 	// ===
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Project-name -Author -Author-email
-       gowizard -Project-name -Author [-Author-email] -org
-	[-Project-type -Application-name -License -vcs]
+Usage: gowizard -Project-type -Project-name -Author -Author-email
+       gowizard -Project-type -Project-name -Author [-Author-email] -org
+	[-Package-name -License -vcs]
 
-       gowizard -u [-ProjectName -ApplicationName -License]
+       gowizard -u [-Project-name -Package-name -License]
 
 `)
 		flag.PrintDefaults()
@@ -144,23 +144,23 @@ Usage: gowizard -Project-name -Author -Author-email
 		*fProjectName = strings.TrimSpace(*fProjectName)
 
 		switch *fProjecType {
-		// The name of a tool for the command line is usually named as
-		// the project name.
-		case "cmd":
-			if *fApplicationName == "" {
-				*fApplicationName = strings.ToLower(*fProjectName)
+		// The name of a application/tool for the command line is usually named
+		// as the project name.
+		case "app", "tool":
+			if *fPackageName == "" {
+				*fPackageName = strings.ToLower(*fProjectName)
 			}
 		default:
-			if *fApplicationName == "" {
+			if *fPackageName == "" {
 				// The package name is created:
 				// getting the last string after of the dash ('-'), if any,
 				// and removing 'go'. Finally, it's lower cased.
 				pkg := strings.Split(*fProjectName, "-", -1)
-				*fApplicationName = reGo.ReplaceAllString(
+				*fPackageName = reGo.ReplaceAllString(
 					strings.ToLower(pkg[len(pkg)-1]), "")
 			} else {
-				*fApplicationName = strings.ToLower(
-					strings.TrimSpace(*fApplicationName))
+				*fPackageName = strings.ToLower(
+					strings.TrimSpace(*fPackageName))
 			}
 		}
 	}
@@ -169,7 +169,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	// ===
 
 	if *fListProject {
-		fmt.Println("  = Application types\n")
+		fmt.Println("  = Project types\n")
 		for k, v := range listProject {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
@@ -204,9 +204,9 @@ Usage: gowizard -Project-name -Author -Author-email
 			text := fmt.Sprintf("+ %s", strings.TrimRight(f.Usage, "."))
 
 			switch k {
-			case "Application-name":
+			case "Package-name":
 				setNames()
-				input, err = readin.Prompt(text, *fApplicationName)
+				input, err = readin.Prompt(text, *fPackageName)
 			case "Project-type":
 				input, err = readin.PromptChoice(text, arrayKeys(listProject),
 					f.Value.String())
@@ -246,7 +246,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	// ===
 
 	// === Necessary fields
-	if *fProjectName == "" || *fAuthor == "" {
+	if *fProjecType == "" || *fProjectName == "" || *fAuthor == "" {
 		usage()
 	}
 	if *fAuthorEmail == "" && !*fAuthorIsOrg {
@@ -266,7 +266,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	// === Project type
 	*fProjecType = strings.ToLower(*fProjecType)
 	if _, present := listProject[*fProjecType]; !present {
-		log.Exitf("Unavailable application type: %q", *fProjecType)
+		log.Exitf("Unavailable project type: %q", *fProjecType)
 	}
 
 	// === VCS
@@ -282,7 +282,7 @@ Usage: gowizard -Project-name -Author -Author-email
 	var value string
 
 	tag = map[string]string{
-		"application_name": *fApplicationName,
+		"application_name": *fPackageName,
 		"author":           *fAuthor,
 		"author_email":     *fAuthorEmail,
 		"license":          listLicense[*fLicense],
@@ -336,7 +336,7 @@ Usage: gowizard -Project-name -Author -Author-email
 
 	// ===
 
-	data = NewMetadata(*fProjecType, *fProjectName, *fApplicationName,
+	data = NewMetadata(*fProjecType, *fProjectName, *fPackageName,
 		*fAuthor, *fAuthorEmail, *fLicense, configFile())
 
 	return data, header, tag

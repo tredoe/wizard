@@ -22,11 +22,14 @@ import (
 
 const _FILE_NAME = "Metadata"
 
-// Available application types
+// Available project types
 var listProject = map[string]string{
-	"cmd":    "command line",
-	"pkg":    "package",
 	"web.go": "web environment",
+
+	"tool": "development tool",
+	"app":  "program",
+	"cgo":  "package that calls C code",
+	"lib":  "library",
 }
 
 // Available licenses
@@ -56,7 +59,7 @@ added to pages on packages index:
 	Description
 	Classifier
 
-The field 'Name' has been substituted by 'Project-name' and 'Application-name'.
+The field 'Name' has been substituted by 'Project-name' and 'Package-name'.
 The field 'License' needs a value from the map 'license'.
 
 It has been added 'Project-type'.
@@ -67,7 +70,7 @@ type metadata struct {
 	MetadataVersion string "Metadata-Version" // Version of the file format
 	ProjectType     string "Project-type"
 	ProjectName     string "Project-name"
-	ApplicationName string "Application-name"
+	PackageName     string "Package-name"
 	Version         string
 	Summary         string
 	DownloadURL     string "Download-URL"
@@ -87,14 +90,14 @@ type metadata struct {
 }
 
 /* Creates a new metadata with the basic fields to build the project. */
-func NewMetadata(ProjectType, ProjectName, ApplicationName, Author,
+func NewMetadata(ProjectType, ProjectName, PackageName, Author,
 AuthorEmail, License string, file *config.File) *metadata {
 	metadata := new(metadata)
 
 	metadata.MetadataVersion = "1.1"
 	metadata.ProjectType = ProjectType
 	metadata.ProjectName = ProjectName
-	metadata.ApplicationName = ApplicationName
+	metadata.PackageName = PackageName
 	metadata.Author = Author
 	metadata.AuthorEmail = AuthorEmail
 	metadata.License = License
@@ -112,13 +115,13 @@ func (self *metadata) WriteINI(dir string) {
 
 	default_ := []string{
 		"MetadataVersion",
+		"ProjectType",
 		"ProjectName",
-		"ApplicationName",
+		"PackageName",
 		"License",
 	}
 
 	base := []string{
-		"ProjectType",
 		"Version",
 		"Summary",
 		"DownloadURL",

@@ -46,15 +46,18 @@ func main() {
 	projectName := cfg.ProjectName // Stores the name before of change it
 	cfg.ProjectName = strings.ToLower(cfg.ProjectName)
 
-	dirApp := path.Join(cfg.ProjectName, cfg.ApplicationName)
+	dirApp := path.Join(cfg.ProjectName, cfg.PackageName)
 	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
-	// Templates base directory
-	dirTmpl := dirData + "/tmpl/pkg"
-
 	// === Renders application files
-	switch cfg.ApplicationType {
-	case "pkg":
+	dirTmpl := dirData + "/tmpl/pkg" // Templates base directory
+
+	switch cfg.ProjectType {
+	case "lib":
+		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
+		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
+	case "cgo":
 		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
@@ -65,7 +68,7 @@ func main() {
 		dirTmpl = dirData + "/tmpl/web.go"
 		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/setup.go", tag)
-	case "cmd":
+	case "app", "tool":
 		dirTmpl = dirData + "/tmpl/cmd"
 		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
