@@ -29,17 +29,17 @@ documentation in directory *doc*.
 ## Operating instructions
 
 The required flags to build a new project are *-Project-type*, *-Project-name*,
-*-Author* and *-Author-email*; this last one is not necessary when the author is
-an organization (*-org*). Another required flags have values by default;
-*-Package-name*, *-License* and *-vcs*.
+*-Author*, *-Author-email* and *-vcs*; *-Author-email* is not necessary when the
+author is an organization (*-org*). Another required flags have values by
+default; *-Package-name* and *-License*.
 
 By default, the package name for a program (app, tool) is named as the project
 name. For other types of project, it is removed "go-" from project name.
 
-Useful flags:
+*-vcs* indicates the version control system to use, and it is used to add the
+appropriate ignore file.
 
-+ ***-vcs***: indicates the version control system to use, and it is used to add
-the appropriate ignore file.
+Useful flags:
 
 + ***-i***: the interactive mode is a simple way to get all required
 information, showing the required choices for the flags that need it.

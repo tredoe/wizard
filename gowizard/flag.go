@@ -97,7 +97,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		fAuthorIsOrg = flag.Bool("org", false,
 			"Does the author is an organization?")
 
-		fVCS = flag.String("vcs", "none", "Version control system")
+		fVCS = flag.String("vcs", "", "Version control system")
 	)
 
 	// Sorted flags for interactive mode
@@ -124,9 +124,8 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 	// ===
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Project-type -Project-name -Author -Author-email
-       gowizard -Project-type -Project-name -Author [-Author-email] -org
-	[-Package-name -License -vcs]
+Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
+	[-Package-name -License -org]
 
        gowizard -u [-Project-name -Package-name -License]
 
@@ -245,7 +244,7 @@ Usage: gowizard -Project-type -Project-name -Author -Author-email
 	// ===
 
 	// === Necessary fields
-	if *fProjecType == "" || *fProjectName == "" || *fAuthor == "" {
+	if *fProjecType == "" || *fProjectName == "" || *fAuthor == "" || *fVCS == "" {
 		usage()
 	}
 	if *fAuthorEmail == "" && !*fAuthorIsOrg {
@@ -270,10 +269,8 @@ Usage: gowizard -Project-type -Project-name -Author -Author-email
 
 	// === VCS
 	*fVCS = strings.ToLower(*fVCS)
-	if *fVCS != "none" {
-		if _, present := listVCS[*fVCS]; !present {
-			log.Exitf("Unavailable version control system: %q", *fVCS)
-		}
+	if _, present := listVCS[*fVCS]; !present {
+		log.Exitf("Unavailable version control system: %q", *fVCS)
 	}
 
 	// === Adds the tags to pass to the templates
