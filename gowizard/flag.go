@@ -144,7 +144,7 @@ Usage: gowizard -Project-type -Project-name -Author -Author-email
 		*fProjectName = strings.TrimSpace(*fProjectName)
 
 		switch *fProjecType {
-		// The name of a application/tool for the command line is usually named
+		// The name of application/tool for the command line is usually named
 		// as the project name.
 		case "app", "tool":
 			if *fPackageName == "" {

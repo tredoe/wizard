@@ -24,12 +24,10 @@ const _FILE_NAME = "Metadata"
 
 // Available project types
 var listProject = map[string]string{
-	"web.go": "web environment",
-
-	"tool": "development tool",
-	"app":  "program",
-	"cgo":  "package that calls C code",
-	"lib":  "library",
+	"tool": "Development tool",
+	"app":  "Program",
+	"cgo":  "Package that calls C code",
+	"lib":  "Library",
 }
 
 // Available licenses

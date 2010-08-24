@@ -61,13 +61,6 @@ func main() {
 		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
 		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
-	case "web.go":
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
-
-		dirTmpl = dirData + "/tmpl/web.go"
-		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/setup.go", tag)
 	case "app", "tool":
 		dirTmpl = dirData + "/tmpl/cmd"
 		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
