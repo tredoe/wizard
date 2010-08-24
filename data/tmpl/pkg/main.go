@@ -1,5 +1,5 @@
-package {{application_name}}
-{{.section app_is_cgo}}
+package {{package_name}}
+{{.section project_is_cgo}}
 
 import "C"
 {{.end}}

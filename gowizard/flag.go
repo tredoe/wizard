@@ -278,12 +278,12 @@ Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
 	var value string
 
 	tag = map[string]string{
-		"application_name": *fPackageName,
-		"author":           *fAuthor,
-		"author_email":     *fAuthorEmail,
-		"license":          listLicense[*fLicense],
-		"project_name":     *fProjectName,
-		"vcs":              *fVCS,
+		"project_name": *fProjectName,
+		"package_name": *fPackageName,
+		"author":       *fAuthor,
+		"author_email": *fAuthorEmail,
+		"license":      listLicense[*fLicense],
+		"vcs":          *fVCS,
 	}
 
 	projectHeader := make([]byte, len(*fProjectName))
@@ -304,7 +304,7 @@ Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
 	} else {
 		value = ""
 	}
-	tag["app_is_cgo"] = value
+	tag["project_is_cgo"] = value
 
 	if strings.HasPrefix(*fLicense, "cc0") {
 		value = "ok"
