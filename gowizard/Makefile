@@ -7,7 +7,7 @@
 # OR CONDITIONS OF ANY KIND, either express or implied. See the License
 # for more details.
 
-include $(GOROOT)/src/Make.$(GOARCH)
+include $(GOROOT)/src/Make.inc
 
 TARG=gowizard
 GOFILES=\
