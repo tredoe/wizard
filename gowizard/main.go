@@ -32,11 +32,24 @@ var cfg *metadata
 
 
 // === Main program execution
-
 func main() {
-	var header, tag map[string]string
+	if !*fUpdate {
+		createProject()
+	} else {
+		updateProject()
+	}
 
-	cfg, header, tag = loadMetadata()
+	os.Exit(0)
+}
+
+// ===
+
+func createProject() {
+	tag := loadConfig()             // Tags for templates
+	header := renderHeader(tag, "") // Header with copyright and license
+
+	cfg = NewMetadata(*fProjecType, *fProjectName, *fPackageName,
+		*fAuthor, *fAuthorEmail, *fLicense, configFile())
 
 	// === Create directories in lower case
 
@@ -74,25 +87,25 @@ func main() {
 	}
 
 	// === Add file related to VCS
-	switch tag["vcs"] {
-		case "other":
-			break
-		// CHANGES is only necessary when is not used a VCS.
-		case "none":
-			renderFile(cfg.ProjectName, dirTmpl+"/CHANGES.mkd", tag)
-		default:
-			fileIgnore := tag["vcs"] + "ignore"
+	switch *fVCS {
+	case "other":
+		break
+	// CHANGES is only necessary when is not used a VCS.
+	case "none":
+		renderFile(cfg.ProjectName, dirTmpl+"/CHANGES.mkd", tag)
+	default:
+		fileIgnore := *fVCS + "ignore"
 
-			if err := copyFile(path.Join(cfg.ProjectName, "."+fileIgnore),
-				path.Join(dirTmpl, fileIgnore)); err != nil {
-				log.Exit(err)
-			}
+		if err := copyFile(path.Join(cfg.ProjectName, "."+fileIgnore),
+			path.Join(dirTmpl, fileIgnore)); err != nil {
+			log.Exit(err)
+		}
 	}
 
 	// === Add license file
 	dirTmpl = dirData + "/license"
 
-	switch cfg.License {
+	switch *fLicense {
 	case "none":
 		break
 	case "bsd-3":
@@ -122,7 +135,11 @@ func main() {
 		}
 		fmt.Print(" file to add people.\n")
 	}
+}
 
-	os.Exit(0)
+
+func updateProject() {
+	//tag := loadConfig()
+
 }
 

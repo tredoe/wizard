@@ -61,3 +61,17 @@ func configFile() (file *config.File) {
 	return
 }
 
+/* Create a string of characters with length of ProjectName to use under that name.
+*/
+func projectHeader() string {
+	const char = '='
+
+	header := make([]byte, len(*fProjectName))
+
+	for i, _ := range header {
+		header[i] = char
+	}
+
+	return string(header)
+}
+
