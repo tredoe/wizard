@@ -38,9 +38,9 @@ func main() {
 
 	cfg, header, tag = loadMetadata()
 
-	// === Creates directories in lower case
+	// === Create directories in lower case
 
-	// Gets the data directory from `$(GOROOT)/lib/$(TARG)`
+	// Get data directory from `$(GOROOT)/lib/$(TARG)`
 	dirData := path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 
 	projectName := cfg.ProjectName // Stores the name before of change it
@@ -49,27 +49,19 @@ func main() {
 	dirApp := path.Join(cfg.ProjectName, cfg.PackageName)
 	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
-	// === Renders application files
-	dirTmpl := dirData + "/tmpl/pkg" // Templates base directory
-
+	// === Render project files
 	switch cfg.ProjectType {
-	case "lib":
-		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
-	case "cgo":
-		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
+	case "lib", "cgo":
+		renderCode(dirApp+"/Makefile", tmplPkgMakefile, header["makefile"], tag)
+		renderCode(dirApp+"/main.go", tmplPkgMain, header["code"], tag)
+		renderCode(dirApp+"/main_test.go", tmplPkgTest, header["code"], tag)
 	case "app", "tool":
-		dirTmpl = dirData + "/tmpl/cmd"
-		renderCodeFile(header["makefile"], dirApp, dirTmpl+"/Makefile", tag)
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/main.go", tag)
-		renderCodeFile(header["code"], dirApp, dirTmpl+"/main_test.go", tag)
+		renderCode(dirApp+"/Makefile", tmplCmdMakefile, header["makefile"], tag)
+		renderCode(dirApp+"/main.go", tmplCmdMain, header["code"], tag)
 	}
 
-	// === Renders common files
-	dirTmpl = dirData + "/tmpl/common"
+	// === Render common files
+	dirTmpl := dirData + "/tmpl" // Templates base directory
 
 	renderFile(cfg.ProjectName, dirTmpl+"/README.mkd", tag)
 
@@ -81,7 +73,7 @@ func main() {
 		renderFile(cfg.ProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
 	}
 
-	// === Adds file related to VCS
+	// === Add file related to VCS
 	switch tag["vcs"] {
 		case "other":
 			break
@@ -97,7 +89,7 @@ func main() {
 			}
 	}
 
-	// === Adds license file
+	// === Add license file
 	dirTmpl = dirData + "/license"
 
 	switch cfg.License {
@@ -113,11 +105,11 @@ func main() {
 		}
 	}
 
-	// === Creates file Metadata
+	// === Create file Metadata
 	cfg.ProjectName = projectName
 	cfg.WriteINI(strings.ToLower(projectName))
 
-	// === Prints messages
+	// === Print messages
 	if tag["author_is_org"] != "" {
 		fmt.Print(`
   * The organization has been added as author.

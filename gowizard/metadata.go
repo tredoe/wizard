@@ -176,7 +176,7 @@ type reflectStruct struct {
 	strValue *reflect.StructValue
 }
 
-/* Gets the structs that represent the type 'metadata'. */
+/* Gets structs that represent the type 'metadata'. */
 func (self *metadata) getStruct() *reflectStruct {
 	v := reflect.NewValue(self).(*reflect.PtrValue)
 
@@ -186,7 +186,7 @@ func (self *metadata) getStruct() *reflectStruct {
 	return &reflectStruct{strType, strValue}
 }
 
-/* Gets the tag or field name and its value, given the field name. */
+/* Gets tag or field name and its value, given the field name. */
 func (self *reflectStruct) name_value(fieldName string) (name, value string) {
 	field, _ := self.strType.FieldByName(fieldName)
 	value_ := self.strValue.FieldByName(fieldName)

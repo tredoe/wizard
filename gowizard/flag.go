@@ -120,7 +120,7 @@ func loadMetadata() (data *metadata, header, tag map[string]string) {
 		"none":  "none",
 	}
 
-	// === Parses the flags
+	// === Parse the flags
 	// ===
 	usage := func() {
 		fmt.Fprintf(os.Stderr, `
@@ -137,7 +137,7 @@ Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
 	flag.Usage = usage
 	flag.Parse()
 
-	// === Sets names for both project and package
+	// === Set names for both project and package
 	setNames := func() {
 		reGo := regexp.MustCompile(`^go`) // To remove it from the project name
 		*fProjectName = strings.TrimSpace(*fProjectName)
@@ -240,7 +240,7 @@ Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
 		setNames()
 	}
 
-	// === Checks
+	// === Checking
 	// ===
 
 	// === Necessary fields
@@ -273,7 +273,7 @@ Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
 		log.Exitf("Unavailable version control system: %q", *fVCS)
 	}
 
-	// === Adds the tags to pass to the templates
+	// === Add the tags to pass to the templates
 	// ===
 	var value string
 
@@ -306,6 +306,13 @@ Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
 	}
 	tag["project_is_cgo"] = value
 
+	if *fProjecType == "lib" {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["project_is_lib"] = value
+
 	if strings.HasPrefix(*fLicense, "cc0") {
 		value = "ok"
 	} else {
@@ -313,10 +320,17 @@ Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
 	}
 	tag["license_is_cc0"] = value
 
-	// === Adds the headers
+	if *fVCS == "none" {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["vcs_is_none"] = value
+
+	// === Add headers
 	header = renderHeader(tag, fLicense)
 
-	// === Shows data on 'tag' and license header, if 'fDebug' is set
+	// === Show data on 'tag' and license header, if 'fDebug' is set
 	if *fDebug {
 		fmt.Println("  = Debug\n")
 
@@ -352,7 +366,7 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 
 	switch licenseName {
 	case "apache":
-		header := fmt.Sprint(t_COPYRIGHT, t_APACHE)
+		header := fmt.Sprint(tmplCopyright, tmplApache)
 
 		tag["comment"] = COMMENT_MAKEFILE
 		headerMakefile = parse(header, tag)
@@ -360,7 +374,7 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 		tag["comment"] = COMMENT_CODE
 		headerCode = parse(header, tag)
 	case "bsd":
-		header := fmt.Sprint(t_COPYRIGHT, t_BSD)
+		header := fmt.Sprint(tmplCopyright, tmplBSD)
 
 		tag["comment"] = COMMENT_MAKEFILE
 		headerMakefile = parse(header, tag)
@@ -369,12 +383,12 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 		headerCode = parse(header, tag)
 	case "cc0":
 		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(t_CC0, tag)
+		headerMakefile = parse(tmplCC0, tag)
 
 		tag["comment"] = COMMENT_CODE
-		headerCode = parse(t_CC0, tag)
+		headerCode = parse(tmplCC0, tag)
 	case "gpl", "agpl":
-		header := fmt.Sprint(t_COPYRIGHT, t_GNU)
+		header := fmt.Sprint(tmplCopyright, tmplGNU)
 		if licenseName == "agpl" {
 			tag["Affero"] = "Affero"
 		} else {
@@ -387,7 +401,7 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 		tag["comment"] = COMMENT_CODE
 		headerCode = parse(header, tag)
 	case "none":
-		header := fmt.Sprint(t_COPYRIGHT, "\n")
+		header := fmt.Sprint(tmplCopyright, "\n")
 
 		tag["comment"] = COMMENT_MAKEFILE
 		headerMakefile = parse(header, tag)
@@ -398,7 +412,7 @@ func renderHeader(tag map[string]string, fLicense *string) map[string]string {
 
 	// Tag to render the copyright in README.
 	tag["comment"] = ""
-	tag["copyright"] = parse(t_COPYRIGHT, tag)
+	tag["copyright"] = parse(tmplCopyright, tag)
 
 	// These tags are not used anymore.
 	for _, t := range []string{"Affero", "comment", "year"} {

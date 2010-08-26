@@ -6,7 +6,7 @@
 
 ## Installation
 
-{{.section app_is_pkg}}
+{{.section project_is_lib}}
 	$ [sudo -E] goinstall << download URL >>
 {{.or}}
 << Instructions to install >>
@@ -49,7 +49,7 @@ For credits, see AUTHORS {{.section license_is_cc0}}file{{.or}}and CONTRIBUTORS 
 
 ## ChangeLog
 
-See CHANGES file.
+{{.section vcs_is_none}}See CHANGES file.{{.end}}
 
 
 ***
