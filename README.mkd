@@ -18,7 +18,8 @@ documentation in directory *doc*.
 	$ [sudo -E] goinstall github.com/kless/go-readin/readin
 
 	$ git clone git://github.com/kless/gowizard.git
-	$ cd gowizard/gowizard && sudo -E make install ; cd -
+	$ cd gowizard/gowizard && sudo -E make install
+	$ make data ; cd -
 
 
 ## Configuration
