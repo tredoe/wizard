@@ -305,6 +305,7 @@ Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
 		value = ""
 	}
 	tag["project_is_cgo"] = value
+	tag["project_is_lib"] = value
 
 	if *fProjecType == "lib" {
 		value = "ok"

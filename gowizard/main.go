@@ -52,11 +52,11 @@ func main() {
 	// === Render project files
 	switch cfg.ProjectType {
 	case "lib", "cgo":
-		renderCode(dirApp+"/Makefile", tmplPkgMakefile, header["makefile"], tag)
+		renderCode(dirApp+"/Makefile", tmplMakefile, header["makefile"], tag)
 		renderCode(dirApp+"/main.go", tmplPkgMain, header["code"], tag)
-		renderCode(dirApp+"/main_test.go", tmplPkgTest, header["code"], tag)
+		renderCode(dirApp+"/main_test.go", tmplTest, header["code"], tag)
 	case "app", "tool":
-		renderCode(dirApp+"/Makefile", tmplCmdMakefile, header["makefile"], tag)
+		renderCode(dirApp+"/Makefile", tmplMakefile, header["makefile"], tag)
 		renderCode(dirApp+"/main.go", tmplCmdMain, header["code"], tag)
 	}
 

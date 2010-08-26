@@ -62,7 +62,7 @@ const (
 `
 )
 
-/* For applications. */
+/* For source code. */
 const (
 	tmplCmdMain = `package main
 
@@ -77,20 +77,6 @@ func main() {
 
 `
 
-	tmplCmdMakefile = `
-include $(GOROOT)/src/Make.inc
-
-TARG={{package_name}}
-GOFILES=\
-	main.go\
-
-include $(GOROOT)/src/Make.cmd
-
-`
-)
-
-/* For libraries. */
-const (
 	tmplPkgMain = `package {{package_name}}
 {{.section project_is_cgo}}
 
@@ -108,7 +94,7 @@ func () {
 
 `
 
-	tmplPkgTest = `package {{package_name}}
+	tmplTest = `package {{package_name}}
 
 import (
 	"testing"
@@ -121,13 +107,13 @@ func Test(t *testing.T) {
 
 `
 
-	tmplPkgMakefile = `include $(GOROOT)/src/Make.inc
+	tmplMakefile = `include $(GOROOT)/src/Make.inc
 
 TARG={{package_name}}
 GOFILES=\
 	main.go\
 
-include $(GOROOT)/src/Make.pkg
+include $(GOROOT)/src/Make.{{.section project_is_lib}}pkg{{.or}}cmd{{.end}}
 
 `
 )
