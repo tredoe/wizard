@@ -16,8 +16,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"strconv"
-	"time"
 
 	"github.com/kless/go-readin/readin"
 )
@@ -287,84 +285,6 @@ func interactive() {
 	}
 
 	fmt.Println()
-}
-
-/* Renders the headers of source code files according to the license.
-If `year` is nil then gets the actual year.
-*/
-func renderHeader(tag map[string]string, year string) map[string]string {
-	const (
-		COMMENT_CODE     = "//"
-		COMMENT_MAKEFILE = "#"
-	)
-
-	var headerMakefile, headerCode string
-
-	if year == "" {
-		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
-	}
-
-	licenseName := strings.Split(*fLicense, "-", -1)[0]
-
-	switch licenseName {
-	case "apache":
-		header := fmt.Sprint(tmplCopyright, tmplApache)
-
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
-	case "bsd":
-		header := fmt.Sprint(tmplCopyright, tmplBSD)
-
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
-	case "cc0":
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(tmplCC0, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(tmplCC0, tag)
-	case "gpl", "agpl":
-		header := fmt.Sprint(tmplCopyright, tmplGNU)
-		if licenseName == "agpl" {
-			tag["Affero"] = "Affero"
-		} else {
-			tag["Affero"] = ""
-		}
-
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
-	case "none":
-		header := fmt.Sprint(tmplCopyright, "\n")
-
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
-	}
-
-	// Tag to render the copyright in README.
-	tag["comment"] = ""
-	tag["copyright"] = parse(tmplCopyright, tag)
-
-	// These tags are not used anymore.
-	for _, t := range []string{"Affero", "comment", "year"} {
-		tag[t] = "", false
-	}
-
-	return map[string]string{
-		"makefile": headerMakefile,
-		"code":     headerCode,
-	}
 }
 
 /* Set names for both project and package. */
