@@ -17,18 +17,19 @@ import (
 	"strings"
 )
 
-
-// Exit status code if there is any error
-const ERROR = 2
-
-// Permissions
 const (
+	// Exit status code if there is any error
+	ERROR = 2
+
+	// Permissions
 	PERM_DIRECTORY = 0755
 	PERM_FILE      = 0644
 )
 
-// Metadata to build the new project
-var cfg *metadata
+var (
+	argv0 = os.Args[0] // Executable name
+	cfg   *metadata
+)
 
 
 // === Main program execution
@@ -171,7 +172,8 @@ func updateProject(tag map[string]string) {
 	path.Walk(metadata.PackageName, finderGo, nil)
 
 	if len(finderGo.files) == 0 {
-		log.Exit(goFileError(metadata.PackageName))
+		fmt.Fprintf(os.Stderr,
+			"%s: no Go source files in %q\n", argv0, metadata.PackageName)
 	}
 
 	// === Update license
@@ -179,7 +181,6 @@ func updateProject(tag map[string]string) {
 	if updateLicense || updateProjectName {
 		println()
 	}
-
 
 	fmt.Println(finderGo.files, updatePackageName)
 }

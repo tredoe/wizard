@@ -34,7 +34,7 @@ var (
 		"A string containing the author's e-mail address.")
 
 	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
-	fUpdate      = flag.Bool("u", false, "Updates metadata")
+	fUpdate      = flag.Bool("u", false, "Updates")
 	fVCS         = flag.String("vcs", "", "Version control system")
 )
 
@@ -46,6 +46,18 @@ var listVCS = map[string]string{
 	"none":  "none",
 }
 
+
+func usage() {
+	fmt.Fprintf(os.Stderr, `
+Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
+	[-Package-name -org]
+
+       gowizard -u [-Project-name -Package-name -License]
+
+`)
+	flag.PrintDefaults()
+	os.Exit(ERROR)
+}
 
 /* Loads configuration from flags.
 
@@ -69,13 +81,16 @@ func loadConfig() (tag map[string]string) {
 	flag.Usage = usage
 	flag.Parse()
 
+	if len(os.Args) == 1 {
+		usage()
+	}
+
 	// === Options
 	if *fListProject {
 		fmt.Println("  = Project types\n")
 		for k, v := range listProject {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
-		os.Exit(0)
 	}
 
 	if *fListLicense {
@@ -83,7 +98,6 @@ func loadConfig() (tag map[string]string) {
 		for k, v := range listLicense {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
-		os.Exit(0)
 	}
 
 	if *fListVCS {
@@ -91,7 +105,6 @@ func loadConfig() (tag map[string]string) {
 		for k, v := range listVCS {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
-		os.Exit(0)
 	}
 
 	if !*fUpdate {
@@ -111,7 +124,7 @@ func loadConfig() (tag map[string]string) {
 		tag = tagsToUpdate()
 	}
 
-	// === Show data on 'tag' and license header, if 'fDebug' is set
+	// === Show data on 'tag', if 'fDebug' is set
 	if *fDebug {
 		fmt.Println("  = Debug\n")
 
@@ -133,52 +146,74 @@ func loadConfig() (tag map[string]string) {
 // ===
 
 /* Common checking. */
-func checkCommon() {
+func checkCommon(errors bool) {
 	// === License
 	*fLicense = strings.ToLower(*fLicense)
 	if _, present := listLicense[*fLicense]; !present {
-		log.Exitf("Unavailable license: %q", *fLicense)
+		fmt.Fprintf(os.Stderr,
+			"%s: unavailable license: %q\n", argv0, *fLicense)
+		errors = true
 	}
 
 	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
-		log.Exit("The license 'bsd-3' requires an organization as author")
+		fmt.Fprintf(os.Stderr,
+			"%s: license 'bsd-3' requires an organization as author\n", argv0)
+		errors = true
+	}
+
+	if errors {
+		os.Exit(ERROR)
 	}
 }
 
 /* Checking at create project. */
 func checkAtCreate() {
+	var errors bool
+
 	// === Necessary fields
 	if *fProjecType == "" || *fProjectName == "" || *fLicense == "" ||
 		*fAuthor == "" || *fVCS == "" {
+		fmt.Fprintf(os.Stderr,
+			"%s: missing required fields to create project\n", argv0)
 		usage()
 	}
 	if *fAuthorEmail == "" && !*fAuthorIsOrg {
-		log.Exit("The email address is required for people")
+		fmt.Fprintf(os.Stderr,
+			"%s: the email address is required for people\n", argv0)
+		errors = true
 	}
 
 	// === Project type
 	*fProjecType = strings.ToLower(*fProjecType)
 	if _, present := listProject[*fProjecType]; !present {
-		log.Exitf("Unavailable project type: %q", *fProjecType)
+		fmt.Fprintf(os.Stderr,
+			"%s: unavailable project type: %q\n", argv0, *fProjecType)
+		errors = true
 	}
 
 	// === VCS
 	*fVCS = strings.ToLower(*fVCS)
 	if _, present := listVCS[*fVCS]; !present {
-		log.Exitf("Unavailable version control system: %q", *fVCS)
+		fmt.Fprintf(os.Stderr,
+			"%s: unavailable version control system: %q\n", argv0, *fVCS)
+		errors = true
 	}
 
-	checkCommon()
+	checkCommon(errors)
 }
 
 /* Checking at update project. */
 func checkAtUpdate() {
+	var errors bool
+
 	// === Necessary fields
 	if *fProjectName == "" && *fPackageName == "" && *fLicense == "" {
+		fmt.Fprintf(os.Stderr,
+			"%s: missing required fields to update\n", argv0)
 		usage()
 	}
 
-	checkCommon()
+	checkCommon(errors)
 }
 
 // ===
@@ -349,17 +384,5 @@ func tagsToUpdate() map[string]string {
 	}
 
 	return tag
-}
-
-func usage() {
-	fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
-	[-Package-name -org]
-
-       gowizard -u [-Project-name -Package-name -License]
-
-`)
-	flag.PrintDefaults()
-	os.Exit(ERROR)
 }
 

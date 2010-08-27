@@ -15,6 +15,7 @@ GOFILES=\
 	error.go\
 	flag.go\
 	metadata.go\
+	replace.go\
 	template.go\
 	tmpl-data.go\
 	util.go\
