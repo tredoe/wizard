@@ -12,6 +12,7 @@ include $(GOROOT)/src/Make.inc
 TARG=gowizard
 GOFILES=\
 	main.go\
+	error.go\
 	flag.go\
 	metadata.go\
 	template.go\
