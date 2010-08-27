@@ -7,7 +7,33 @@
 // OR CONDITIONS OF ANY KIND, either express or implied. See the License
 // for more details.
 
-/* Based on Metadata for Python Software Packages. */
+/* Based on Metadata for Python Software Packages.
+
+Description of fields that are not set via 'flag':
+
+* Version: A string containing the package's version number.
+
+* Summary: A one-line summary of what the package does.
+
+* Download-URL: A string containing the URL from which this version of the
+	package can be downloaded.
+
+* Platform: A comma-separated list of platform specifications, summarizing
+	the operating systems supported by the package which are not listed
+	in the "Operating System" Trove classifiers.
+
+* Description: A longer description of the package that can run to several
+	paragraphs.
+
+* Keywords: A list of additional keywords to be used to assist searching for
+	the package in a larger catalog.
+
+* Home-page: A string containing the URL for the package's home page.
+
+* Classifier: Each entry is a string giving a single classification value
+	for the package.
+
+*/
 
 package main
 
@@ -122,7 +148,7 @@ func ReadMetadata() (*metadata, os.Error) {
 	metadata := new(metadata)
 	metadata.file = file
 
-	// Section 'default' has several required fields.
+	// === Section 'default' has several required fields.
 	if s, err := file.String("default", "project-type"); err == nil {
 		metadata.ProjectType = s
 	} else {

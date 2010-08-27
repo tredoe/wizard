@@ -21,62 +21,21 @@ import (
 )
 
 
-// === Flags for the command line
-// ===
-
-// Metadata
+// Flags for the command line
 var (
+	// === Metadata
 	fProjecType  = flag.String("Project-type", "", "The project type.")
 	fProjectName = flag.String("Project-name", "", "The name of the project.")
 	fPackageName = flag.String("Package-name", "", "The name of the package.")
 	fLicense     = flag.String("License", "", "The license covering the package.")
-
-	fAuthor = flag.String("Author", "",
+	fAuthor      = flag.String("Author", "",
 		"A string containing the author's name at a minimum.")
-
 	fAuthorEmail = flag.String("Author-email", "",
 		"A string containing the author's e-mail address.")
 
-	/*
-		fVersion = flag.String("Version", "",
-			"A string containing the package's version number.")
-
-		fSummary = flag.String("Summary", "",
-			"A one-line summary of what the package does.")
-
-		/*fDownloadURL = flag.String("Download-URL", "",
-			"A string containing the URL from which this version of the\n"+
-				"\tpackage can be downloaded.")
-
-		fPlatform = flag.String("Platform", "",
-			"A comma-separated list of platform specifications, summarizing\n"+
-				"\tthe operating systems supported by the package which are not listed\n"+
-				"\tin the \"Operating System\" Trove classifiers.")
-
-		fDescription = flag.String("Description", "",
-			"A longer description of the package that can run to several\n"+
-				"\tparagraphs.")
-
-		fKeywords = flag.String("Keywords", "",
-			"A list of additional keywords to be used to assist searching for\n"+
-				"\tthe package in a larger catalog.")
-
-		fHomePage = flag.String("Home-page", "",
-			"A string containing the URL for the package's home page.")
-
-		fClassifier = flag.String("Classifier", "",
-			"Each entry is a string giving a single classification value\n"+
-				"\tfor the package.")
-	*/
-)
-
-// Global flag
-var (
-	fUpdate = flag.Bool("u", false, "Updates metadata")
-	fVCS    = flag.String("vcs", "", "Version control system")
-
-	fAuthorIsOrg = flag.Bool("org", false,
-		"Does the author is an organization?")
+	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
+	fUpdate      = flag.Bool("u", false, "Updates metadata")
+	fVCS         = flag.String("vcs", "", "Version control system")
 )
 
 // Available version control systems
@@ -111,8 +70,6 @@ func loadConfig() (tag map[string]string) {
 	flag.Parse()
 
 	// === Options
-	// ===
-
 	if *fListProject {
 		fmt.Println("  = Project types\n")
 		for k, v := range listProject {
@@ -396,8 +353,8 @@ func tagsToUpdate() map[string]string {
 
 func usage() {
 	fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Project-type -Project-name -Author [-Author-email] -vcs
-	[-Package-name -License -org]
+Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
+	[-Package-name -org]
 
        gowizard -u [-Project-name -Package-name -License]
 
