@@ -31,16 +31,6 @@ const (
 var cfg *metadata
 
 
-// === Errors introduced by this package.
-type error struct {
-	os.ErrorString
-}
-
-var (
-	ErrNoHeader = &error{"gowizard: no header with copyright"}
-)
-
-
 // === Main program execution
 func main() {
 	tag := loadConfig()
@@ -153,10 +143,44 @@ func createProject(tag map[string]string) {
 
 /* Updates some values from a project already created. */
 func updateProject(tag map[string]string) {
+	var updateProjectName, updatePackageName, updateLicense bool
+
 	metadata, err := ReadMetadata()
 	if err != nil {
 		log.Exit(err)
 	}
 
+	// === See what updating
+	if *fProjectName != "" && *fProjectName != metadata.ProjectName {
+		metadata.ProjectName = *fProjectName
+		updateProjectName = true
+	}
+
+	if *fPackageName != "" && *fPackageName != metadata.PackageName {
+		metadata.PackageName = *fPackageName
+		updatePackageName = true
+	}
+
+	if *fLicense != "" && *fLicense != metadata.License {
+		metadata.License = *fLicense
+		updateLicense = true
+	}
+
+	// === Get all Go source files
+	finderGo := newFinderGo()
+	path.Walk(metadata.PackageName, finderGo, nil)
+
+	if len(finderGo.files) == 0 {
+		log.Exit(goFileError(metadata.PackageName))
+	}
+
+	// === Update license
+	// ===
+	if updateLicense || updateProjectName {
+		println()
+	}
+
+
+	fmt.Println(finderGo.files, updatePackageName)
 }
 

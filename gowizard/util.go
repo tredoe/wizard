@@ -10,8 +10,10 @@
 package main
 
 import (
+	"container/vector"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 
@@ -55,5 +57,35 @@ func header(name string) string {
 	}
 
 	return string(header)
+}
+
+
+// === Implementation of interface 'Visitor' for 'path.Walk'
+// ===
+type finderGo struct {
+	files vector.StringVector
+}
+
+func newFinderGo() *finderGo {
+	return &finderGo{}
+}
+
+/* Skips directories created on compilation. */
+func (self *finderGo) VisitDir(path string, f *os.FileInfo) bool {
+	dirName := f.Name
+
+	if dirName == "_test" || dirName == "_obj" {
+		return false
+	}
+	return true
+}
+
+/* Adds all Go files to the list. */
+func (self *finderGo) VisitFile(path string, f *os.FileInfo) {
+	name := f.Name
+
+	if strings.HasSuffix(name, ".go") && len(name) > 3 {
+		self.files.Push(path)
+	}
 }
 
