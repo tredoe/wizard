@@ -29,15 +29,13 @@ var (
 	fProjecType  = flag.String("Project-type", "", "The project type.")
 	fProjectName = flag.String("Project-name", "", "The name of the project.")
 	fPackageName = flag.String("Package-name", "", "The name of the package.")
+	fLicense     = flag.String("License", "", "The license covering the package.")
 
 	fAuthor = flag.String("Author", "",
 		"A string containing the author's name at a minimum.")
 
 	fAuthorEmail = flag.String("Author-email", "",
 		"A string containing the author's e-mail address.")
-
-	fLicense = flag.String("License", "bsd-2",
-		"The license covering the package.")
 
 	/*
 		fVersion = flag.String("Version", "",
@@ -93,7 +91,7 @@ var listVCS = map[string]string{
 /* Loads configuration from flags.
 
 Return tags for templates.
- */
+*/
 func loadConfig() (tag map[string]string) {
 	// Generic flags
 	var (
@@ -193,7 +191,8 @@ func checkCommon() {
 /* Checking at create project. */
 func checkAtCreate() {
 	// === Necessary fields
-	if *fProjecType == "" || *fProjectName == "" || *fAuthor == "" || *fVCS == "" {
+	if *fProjecType == "" || *fProjectName == "" || *fLicense == "" ||
+		*fAuthor == "" || *fVCS == "" {
 		usage()
 	}
 	if *fAuthorEmail == "" && !*fAuthorIsOrg {
