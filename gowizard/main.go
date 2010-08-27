@@ -155,7 +155,6 @@ func createProject(tag map[string]string) {
 func updateProject(tag map[string]string) {
 	metadata, err := ReadMetadata()
 	if err != nil {
-		fmt.Fprint(os.Stderr, "Metadata file is necessary to update project data\n")
 		log.Exit(err)
 	}
 

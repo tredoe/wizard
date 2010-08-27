@@ -42,6 +42,14 @@ var listLicense = map[string]string{
 }
 
 
+// === Errors
+type MetadataFieldError string
+
+func (self MetadataFieldError) String() string {
+	return "metadata: section default has not field '" + string(self) + "'"
+}
+
+
 /* v1.1 http://www.python.org/dev/peps/pep-0314/
 
 The next fields have not been taken:
@@ -104,7 +112,7 @@ AuthorEmail string) *metadata {
 	return metadata
 }
 
-/* Reads file Metadata. */
+/* Reads metadata file. */
 func ReadMetadata() (*metadata, os.Error) {
 	file, err := config.ReadFile(_FILE_NAME)
 	if err != nil {
@@ -114,17 +122,26 @@ func ReadMetadata() (*metadata, os.Error) {
 	metadata := new(metadata)
 	metadata.file = file
 
+	// Section 'default' has several required fields.
 	if s, err := file.String("default", "project-type"); err == nil {
 		metadata.ProjectType = s
+	} else {
+		return nil, MetadataFieldError("project-type")
 	}
 	if s, err := file.String("default", "project-name"); err == nil {
 		metadata.ProjectName = s
+	} else {
+		return nil, MetadataFieldError("project-name")
 	}
 	if s, err := file.String("default", "package-name"); err == nil {
 		metadata.PackageName = s
+	} else {
+		return nil, MetadataFieldError("package-name")
 	}
 	if s, err := file.String("default", "license"); err == nil {
 		metadata.License = s
+	} else {
+		return nil, MetadataFieldError("license")
 	}
 
 	if s, err := file.String("base", "author"); err == nil {
