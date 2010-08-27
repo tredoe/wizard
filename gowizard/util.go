@@ -11,10 +11,8 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 
-	"github.com/kless/goconfig/config"
 )
 
 
@@ -46,27 +44,12 @@ func copyFile(destination, source string) os.Error {
 	return nil
 }
 
-/* Returns the INI configuration file. */
-func configFile() (file *config.File) {
-	var err os.Error
-
-	if *fUpdate {
-		if file, err = config.ReadFile(_FILE_NAME); err != nil {
-			log.Exit(err)
-		}
-	} else {
-		file = config.NewFile()
-	}
-
-	return
-}
-
-/* Create a string of characters with length of ProjectName to use under that name.
+/* Create a string of characters with length of `name` to use it under that name.
 */
-func projectHeader() string {
+func header(name string) string {
 	const char = '='
 
-	header := make([]byte, len(*fProjectName))
+	header := make([]byte, len(name))
 
 	for i, _ := range header {
 		header[i] = char

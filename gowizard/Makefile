@@ -15,6 +15,7 @@ GOFILES=\
 	flag.go\
 	metadata.go\
 	template.go\
+	tmpl-data.go\
 	util.go\
 
 include $(GOROOT)/src/Make.cmd

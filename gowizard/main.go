@@ -31,12 +31,24 @@ const (
 var cfg *metadata
 
 
+// === Errors introduced by this package.
+type error struct {
+	os.ErrorString
+}
+
+var (
+	ErrNoHeader = &error{"gowizard: no header with copyright"}
+)
+
+
 // === Main program execution
 func main() {
+	tag := loadConfig()
+
 	if !*fUpdate {
-		createProject()
+		createProject(tag)
 	} else {
-		updateProject()
+		updateProject(tag)
 	}
 
 	os.Exit(0)
@@ -44,12 +56,12 @@ func main() {
 
 // ===
 
-func createProject() {
-	tag := loadConfig()             // Tags for templates
+/* Creates a new project. */
+func createProject(tag map[string]string) {
 	header := renderHeader(tag, "") // Header with copyright and license
 
-	cfg = NewMetadata(*fProjecType, *fProjectName, *fPackageName,
-		*fAuthor, *fAuthorEmail, *fLicense, configFile())
+	cfg = NewMetadata(*fProjecType, *fProjectName, *fPackageName, *fLicense,
+		*fAuthor, *fAuthorEmail)
 
 	// === Create directories in lower case
 
@@ -120,7 +132,9 @@ func createProject() {
 
 	// === Create file Metadata
 	cfg.ProjectName = projectName
-	cfg.WriteINI(strings.ToLower(projectName))
+	if err := cfg.WriteINI(strings.ToLower(projectName)); err != nil {
+		log.Exit(err)
+	}
 
 	// === Print messages
 	if tag["author_is_org"] != "" {
@@ -137,9 +151,13 @@ func createProject() {
 	}
 }
 
-
-func updateProject() {
-	//tag := loadConfig()
+/* Updates some values from a project already created. */
+func updateProject(tag map[string]string) {
+	metadata, err := ReadMetadata()
+	if err != nil {
+		fmt.Fprint(os.Stderr, "Metadata file is necessary to update project data\n")
+		log.Exit(err)
+	}
 
 }
 

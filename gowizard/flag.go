@@ -26,7 +26,7 @@ import (
 
 // Metadata
 var (
-	fProjecType = flag.String("Project-type", "", "The project type.")
+	fProjecType  = flag.String("Project-type", "", "The project type.")
 	fProjectName = flag.String("Project-name", "", "The name of the project.")
 	fPackageName = flag.String("Package-name", "", "The name of the package.")
 
@@ -40,45 +40,45 @@ var (
 		"The license covering the package.")
 
 	/*
-	fVersion = flag.String("Version", "",
-		"A string containing the package's version number.")
+		fVersion = flag.String("Version", "",
+			"A string containing the package's version number.")
 
-	fSummary = flag.String("Summary", "",
-		"A one-line summary of what the package does.")
+		fSummary = flag.String("Summary", "",
+			"A one-line summary of what the package does.")
 
-	/*fDownloadURL = flag.String("Download-URL", "",
-		"A string containing the URL from which this version of the\n"+
-			"\tpackage can be downloaded.")
+		/*fDownloadURL = flag.String("Download-URL", "",
+			"A string containing the URL from which this version of the\n"+
+				"\tpackage can be downloaded.")
 
-	fPlatform = flag.String("Platform", "",
-		"A comma-separated list of platform specifications, summarizing\n"+
-			"\tthe operating systems supported by the package which are not listed\n"+
-			"\tin the \"Operating System\" Trove classifiers.")
+		fPlatform = flag.String("Platform", "",
+			"A comma-separated list of platform specifications, summarizing\n"+
+				"\tthe operating systems supported by the package which are not listed\n"+
+				"\tin the \"Operating System\" Trove classifiers.")
 
-	fDescription = flag.String("Description", "",
-		"A longer description of the package that can run to several\n"+
-			"\tparagraphs.")
+		fDescription = flag.String("Description", "",
+			"A longer description of the package that can run to several\n"+
+				"\tparagraphs.")
 
-	fKeywords = flag.String("Keywords", "",
-		"A list of additional keywords to be used to assist searching for\n"+
-			"\tthe package in a larger catalog.")
+		fKeywords = flag.String("Keywords", "",
+			"A list of additional keywords to be used to assist searching for\n"+
+				"\tthe package in a larger catalog.")
 
-	fHomePage = flag.String("Home-page", "",
-		"A string containing the URL for the package's home page.")
+		fHomePage = flag.String("Home-page", "",
+			"A string containing the URL for the package's home page.")
 
-	fClassifier = flag.String("Classifier", "",
-		"Each entry is a string giving a single classification value\n"+
-			"\tfor the package.")
+		fClassifier = flag.String("Classifier", "",
+			"Each entry is a string giving a single classification value\n"+
+				"\tfor the package.")
 	*/
 )
 
 // Global flag
 var (
 	fUpdate = flag.Bool("u", false, "Updates metadata")
-	fVCS = flag.String("vcs", "", "Version control system")
+	fVCS    = flag.String("vcs", "", "Version control system")
 
 	fAuthorIsOrg = flag.Bool("org", false,
-			"Does the author is an organization?")
+		"Does the author is an organization?")
 )
 
 // Available version control systems
@@ -90,7 +90,10 @@ var listVCS = map[string]string{
 }
 
 
-/* Loads configuration from flags. */
+/* Loads configuration from flags.
+
+Return tags for templates.
+ */
 func loadConfig() (tag map[string]string) {
 	// Generic flags
 	var (
@@ -191,7 +194,6 @@ func checkCommon() {
 func checkAtCreate() {
 	// === Necessary fields
 	if *fProjecType == "" || *fProjectName == "" || *fAuthor == "" || *fVCS == "" {
-		println("DEBUG") // !!! Delete
 		usage()
 	}
 	if *fAuthorEmail == "" && !*fAuthorIsOrg {
@@ -318,13 +320,13 @@ func tagsToCreate() map[string]string {
 	var value string
 
 	tag := map[string]string{
-		"project_name": *fProjectName,
-		"package_name": *fPackageName,
-		"author":       *fAuthor,
-		"author_email": *fAuthorEmail,
-		"license":      listLicense[*fLicense],
-		"vcs":          *fVCS,
-		"_project_header": projectHeader(),
+		"project_name":    *fProjectName,
+		"package_name":    *fPackageName,
+		"author":          *fAuthor,
+		"author_email":    *fAuthorEmail,
+		"license":         listLicense[*fLicense],
+		"vcs":             *fVCS,
+		"_project_header": header(*fProjectName),
 	}
 
 	if *fAuthorIsOrg {
@@ -376,7 +378,7 @@ func tagsToUpdate() map[string]string {
 	}
 
 	if *fProjectName != "" {
-		tag["_project_header"] = projectHeader()
+		tag["_project_header"] = header(*fProjectName)
 	}
 
 	if *fLicense != "" {

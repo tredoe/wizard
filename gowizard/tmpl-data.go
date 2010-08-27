@@ -12,7 +12,7 @@
 package main
 
 
-// copyright and licenses
+// Copyright and licenses
 const (
 	tmplCopyright = `{{.section comment}}{{@}} {{.end}}Copyright {{year}}  The "{{project_name}}" Authors`
 
@@ -62,7 +62,7 @@ const (
 `
 )
 
-/* For source code. */
+/* For source code files. */
 const (
 	tmplCmdMain = `package main
 
