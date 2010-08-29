@@ -84,7 +84,7 @@ func (self *finderGo) VisitDir(path string, f *os.FileInfo) bool {
 func (self *finderGo) VisitFile(filePath string, f *os.FileInfo) {
 	name := f.Name
 
-	if ext := path.Ext(name); ext == "go" {
+	if path.Ext(name) == ".go" {
 		self.files.Push(filePath)
 	}
 }
