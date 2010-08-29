@@ -7,7 +7,7 @@ listed below.*
 
 	### YYYY-MM-DD  Release
 
-	+ My additional changes.
+	+ Additional changes.
 
 	+ More changes.
 

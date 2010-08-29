@@ -31,8 +31,8 @@ const (
 )
 
 var (
-	commentCodeBi     = []byte(COMMENT_CODE)
-	commentMakefileBi = []byte(COMMENT_MAKEFILE)
+	bCommentCode     = []byte(COMMENT_CODE)
+	bCommentMakefile = []byte(COMMENT_MAKEFILE)
 )
 
 const ERROR = 2 // Exit status code if there is any error
@@ -108,6 +108,7 @@ func createProject() {
 	// === Render common files
 	dirTmpl := dirData + "/tmpl" // Templates base directory
 
+	renderFile(cfg.ProjectName, dirTmpl+"/NEWS.mkd", tag)
 	renderFile(cfg.ProjectName, dirTmpl+"/README.mkd", tag)
 
 	if strings.HasPrefix(cfg.License, "cc0") {
@@ -122,7 +123,7 @@ func createProject() {
 	switch *fVCS {
 	case "other":
 		break
-	// CHANGES is only necessary when is not used a VCS.
+	// File CHANGES is only necessary when is not used a VCS.
 	case "none":
 		renderFile(cfg.ProjectName, dirTmpl+"/CHANGES.mkd", tag)
 	default:
@@ -173,7 +174,6 @@ func createProject() {
 
 /* Updates some values from a project already created. */
 func updateProject() {
-	//var oldDir string // !!! DELETE
 	var err os.Error
 
 	if cfg, err = ReadMetadata(); err != nil {
@@ -195,50 +195,35 @@ func updateProject() {
 		os.Exit(ERROR)
 	}
 
-	// === Update license
-	packageNameBi := []byte(tag["package_name"])
+	// === Update Makefile and source code files
+	bPackageName := []byte(tag["package_name"])
 
 	if update["ProjectName"] || update["License"] || update["PackageInCode"] {
 		for _, fname := range finderGo.files {
-			println(fname)
-
-			file, err := replaceCode(fname, packageNameBi, tag, update)
-
+			file, err := replaceCode(fname, bPackageName, tag, update)
 			if err != nil {
 				fmt.Println(err)
 			}
 			fmt.Println(string(file))
 		}
 
-		println("* * *")
-
+		// Makefile
 		file, err := replaceMakefile(path.Join(cfg.PackageName, "Makefile"),
-			packageNameBi, tag, update)
+			bPackageName, tag, update)
 		if err != nil {
-			fmt.Println(err, path.Join(cfg.PackageName, "Makefile"))
+			fmt.Println(err)
 		}
 		fmt.Println(string(file))
 	}
 
-	println("* * *")
-	fmt.Println(finderGo.files)
-
-	// DELETE
-	//os.Rename(metadata.PackageName, oldDir)
 }
 
-
 /*
-	if *fPackageName != "" && *fPackageName != cfg.PackageName {
-
+	// Rename directory named like the package name.
 	if update["PackageName"] {
-		// Rename directory named like the package name.
 		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
 			log.Exit(err)
 		}
-		oldDir = cfg.PackageName // !!! DELETE
-		cfg.PackageName = *fPackageName
-		updatePackageName = true
 	}
 */
 

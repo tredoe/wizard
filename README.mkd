@@ -88,7 +88,7 @@ For credits, see file AUTHORS and CONTRIBUTORS (if any).
 
 ## ChangeLog
 
-For changes between releases, see file NEWS. And for changes between the commits,
+For changes between releases, see file NEWS; and for changes between the commits,
 see the [commit history][3].
 
 
