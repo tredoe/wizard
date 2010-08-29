@@ -17,39 +17,68 @@ import (
 	"strings"
 )
 
-const (
-	// Exit status code if there is any error
-	ERROR = 2
 
-	// Permissions
+// Permissions
+const (
 	PERM_DIRECTORY = 0755
 	PERM_FILE      = 0644
 )
 
-var (
-	argv0 = os.Args[0] // Executable name
-	cfg   *metadata
+// Comment characters
+const (
+	COMMENT_CODE     = "//"
+	COMMENT_MAKEFILE = "#"
 )
+
+var (
+	commentCodeBi     = []byte(COMMENT_CODE)
+	commentMakefileBi = []byte(COMMENT_MAKEFILE)
+)
+
+const ERROR = 2 // Exit status code if there is any error
+
+var argv0 = os.Args[0] // Executable name
+var cfg *Metadata
 
 
 // === Main program execution
 func main() {
-	tag := loadConfig()
+	loadConfig()
 
 	if !*fUpdate {
-		createProject(tag)
+		createProject()
 	} else {
-		updateProject(tag)
+		updateProject()
 	}
 
 	os.Exit(0)
 }
 
+/* Show data on 'tag'. */
+func debug(tag map[string]string) {
+	fmt.Println("  = Debug\n")
+
+	for k, v := range tag {
+		// Tags starting with '_' are not showed.
+		if k[0] == '_' {
+			continue
+		}
+		fmt.Printf("  %s: %s\n", k, v)
+	}
+	os.Exit(0)
+}
+
 // ===
 
+
 /* Creates a new project. */
-func createProject(tag map[string]string) {
-	header := renderHeader(tag, "") // Header with copyright and license
+func createProject() {
+	tag := tagsToCreate()
+	if *fDebug {
+		debug(tag)
+	}
+
+	headerCode, headerMakefile := renderAllHeaders(tag, "")
 
 	cfg = NewMetadata(*fProjecType, *fProjectName, *fPackageName, *fLicense,
 		*fAuthor, *fAuthorEmail)
@@ -59,7 +88,7 @@ func createProject(tag map[string]string) {
 	// Get data directory from `$(GOROOT)/lib/$(TARG)`
 	dirData := path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 
-	projectName := cfg.ProjectName // Stores the name before of change it
+	projectName := cfg.ProjectName // Store the name before of change it
 	cfg.ProjectName = strings.ToLower(cfg.ProjectName)
 
 	dirApp := path.Join(cfg.ProjectName, cfg.PackageName)
@@ -68,12 +97,12 @@ func createProject(tag map[string]string) {
 	// === Render project files
 	switch cfg.ProjectType {
 	case "lib", "cgo":
-		renderCode(dirApp+"/Makefile", tmplMakefile, header["makefile"], tag)
-		renderCode(dirApp+"/main.go", tmplPkgMain, header["code"], tag)
-		renderCode(dirApp+"/main_test.go", tmplTest, header["code"], tag)
+		renderCode(dirApp+"/Makefile", tmplMakefile, headerMakefile, tag)
+		renderCode(dirApp+"/main.go", tmplPkgMain, headerCode, tag)
+		renderCode(dirApp+"/main_test.go", tmplTest, headerCode, tag)
 	case "app", "tool":
-		renderCode(dirApp+"/Makefile", tmplMakefile, header["makefile"], tag)
-		renderCode(dirApp+"/main.go", tmplCmdMain, header["code"], tag)
+		renderCode(dirApp+"/Makefile", tmplMakefile, headerMakefile, tag)
+		renderCode(dirApp+"/main.go", tmplCmdMain, headerCode, tag)
 	}
 
 	// === Render common files
@@ -143,45 +172,73 @@ func createProject(tag map[string]string) {
 }
 
 /* Updates some values from a project already created. */
-func updateProject(tag map[string]string) {
-	var updateProjectName, updatePackageName, updateLicense bool
+func updateProject() {
+	//var oldDir string // !!! DELETE
+	var err os.Error
 
-	metadata, err := ReadMetadata()
-	if err != nil {
+	if cfg, err = ReadMetadata(); err != nil {
 		log.Exit(err)
 	}
 
-	// === See what updating
-	if *fProjectName != "" && *fProjectName != metadata.ProjectName {
-		metadata.ProjectName = *fProjectName
-		updateProjectName = true
-	}
-
-	if *fPackageName != "" && *fPackageName != metadata.PackageName {
-		metadata.PackageName = *fPackageName
-		updatePackageName = true
-	}
-
-	if *fLicense != "" && *fLicense != metadata.License {
-		metadata.License = *fLicense
-		updateLicense = true
+	tag, update := tagsToUpdate()
+	if *fDebug {
+		debug(tag)
 	}
 
 	// === Get all Go source files
 	finderGo := newFinderGo()
-	path.Walk(metadata.PackageName, finderGo, nil)
+	path.Walk(cfg.PackageName, finderGo, nil)
 
 	if len(finderGo.files) == 0 {
 		fmt.Fprintf(os.Stderr,
-			"%s: no Go source files in %q\n", argv0, metadata.PackageName)
+			"%s: no Go source files in %q\n", argv0, cfg.PackageName)
+		os.Exit(ERROR)
 	}
 
 	// === Update license
-	// ===
-	if updateLicense || updateProjectName {
-		println()
+	packageNameBi := []byte(tag["package_name"])
+
+	if update["ProjectName"] || update["License"] || update["PackageInCode"] {
+		for _, fname := range finderGo.files {
+			println(fname)
+
+			file, err := replaceCode(fname, packageNameBi, tag, update)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(string(file))
+		}
+
+		println("* * *")
+
+		file, err := replaceMakefile(path.Join(cfg.PackageName, "Makefile"),
+			packageNameBi, tag, update)
+		if err != nil {
+			fmt.Println(err, path.Join(cfg.PackageName, "Makefile"))
+		}
+		fmt.Println(string(file))
 	}
 
-	fmt.Println(finderGo.files, updatePackageName)
+	println("* * *")
+	fmt.Println(finderGo.files)
+
+	// DELETE
+	//os.Rename(metadata.PackageName, oldDir)
 }
+
+
+/*
+	if *fPackageName != "" && *fPackageName != cfg.PackageName {
+
+	if update["PackageName"] {
+		// Rename directory named like the package name.
+		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
+			log.Exit(err)
+		}
+		oldDir = cfg.PackageName // !!! DELETE
+		cfg.PackageName = *fPackageName
+		updatePackageName = true
+	}
+*/
 
