@@ -13,7 +13,7 @@ import (
 	"container/vector"
 	"io/ioutil"
 	"os"
-	"strings"
+	"path"
 )
 
 
@@ -81,11 +81,11 @@ func (self *finderGo) VisitDir(path string, f *os.FileInfo) bool {
 }
 
 /* Adds all Go files to the list. */
-func (self *finderGo) VisitFile(path string, f *os.FileInfo) {
+func (self *finderGo) VisitFile(filePath string, f *os.FileInfo) {
 	name := f.Name
 
-	if strings.HasSuffix(name, ".go") && len(name) > 3 {
-		self.files.Push(path)
+	if ext := path.Ext(name); ext == "go" {
+		self.files.Push(filePath)
 	}
 }
 
