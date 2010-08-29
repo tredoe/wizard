@@ -192,6 +192,13 @@ func _renderHeader(tag map[string]string, year string, renderCode, renderMakefil
 		tag[t] = "", false
 	}
 
+	if renderCode {
+		return headerCode, ""
+	}
+	if renderMakefile {
+		return headerMakefile, ""
+	}
+
 	return headerCode, headerMakefile
 }
 
@@ -199,7 +206,7 @@ func renderHeaderCode(tag map[string]string, year string) (headerCode, headerMak
 	return _renderHeader(tag, year, true, false)
 }
 
-func renderHeaderMakefile(tag map[string]string, year string) (headerCode, headerMakefile string) {
+func renderHeaderMakefile(tag map[string]string, year string) (headerMakefile, headerCode string) {
 	return _renderHeader(tag, year, false, true)
 }
 
