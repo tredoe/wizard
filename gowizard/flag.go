@@ -330,13 +330,6 @@ func tagsToCreate() map[string]string {
 	}
 	tag["project_is_lib"] = value
 
-	if strings.HasPrefix(*fLicense, "cc0") {
-		value = "ok"
-	} else {
-		value = ""
-	}
-	tag["license_is_cc0"] = value
-
 	if *fVCS == "none" {
 		value = "ok"
 	} else {
@@ -354,13 +347,12 @@ If flags are not empty then is indicated in map 'update' since they are the
 values to change.
 */
 func tagsToUpdate() (tag map[string]string, update map[string]bool) {
-	var value string
+	update = map[string]bool{}
 
 	tag = map[string]string{
 		"project_name": *fProjectName,
 		"package_name": *fPackageName,
 	}
-	update = map[string]bool{}
 
 	if *fProjectName == "" {
 		tag["project_name"] = cfg.ProjectName
@@ -384,13 +376,6 @@ func tagsToUpdate() (tag map[string]string, update map[string]bool) {
 	} else if *fLicense != cfg.License {
 		update["License"] = true
 	}
-
-	if strings.HasPrefix(*fLicense, "cc0") {
-		value = "ok"
-	} else {
-		value = ""
-	}
-	tag["license_is_cc0"] = value
 	tag["license"] = listLicense[*fLicense]
 
 	return tag, update

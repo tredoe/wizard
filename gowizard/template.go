@@ -113,13 +113,11 @@ func renderNewFile(destination, template string, tag map[string]string) {
 If `year` is nil then gets the actual year.
 */
 func _renderHeader(tag map[string]string, year string, renderCode, renderMakefile bool) (headerCode, headerMakefile string) {
-	//var 
+	licenseName := strings.Split(*fLicense, "-", -1)[0]
 
 	if year == "" {
 		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
 	}
-
-	licenseName := strings.Split(*fLicense, "-", -1)[0]
 
 	switch licenseName {
 	case "apache":

@@ -58,17 +58,17 @@ for Go, the packages themselves need not be.
 Copyright notices only need the year the file was created, so don't add new
 years.
 
-**Warning:** Don't edit section *default* in Metadata file; they are necessary
+**Warning:** Don't edit section *default* in file Metadata; they are necessary
 to update them, if were necessary.
 
 
 ## Copyright and licensing
 
 ***Copyright 2010  The "gowizard" Authors***  
-See AUTHORS and CONTRIBUTORS files.
+See file AUTHORS and CONTRIBUTORS (if any).
 
 Licensed under **Simplified BSD License**.  
-See LICENSE file.
+See file LICENSE.
 
 
 ## Contact
@@ -83,12 +83,13 @@ To reporting bugs, please login and create a new issue [here][2].
 
 ## Credits and acknowledgments
 
-For credits, see AUTHORS and CONTRIBUTORS files.
+For credits, see file AUTHORS and CONTRIBUTORS (if any).
 
 
 ## ChangeLog
 
-See [commit history][3].
+For changes between releases, see file NEWS. And for changes between the commits,
+see the [commit history][3].
 
 
 ## ToDo

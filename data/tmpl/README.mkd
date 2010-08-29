@@ -26,10 +26,10 @@
 ## Copyright and licensing
 
 ***{{copyright}}***  
-See AUTHORS {{.section license_is_cc0}}file{{.or}}and CONTRIBUTORS files{{.end}}.
+See file AUTHORS and CONTRIBUTORS (if any).
 
 Licensed under **{{license}}**.  
-See LICENSE file.
+See file LICENSE.
 
 
 ## Contact
@@ -44,12 +44,13 @@ See LICENSE file.
 
 ## Credits and acknowledgments
 
-For credits, see AUTHORS {{.section license_is_cc0}}file{{.or}}and CONTRIBUTORS files{{.end}}.
+For credits, see file AUTHORS and CONTRIBUTORS (if any).
 
 
 ## ChangeLog
 
-{{.section vcs_is_none}}See CHANGES file.{{.end}}
+For changes between releases, see file NEWS. And for changes between the commits,
+see {{.section vcs_is_none}}file CHANGES{{.or}}the [commit history][]{{.end}}.
 
 
 * * *
