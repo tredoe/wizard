@@ -23,11 +23,11 @@ import (
 
 
 // === Structure of a page for a source code file
-const tmplCode = "{{header}}\n{{content}}"
+const tmplCode = "{{tmplHeader}}\n{{content}}"
 
 type code struct {
-	header  string
-	content string
+	tmplHeader string
+	content    string
 }
 
 
@@ -80,10 +80,10 @@ func parseFile(filename string, data interface{}) string {
 // === Utility
 // ===
 
-/* Renders template nesting both header and content. */
-func renderCode(destination, template, header string, tag map[string]string) {
+/* Renders template nesting both tmplHeader and content. */
+func renderCode(destination, template, tmplHeader string, tag map[string]string) {
 	renderContent := parse(template, tag)
-	render := parse(tmplCode, &code{header, renderContent})
+	render := parse(tmplCode, &code{tmplHeader, renderContent})
 
 	ioutil.WriteFile(destination, []byte(render), PERM_FILE)
 }
@@ -106,19 +106,14 @@ func renderNewFile(destination, template string, tag map[string]string) {
 }
 
 
-// === Header render
+// === Render of header
 // ===
 
-/* Renders the headers of source code files according to the license.
+/* Base to render the headers of source code files according to the license.
 If `year` is nil then gets the actual year.
 */
-func renderHeader(tag map[string]string, year string) map[string]string {
-	const (
-		COMMENT_CODE     = "//"
-		COMMENT_MAKEFILE = "#"
-	)
-
-	var headerMakefile, headerCode string
+func _renderHeader(tag map[string]string, year string, renderCode, renderMakefile bool) (headerCode, headerMakefile string) {
+	//var 
 
 	if year == "" {
 		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
@@ -128,48 +123,64 @@ func renderHeader(tag map[string]string, year string) map[string]string {
 
 	switch licenseName {
 	case "apache":
-		header := fmt.Sprint(tmplCopyright, tmplApache)
+		tmplHeader := fmt.Sprint(tmplCopyright, tmplApache)
 
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
+		if renderCode {
+			tag["comment"] = COMMENT_CODE
+			headerCode = parse(tmplHeader, tag)
+		}
+		if renderMakefile {
+			tag["comment"] = COMMENT_MAKEFILE
+			headerMakefile = parse(tmplHeader, tag)
+		}
 	case "bsd":
-		header := fmt.Sprint(tmplCopyright, tmplBSD)
+		tmplHeader := fmt.Sprint(tmplCopyright, tmplBSD)
 
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
+		if renderCode {
+			tag["comment"] = COMMENT_CODE
+			headerCode = parse(tmplHeader, tag)
+		}
+		if renderMakefile {
+			tag["comment"] = COMMENT_MAKEFILE
+			headerMakefile = parse(tmplHeader, tag)
+		}
 	case "cc0":
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(tmplCC0, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(tmplCC0, tag)
+		if renderCode {
+			tag["comment"] = COMMENT_CODE
+			headerCode = parse(tmplCC0, tag)
+		}
+		if renderMakefile {
+			tag["comment"] = COMMENT_MAKEFILE
+			headerMakefile = parse(tmplCC0, tag)
+		}
 	case "gpl", "agpl":
-		header := fmt.Sprint(tmplCopyright, tmplGNU)
+		tmplHeader := fmt.Sprint(tmplCopyright, tmplGNU)
+
 		if licenseName == "agpl" {
 			tag["Affero"] = "Affero"
 		} else {
 			tag["Affero"] = ""
 		}
 
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
+		if renderCode {
+			tag["comment"] = COMMENT_CODE
+			headerCode = parse(tmplHeader, tag)
+		}
+		if renderMakefile {
+			tag["comment"] = COMMENT_MAKEFILE
+			headerMakefile = parse(tmplHeader, tag)
+		}
 	case "none":
-		header := fmt.Sprint(tmplCopyright, "\n")
+		tmplHeader := fmt.Sprint(tmplCopyright, "\n")
 
-		tag["comment"] = COMMENT_MAKEFILE
-		headerMakefile = parse(header, tag)
-
-		tag["comment"] = COMMENT_CODE
-		headerCode = parse(header, tag)
+		if renderCode {
+			tag["comment"] = COMMENT_CODE
+			headerCode = parse(tmplHeader, tag)
+		}
+		if renderMakefile {
+			tag["comment"] = COMMENT_MAKEFILE
+			headerMakefile = parse(tmplHeader, tag)
+		}
 	}
 
 	// Tag to render the copyright in README.
@@ -181,9 +192,18 @@ func renderHeader(tag map[string]string, year string) map[string]string {
 		tag[t] = "", false
 	}
 
-	return map[string]string{
-		"makefile": headerMakefile,
-		"code":     headerCode,
-	}
+	return headerCode, headerMakefile
+}
+
+func renderHeaderCode(tag map[string]string, year string) (headerCode, headerMakefile string) {
+	return _renderHeader(tag, year, true, false)
+}
+
+func renderHeaderMakefile(tag map[string]string, year string) (headerCode, headerMakefile string) {
+	return _renderHeader(tag, year, false, true)
+}
+
+func renderAllHeaders(tag map[string]string, year string) (headerCode, headerMakefile string) {
+	return _renderHeader(tag, year, true, true)
 }
 
