@@ -29,11 +29,12 @@ var (
 	fPackageName = flag.String("Package-name", "", "The name of the package.")
 	fLicense     = flag.String("License", "", "The license covering the package.")
 	fAuthor      = flag.String("Author", "",
-		"A string containing the author's name at a minimum.")
+		"A string containing the author's name at a minimucfg.")
 	fAuthorEmail = flag.String("Author-email", "",
 		"A string containing the author's e-mail address.")
 
 	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
+	fDebug       = flag.Bool("d", false, "Debug mode")
 	fUpdate      = flag.Bool("u", false, "Updates")
 	fVCS         = flag.String("vcs", "", "Version control system")
 )
@@ -63,10 +64,9 @@ Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 
 Return tags for templates.
 */
-func loadConfig() (tag map[string]string) {
+func loadConfig() {
 	// Generic flags
 	var (
-		fDebug       = flag.Bool("d", false, "Debug mode")
 		fInteractive = flag.Bool("i", false, "Interactive mode")
 
 		fListLicense = flag.Bool("ll", false,
@@ -118,27 +118,13 @@ func loadConfig() (tag map[string]string) {
 	// === Checking and add tags
 	if !*fUpdate {
 		checkAtCreate()
-		tag = tagsToCreate()
+		//tag = tagsToCreate()
 	} else {
 		checkAtUpdate()
-		tag = tagsToUpdate()
+		//tag = tagsToUpdate()
 	}
 
-	// === Show data on 'tag', if 'fDebug' is set
-	if *fDebug {
-		fmt.Println("  = Debug\n")
-
-		for k, v := range tag {
-			// Tags starting with '_' are not showed.
-			if k[0] == '_' {
-				continue
-			}
-			fmt.Printf("  %s: %s\n", k, v)
-		}
-		os.Exit(0)
-	}
-
-	return tag
+	//return tag
 }
 
 
@@ -213,7 +199,9 @@ func checkAtUpdate() {
 		usage()
 	}
 
-	checkCommon(errors)
+	if *fLicense != "" {
+		checkCommon(errors)
+	}
 }
 
 // ===
@@ -359,30 +347,52 @@ func tagsToCreate() map[string]string {
 	return tag
 }
 
-/* Create tags to pass to the templates. Used at updating a project. */
-func tagsToUpdate() map[string]string {
+/* Create tags to pass to the templates. Used at updating a project.
+
+If the flags are empty then they are set with metadata values.
+If flags are not empty then is indicated in map 'update' since they are the
+values to change.
+*/
+func tagsToUpdate() (tag map[string]string, update map[string]bool) {
 	var value string
 
-	tag := map[string]string{
+	tag = map[string]string{
 		"project_name": *fProjectName,
 		"package_name": *fPackageName,
 	}
+	update = map[string]bool{}
 
-	if *fProjectName != "" {
+	if *fProjectName == "" {
+		tag["project_name"] = cfg.ProjectName
+	} else if *fProjectName != cfg.ProjectName {
+		update["ProjectName"] = true
 		tag["_project_header"] = header(*fProjectName)
 	}
 
-	if *fLicense != "" {
-		tag["license"] = listLicense[*fLicense]
+	if *fPackageName == "" {
+		tag["package_name"] = cfg.PackageName
+	} else if *fPackageName != cfg.PackageName {
+		update["PackageName"] = true
 
-		if strings.HasPrefix(*fLicense, "cc0") {
-			value = "ok"
-		} else {
-			value = ""
+		if cfg.ProjectType == "lib" || cfg.ProjectType == "cgo" {
+			update["PackageInCode"] = true
 		}
-		tag["license_is_cc0"] = value
 	}
 
-	return tag
+	if *fLicense == "" {
+		*fLicense = cfg.License
+	} else if *fLicense != cfg.License {
+		update["License"] = true
+	}
+
+	if strings.HasPrefix(*fLicense, "cc0") {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["license_is_cc0"] = value
+	tag["license"] = listLicense[*fLicense]
+
+	return tag, update
 }
 
