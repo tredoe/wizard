@@ -1,4 +1,4 @@
-##### Notice
+###### Notice
 
 *This is the official list of ***{{project_name}}*** authors.*
 
@@ -10,7 +10,7 @@
 
 *Please keep the list sorted.*
 
-***
+* * *
 
 ### Initial author
 

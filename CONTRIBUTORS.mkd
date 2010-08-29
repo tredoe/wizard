@@ -1,4 +1,4 @@
-##### Notice
+###### Notice
 
 *This is the official list of people who can contribute (and typically have
 contributed) code to the ***gowizard*** repository.*
@@ -13,7 +13,7 @@ because the organization holds the copyright.*
 
 *Please keep the list sorted.*
 
-***
+* * *
 
 ### Initial author
 

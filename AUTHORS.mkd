@@ -1,4 +1,4 @@
-##### Notice
+###### Notice
 
 *This is the official list of ***gowizard*** authors for copyright
 purposes.*
@@ -14,7 +14,7 @@ explanation.*
 
 *Please keep the list sorted.*
 
-***
+* * *
 
 John Mac <charles.beck@sent.com>
 

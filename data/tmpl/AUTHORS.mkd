@@ -1,4 +1,4 @@
-##### Notice
+###### Notice
 
 *This is the official list of ***{{project_name}}*** authors for copyright
 purposes.*
@@ -14,7 +14,7 @@ explanation.*
 
 *Please keep the list sorted.*
 
-***
+* * *
 
 {{author}}{{.section author_email}} <{{@}}>{{.end}}
 

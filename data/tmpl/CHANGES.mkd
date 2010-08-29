@@ -1,4 +1,4 @@
-##### Notice
+###### Notice
 
 *This file documents the changes in ***{{project_name}}***.*
 
@@ -13,6 +13,6 @@
 
 	+ *anotherfile.ext (somefunction):* More changes.
 
-***
+* * *
 
 
