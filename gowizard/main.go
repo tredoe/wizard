@@ -174,6 +174,8 @@ func createProject() {
 
 /* Updates some values from a project already created. */
 func updateProject() {
+	const README = "README.mkd"
+
 	var err os.Error
 
 	if cfg, err = ReadMetadata(); err != nil {
@@ -185,35 +187,46 @@ func updateProject() {
 		debug(tag)
 	}
 
-	// === Get all Go source files
-	finderGo := newFinderGo()
-	path.Walk(cfg.PackageName, finderGo, nil)
-
-	if len(finderGo.files) == 0 {
-		fmt.Fprintf(os.Stderr,
-			"%s: no Go source files in %q\n", argv0, cfg.PackageName)
-		os.Exit(ERROR)
-	}
-
-	// === Update Makefile and source code files
+	// === Update source code files
 	bPackageName := []byte(tag["package_name"])
+	bProjectName := []byte(tag["project_name"])
 
 	if update["ProjectName"] || update["License"] || update["PackageInCode"] {
-		for _, fname := range finderGo.files {
-			file, err := replaceCode(fname, bPackageName, tag, update)
+		files := finderGo(cfg.PackageName)
+		for _, fname := range files {
+			err := replaceCode(fname, bPackageName, tag, update)
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(string(file))
 		}
 
-		// Makefile
-		file, err := replaceMakefile(path.Join(cfg.PackageName, "Makefile"),
+		// === Update Makefile
+		err := replaceMakefile(path.Join(cfg.PackageName, "Makefile"),
 			bPackageName, tag, update)
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(string(file))
+	}
+
+	// === Update file README
+	if update["ProjectName"] || update["License"] {
+		err := replaceReadme(README, cfg.ProjectName, bProjectName)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	// === Update another text files with extension 'mkd'
+	if update["ProjectName"] {
+		files := finderMkd(".")
+		for _, fname := range files {
+			err := replaceProjectName(fname, cfg.ProjectName, bProjectName)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		fmt.Println(files)
 	}
 
 }
