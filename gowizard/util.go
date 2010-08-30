@@ -11,9 +11,11 @@ package main
 
 import (
 	"container/vector"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 )
 
 
@@ -46,7 +48,7 @@ func copyFile(destination, source string) os.Error {
 }
 
 /* Create a string of characters with length of `name` to use it under that name.
-*/
+ */
 func header(name string) string {
 	const char = '='
 
@@ -62,30 +64,70 @@ func header(name string) string {
 
 // === Implementation of interface 'Visitor' for 'path.Walk'
 // ===
-type finderGo struct {
+type finder struct {
+	ext   string
 	files vector.StringVector
 }
 
-func newFinderGo() *finderGo {
-	return &finderGo{}
+func newFinder(ext string) *finder {
+	_finder := new(finder)
+
+	if ext != ".go" && ext != ".mkd" {
+		panic("File extension not supported")
+	}
+	_finder.ext = ext
+
+	return _finder
 }
 
-/* Skips directories created on compilation. */
-func (self *finderGo) VisitDir(path string, f *os.FileInfo) bool {
+/* Skip directories created on compilation. */
+func (self *finder) VisitDir(path string, f *os.FileInfo) bool {
 	dirName := f.Name
 
 	if dirName == "_test" || dirName == "_obj" {
 		return false
 	}
+
 	return true
 }
 
-/* Adds all Go files to the list. */
-func (self *finderGo) VisitFile(filePath string, f *os.FileInfo) {
+/* Adds all files to the list, according to the extension. */
+func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 	name := f.Name
 
-	if path.Ext(name) == ".go" {
+	if self.ext == ".go" && path.Ext(name) == ".go" {
+		self.files.Push(filePath)
+	} else if self.ext == ".mkd" && path.Ext(name) == ".mkd" &&
+		!strings.HasPrefix(name, "README") {
+
 		self.files.Push(filePath)
 	}
+}
+
+// ===
+
+/* Find all files with extension `ext` on path `pathName`. */
+func _finder(ext string, pathName string) []string {
+	finder := newFinder(ext)
+	path.Walk(pathName, finder, nil)
+
+	if len(finder.files) == 0 {
+		fmt.Fprintf(os.Stderr,
+			"%s: no files with extension %q in directory %q\n",
+			argv0, ext, pathName)
+		os.Exit(ERROR)
+	}
+
+	return finder.files
+}
+
+/* Find all Go source files. */
+func finderGo(pathName string) []string {
+	return _finder(".go", pathName)
+}
+
+/* Find all markup text files, except README. */
+func finderMkd(pathName string) []string {
+	return _finder(".mkd", pathName)
 }
 
