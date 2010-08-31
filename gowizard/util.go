@@ -106,7 +106,7 @@ func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 
 // ===
 
-/* Find all files with extension `ext` on path `pathName`. */
+/* Base to find all files with extension `ext` on path `pathName`. */
 func _finder(ext string, pathName string) []string {
 	finder := newFinder(ext)
 	path.Walk(pathName, finder, nil)

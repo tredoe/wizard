@@ -35,7 +35,8 @@ var (
 
 	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
 	fDebug       = flag.Bool("d", false, "Debug mode")
-	fUpdate      = flag.Bool("u", false, "Updates")
+	fUpdate      = flag.Bool("u", false, "Update data on project created")
+	fVerbose     = flag.Bool("v", false, "Show files updated")
 	fVCS         = flag.String("vcs", "", "Version control system")
 )
 
@@ -70,11 +71,11 @@ func loadConfig() {
 		fInteractive = flag.Bool("i", false, "Interactive mode")
 
 		fListLicense = flag.Bool("ll", false,
-			"Shows the list of licenses for the flag 'License'")
+			"Show the list of licenses for the flag 'License'")
 		fListProject = flag.Bool("lp", false,
-			"Shows the list of project types for the flag 'Project-type'")
+			"Show the list of project types for the flag 'Project-type'")
 		fListVCS = flag.Bool("lv", false,
-			"Shows the list of version control systems")
+			"Show the list of version control systems")
 	)
 
 	// === Parse the flags
@@ -115,16 +116,12 @@ func loadConfig() {
 		}
 	}
 
-	// === Checking and add tags
+	// === Checking
 	if !*fUpdate {
 		checkAtCreate()
-		//tag = tagsToCreate()
 	} else {
 		checkAtUpdate()
-		//tag = tagsToUpdate()
 	}
-
-	//return tag
 }
 
 
