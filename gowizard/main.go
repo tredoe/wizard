@@ -30,11 +30,6 @@ const (
 	COMMENT_MAKEFILE = "#"
 )
 
-var (
-	bCommentCode     = []byte(COMMENT_CODE)
-	bCommentMakefile = []byte(COMMENT_MAKEFILE)
-)
-
 const ERROR = 2 // Exit status code if there is any error
 
 var argv0 = os.Args[0] // Executable name
@@ -193,40 +188,49 @@ func updateProject() {
 
 	if update["ProjectName"] || update["License"] || update["PackageInCode"] {
 		files := finderGo(cfg.PackageName)
+
 		for _, fname := range files {
-			err := replaceCode(fname, bPackageName, tag, update)
-			if err != nil {
-				fmt.Println(err)
+			if err := replaceCode(fname, bPackageName, tag, update); err != nil {
+				fmt.Fprintf(os.Stderr,
+					"%s: file %q not updated: %s\n", argv0, fname, err)
+			} else if *fVerbose {
+				fmt.Printf("%s: file updated: %q", argv0, fname)
 			}
 		}
 
 		// === Update Makefile
-		err := replaceMakefile(path.Join(cfg.PackageName, "Makefile"),
-			bPackageName, tag, update)
-		if err != nil {
-			fmt.Println(err)
+		fname := path.Join(cfg.PackageName, "Makefile"
+
+		if err := replaceMakefile(fname, bPackageName, tag, update); err != nil {
+			fmt.Fprintf(os.Stderr,
+				"%s: file %q not updated: %s\n", argv0, fname, err)
+		} else if *fVerbose {
+			fmt.Printf("%s: file updated: %q", argv0, fname)
 		}
 	}
 
 	// === Update file README
 	if update["ProjectName"] || update["License"] {
-		err := replaceReadme(README, cfg.ProjectName, bProjectName)
-		if err != nil {
-			fmt.Println(err)
+		if err := replaceReadme(README, cfg.ProjectName, bProjectName); err != nil {
+			fmt.Fprintf(os.Stderr,
+				"%s: file %q not updated: %s\n", argv0, README, err)
+		} else if *fVerbose {
+			fmt.Printf("%s: file updated: %q", argv0, README)
 		}
 	}
 
 	// === Update another text files with extension 'mkd'
 	if update["ProjectName"] {
 		files := finderMkd(".")
+
 		for _, fname := range files {
-			err := replaceProjectName(fname, cfg.ProjectName, bProjectName)
-			if err != nil {
-				fmt.Println(err)
+			if err := replaceProjectName(fname, cfg.ProjectName, bProjectName); err != nil {
+				fmt.Fprintf(os.Stderr,
+					"%s: file %q not updated: %s\n", argv0, fname, err)
+			} else if *fVerbose {
+				fmt.Printf("%s: file updated: %q", argv0, fname)
 			}
 		}
-
-		fmt.Println(files)
 	}
 
 }
