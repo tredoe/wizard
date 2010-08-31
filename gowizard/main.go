@@ -75,7 +75,7 @@ func createProject() {
 		debug(tag)
 	}
 
-	headerCode, headerMakefile := renderAllHeaders(tag, "")
+	headerCodeFile, headerMakefile := renderAllHeaders(tag, "")
 
 	cfg = NewMetadata(*fProjecType, *fProjectName, *fPackageName, *fLicense,
 		*fAuthor, *fAuthorEmail)
@@ -92,14 +92,14 @@ func createProject() {
 	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
 	// === Render project files
+	renderNesting(dirApp+"/Makefile", headerMakefile, tmplMakefile, tag)
+
 	switch cfg.ProjectType {
 	case "lib", "cgo":
-		renderCode(dirApp+"/Makefile", tmplMakefile, headerMakefile, tag)
-		renderCode(dirApp+"/main.go", tmplPkgMain, headerCode, tag)
-		renderCode(dirApp+"/main_test.go", tmplTest, headerCode, tag)
+		renderNesting(dirApp+"/main.go", headerCodeFile, tmplPkgMain, tag)
+		renderNesting(dirApp+"/main_test.go", headerCodeFile, tmplTest, tag)
 	case "app", "tool":
-		renderCode(dirApp+"/Makefile", tmplMakefile, headerMakefile, tag)
-		renderCode(dirApp+"/main.go", tmplCmdMain, headerCode, tag)
+		renderNesting(dirApp+"/main.go", headerCodeFile, tmplCmdMain, tag)
 	}
 
 	// === Render common files

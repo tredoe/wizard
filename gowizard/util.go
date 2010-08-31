@@ -34,7 +34,9 @@ func arrayKeys(m map[string]string) []string {
 /* Creates a backup of a file. */
 func backup(fname string) {
 	if err := copyFile(fname+"~", fname); err != nil {
-		panic(fmt.Sprintf("File %q could not be backed up: %s", fname, err))
+		fmt.Fprintf(os.Stderr,
+			"%s: file %q could not be backed up: %s", argv0, fname, err)
+		os.Exit(ERROR)
 	}
 }
 

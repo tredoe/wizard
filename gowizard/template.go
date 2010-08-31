@@ -81,7 +81,7 @@ func parseFile(filename string, data interface{}) string {
 // ===
 
 /* Renders template nesting both tmplHeader and content. */
-func renderCode(destination, template, tmplHeader string, tag map[string]string) {
+func renderNesting(destination, tmplHeader, template string, tag map[string]string) {
 	renderContent := parse(template, tag)
 	render := parse(tmplCode, &code{tmplHeader, renderContent})
 
@@ -112,7 +112,7 @@ func renderNewFile(destination, template string, tag map[string]string) {
 /* Base to render the headers of source code files according to the license.
 If `year` is nil then gets the actual year.
 */
-func _renderHeader(tag map[string]string, year string, renderCode, renderMakefile bool) (headerCode, headerMakefile string) {
+func _renderHeader(tag map[string]string, year string, renderCodeFile, renderMakefile bool) (headerCodeFile, headerMakefile string) {
 	licenseName := strings.Split(*fLicense, "-", -1)[0]
 
 	if year == "" {
@@ -123,9 +123,9 @@ func _renderHeader(tag map[string]string, year string, renderCode, renderMakefil
 	case "apache":
 		tmplHeader := fmt.Sprint(tmplCopyright, tmplApache)
 
-		if renderCode {
+		if renderCodeFile {
 			tag["comment"] = CHAR_COMMENT_CODE
-			headerCode = parse(tmplHeader, tag)
+			headerCodeFile = parse(tmplHeader, tag)
 		}
 		if renderMakefile {
 			tag["comment"] = CHAR_COMMENT_MAKE
@@ -134,18 +134,18 @@ func _renderHeader(tag map[string]string, year string, renderCode, renderMakefil
 	case "bsd":
 		tmplHeader := fmt.Sprint(tmplCopyright, tmplBSD)
 
-		if renderCode {
+		if renderCodeFile {
 			tag["comment"] = CHAR_COMMENT_CODE
-			headerCode = parse(tmplHeader, tag)
+			headerCodeFile = parse(tmplHeader, tag)
 		}
 		if renderMakefile {
 			tag["comment"] = CHAR_COMMENT_MAKE
 			headerMakefile = parse(tmplHeader, tag)
 		}
 	case "cc0":
-		if renderCode {
+		if renderCodeFile {
 			tag["comment"] = CHAR_COMMENT_CODE
-			headerCode = parse(tmplCC0, tag)
+			headerCodeFile = parse(tmplCC0, tag)
 		}
 		if renderMakefile {
 			tag["comment"] = CHAR_COMMENT_MAKE
@@ -160,9 +160,9 @@ func _renderHeader(tag map[string]string, year string, renderCode, renderMakefil
 			tag["Affero"] = ""
 		}
 
-		if renderCode {
+		if renderCodeFile {
 			tag["comment"] = CHAR_COMMENT_CODE
-			headerCode = parse(tmplHeader, tag)
+			headerCodeFile = parse(tmplHeader, tag)
 		}
 		if renderMakefile {
 			tag["comment"] = CHAR_COMMENT_MAKE
@@ -171,9 +171,9 @@ func _renderHeader(tag map[string]string, year string, renderCode, renderMakefil
 	case "none":
 		tmplHeader := fmt.Sprint(tmplCopyright, "\n")
 
-		if renderCode {
+		if renderCodeFile {
 			tag["comment"] = CHAR_COMMENT_CODE
-			headerCode = parse(tmplHeader, tag)
+			headerCodeFile = parse(tmplHeader, tag)
 		}
 		if renderMakefile {
 			tag["comment"] = CHAR_COMMENT_MAKE
@@ -190,25 +190,27 @@ func _renderHeader(tag map[string]string, year string, renderCode, renderMakefil
 		tag[t] = "", false
 	}
 
-	if renderCode {
-		return headerCode, ""
-	}
-	if renderMakefile {
-		return headerMakefile, ""
+	if renderCodeFile && renderMakefile {
+		return headerCodeFile, headerMakefile
 	}
 
-	return headerCode, headerMakefile
+	if renderCodeFile {
+		return headerCodeFile, ""
+	}
+
+	// if renderMakefile
+	return headerMakefile, ""
 }
 
-func renderHeaderCode(tag map[string]string, year string) (headerCode, headerMakefile string) {
+func renderCodeHeader(tag map[string]string, year string) (headerCodeFile, headerMakefile string) {
 	return _renderHeader(tag, year, true, false)
 }
 
-func renderHeaderMakefile(tag map[string]string, year string) (headerMakefile, headerCode string) {
+func renderMakeHeader(tag map[string]string, year string) (headerMakefile, headerCodeFile string) {
 	return _renderHeader(tag, year, false, true)
 }
 
-func renderAllHeaders(tag map[string]string, year string) (headerCode, headerMakefile string) {
+func renderAllHeaders(tag map[string]string, year string) (headerCodeFile, headerMakefile string) {
 	return _renderHeader(tag, year, true, true)
 }
 

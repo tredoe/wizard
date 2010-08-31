@@ -238,9 +238,9 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 
 				// Insert the new header using the year that it just be got.
 				if isCodeFile {
-					header, _ = renderHeaderCode(tag, year)
+					header, _ = renderCodeHeader(tag, year)
 				} else {
-					header, _ = renderHeaderMakefile(tag, year)
+					header, _ = renderMakeHeader(tag, year)
 				}
 
 				if _, err := output.Write([]byte(header)); err != nil {
