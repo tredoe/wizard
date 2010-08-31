@@ -24,13 +24,15 @@ const (
 	PERM_FILE      = 0644
 )
 
-// Comment characters
+// Characters
 const (
-	COMMENT_CODE     = "//"
-	COMMENT_MAKEFILE = "#"
+	CHAR_COMMENT_CODE = "//" // For comments in source code files
+	CHAR_COMMENT_MAKE = "#"  // For comments in file Makefile
+	CHAR_HEADER       = '='  // Header under the project name
 )
 
 const ERROR = 2 // Exit status code if there is any error
+const README = "README.mkd"
 
 var argv0 = os.Args[0] // Executable name
 var cfg *Metadata
@@ -169,8 +171,6 @@ func createProject() {
 
 /* Updates some values from a project already created. */
 func updateProject() {
-	const README = "README.mkd"
-
 	var err os.Error
 
 	if cfg, err = ReadMetadata(); err != nil {
@@ -190,45 +190,40 @@ func updateProject() {
 		files := finderGo(cfg.PackageName)
 
 		for _, fname := range files {
-			if err := replaceCode(fname, bPackageName, tag, update); err != nil {
+			backup(fname)
+
+			if err := replaceGoFile(fname, bPackageName, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
-				fmt.Printf("%s: file updated: %q", argv0, fname)
+				fmt.Printf("%s: file updated: %q\n", argv0, fname)
 			}
 		}
 
 		// === Update Makefile
-		fname := path.Join(cfg.PackageName, "Makefile"
+		fname := path.Join(cfg.PackageName, "Makefile")
+		backup(fname)
 
 		if err := replaceMakefile(fname, bPackageName, tag, update); err != nil {
 			fmt.Fprintf(os.Stderr,
 				"%s: file %q not updated: %s\n", argv0, fname, err)
 		} else if *fVerbose {
-			fmt.Printf("%s: file updated: %q", argv0, fname)
+			fmt.Printf("%s: file updated: %q\n", argv0, fname)
 		}
 	}
 
-	// === Update file README
+	// === Update text files with extension 'mkd'
 	if update["ProjectName"] || update["License"] {
-		if err := replaceReadme(README, cfg.ProjectName, bProjectName); err != nil {
-			fmt.Fprintf(os.Stderr,
-				"%s: file %q not updated: %s\n", argv0, README, err)
-		} else if *fVerbose {
-			fmt.Printf("%s: file updated: %q", argv0, README)
-		}
-	}
-
-	// === Update another text files with extension 'mkd'
-	if update["ProjectName"] {
 		files := finderMkd(".")
 
 		for _, fname := range files {
-			if err := replaceProjectName(fname, cfg.ProjectName, bProjectName); err != nil {
+			backup(fname)
+
+			if err := replaceTextFile(fname, cfg.ProjectName, bProjectName, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
-				fmt.Printf("%s: file updated: %q", argv0, fname)
+				fmt.Printf("%s: file updated: %q\n", argv0, fname)
 			}
 		}
 	}

@@ -15,7 +15,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 )
 
 
@@ -30,6 +29,13 @@ func arrayKeys(m map[string]string) []string {
 	}
 
 	return a
+}
+
+/* Creates a backup of a file. */
+func backup(fname string) {
+	if err := copyFile(fname+"~", fname); err != nil {
+		panic(fmt.Sprintf("File %q could not be backed up: %s", fname, err))
+	}
 }
 
 /* Copies a file from source to destination. */
@@ -50,12 +56,10 @@ func copyFile(destination, source string) os.Error {
 /* Create a string of characters with length of `name` to use it under that name.
  */
 func header(name string) string {
-	const char = '='
-
 	header := make([]byte, len(name))
 
 	for i, _ := range header {
-		header[i] = char
+		header[i] = CHAR_HEADER
 	}
 
 	return string(header)
@@ -97,8 +101,7 @@ func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 
 	if self.ext == ".go" && path.Ext(name) == ".go" {
 		self.files.Push(filePath)
-	} else if self.ext == ".mkd" && path.Ext(name) == ".mkd" &&
-		!strings.HasPrefix(name, "README") {
+	} else if self.ext == ".mkd" && path.Ext(name) == ".mkd" {
 
 		self.files.Push(filePath)
 	}

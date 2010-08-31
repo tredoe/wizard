@@ -124,31 +124,31 @@ func _renderHeader(tag map[string]string, year string, renderCode, renderMakefil
 		tmplHeader := fmt.Sprint(tmplCopyright, tmplApache)
 
 		if renderCode {
-			tag["comment"] = COMMENT_CODE
+			tag["comment"] = CHAR_COMMENT_CODE
 			headerCode = parse(tmplHeader, tag)
 		}
 		if renderMakefile {
-			tag["comment"] = COMMENT_MAKEFILE
+			tag["comment"] = CHAR_COMMENT_MAKE
 			headerMakefile = parse(tmplHeader, tag)
 		}
 	case "bsd":
 		tmplHeader := fmt.Sprint(tmplCopyright, tmplBSD)
 
 		if renderCode {
-			tag["comment"] = COMMENT_CODE
+			tag["comment"] = CHAR_COMMENT_CODE
 			headerCode = parse(tmplHeader, tag)
 		}
 		if renderMakefile {
-			tag["comment"] = COMMENT_MAKEFILE
+			tag["comment"] = CHAR_COMMENT_MAKE
 			headerMakefile = parse(tmplHeader, tag)
 		}
 	case "cc0":
 		if renderCode {
-			tag["comment"] = COMMENT_CODE
+			tag["comment"] = CHAR_COMMENT_CODE
 			headerCode = parse(tmplCC0, tag)
 		}
 		if renderMakefile {
-			tag["comment"] = COMMENT_MAKEFILE
+			tag["comment"] = CHAR_COMMENT_MAKE
 			headerMakefile = parse(tmplCC0, tag)
 		}
 	case "gpl", "agpl":
@@ -161,22 +161,22 @@ func _renderHeader(tag map[string]string, year string, renderCode, renderMakefil
 		}
 
 		if renderCode {
-			tag["comment"] = COMMENT_CODE
+			tag["comment"] = CHAR_COMMENT_CODE
 			headerCode = parse(tmplHeader, tag)
 		}
 		if renderMakefile {
-			tag["comment"] = COMMENT_MAKEFILE
+			tag["comment"] = CHAR_COMMENT_MAKE
 			headerMakefile = parse(tmplHeader, tag)
 		}
 	case "none":
 		tmplHeader := fmt.Sprint(tmplCopyright, "\n")
 
 		if renderCode {
-			tag["comment"] = COMMENT_CODE
+			tag["comment"] = CHAR_COMMENT_CODE
 			headerCode = parse(tmplHeader, tag)
 		}
 		if renderMakefile {
-			tag["comment"] = COMMENT_MAKEFILE
+			tag["comment"] = CHAR_COMMENT_MAKE
 			headerMakefile = parse(tmplHeader, tag)
 		}
 	}

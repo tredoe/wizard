@@ -15,71 +15,41 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
 // Text to search.
 var (
-	bCommentCode     = []byte(COMMENT_CODE)
-	bCommentMakefile = []byte(COMMENT_MAKEFILE)
-	bCopyright       = []byte("opyright ")
-	bEndOfNotice     = []byte("* * *")
-	bPkgInCode       = []byte("package ")
-	bPkgInMakefile   = []byte("TARG=")
+	bCommentCode   = []byte(CHAR_COMMENT_CODE)
+	bCommentMake   = []byte(CHAR_COMMENT_MAKE)
+	bCopyright     = []byte("opyright ")
+	bEndOfNotice   = []byte("* * *")
+	bPkgInCode     = []byte("package ")
+	bPkgInMakefile = []byte("TARG=")
 )
 
+// Regular expressions
+var reHeader = regexp.MustCompile(fmt.Sprint(`^`, CHAR_HEADER, `+$`))
 
-/* replacements in file Readme. */
-func replaceReadme(fname, old string, new []byte) (err os.Error) {
-	var output bytes.Buffer
-
-	// === Read file
-	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
-
-	// === Buffered I/O
-	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
-
-	// === Read line to line
-	for {
-		line, err := rw.ReadSlice('\n')
-		if err != nil {
-			if err == os.EOF {
-				break
-			} else {
-				return err
-			}
-		}
-
-		println(line)
-
-	}
-
-	// === Write changes to file
-	if _, err := file.Seek(0, 0); err != nil {
-		return err
-	}
-
-	if _, err := rw.Write(output.Bytes()); err != nil {
-		return err
-	}
-
-	if err := rw.Writer.Flush(); err != nil {
-		return err
-	}
-
-	return nil
-}
 
 /* Replaces the project name on file `fname`. */
-func replaceProjectName(fname, old string, new []byte) (err os.Error) {
+func replaceTextFile(fname, old string, new []byte, tag map[string]string, update map[string]bool) (err os.Error) {
+	var bOldLicense, bNewLicense []byte
+	var isReadme bool
 	var output bytes.Buffer
 
-	reLineOldName := regexp.MustCompile(fmt.Sprint(`["*', .]`, old, `["*', .]`))
+	reFirstOldName := regexp.MustCompile(fmt.Sprint(`^`, old, '\n'))
+	reLineOldName := regexp.MustCompile(fmt.Sprint(`["*'/, .]`, old, `["*'/, .]`))
 	reOldName := regexp.MustCompile(old)
+
+	if strings.HasPrefix(fname, README) {
+		isReadme = true
+	}
+
+	if isReadme && update["License"] {
+		bOldLicense = []byte(listLicense[cfg.License])
+		bNewLicense = []byte(tag["license"])
+	}
 
 	// === Read file
 	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
@@ -93,6 +63,8 @@ func replaceProjectName(fname, old string, new []byte) (err os.Error) {
 	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
 
 	// === Read line to line
+	isFirstLine := true
+
 	for {
 		line, err := rw.ReadSlice('\n')
 		if err != nil {
@@ -103,22 +75,76 @@ func replaceProjectName(fname, old string, new []byte) (err os.Error) {
 			}
 		}
 
-		if s := bytes.Index(line, bEndOfNotice); s != -1 {
+		if !isReadme && bytes.Index(line, bEndOfNotice) != -1 {
 			break
 		}
 
-		// Search the old name of the project name.
-		if reLineOldName.Match(line) {
-			newLine := reOldName.ReplaceAll(line, new)
+		if update["ProjectName"] {
+			if isFirstLine {
+
+				if reFirstOldName.Match(line) {
+					newLine := reFirstOldName.ReplaceAll(line, new)
+					if _, err := output.Write(newLine); err != nil {
+						return err
+					}
+					println("project header changed")
+
+					// === Get the second line to change the header
+					line, err := rw.ReadSlice('\n')
+					if err != nil {
+						return err
+					}
+
+					if reHeader.Match(line) {
+						newHeader := header(string(new))
+						_, err := output.Write([]byte(newHeader))
+						err = output.WriteByte('\n')
+
+						if err != nil {
+							return err
+						}
+						println("header changed")
+					}
+				} else {
+					if _, err := output.Write(line); err != nil {
+						return err
+					}
+				}
+
+				isFirstLine = false
+				continue
+			}
+
+			// === Not first line.
+
+			// Search the old name of the project name.
+			if reLineOldName.Match(line) {
+				newLine := reOldName.ReplaceAll(line, new)
+				if _, err := output.Write(newLine); err != nil {
+					return err
+				}
+				println("package name changed")
+				continue
+			}
+		}
+
+		if isReadme && update["License"] && bytes.Index(line, bOldLicense) != -1 {
+			newLine := bytes.Replace(line, bOldLicense, bNewLicense, 1)
+			println("license changed")
+
 			if _, err := output.Write(newLine); err != nil {
 				return err
 			}
-		} else {
-			if _, err := output.Write(line); err != nil {
-				return err
-			}
+			continue
 		}
+
+		// Add lines that have not matched.
+		if _, err := output.Write(line); err != nil {
+			return err
+		}
+
 	}
+
 	/*
 		// === Get the remaining of the buffer.
 		end := make([]byte, rw.Reader.Buffered())
@@ -131,15 +157,15 @@ func replaceProjectName(fname, old string, new []byte) (err os.Error) {
 		}
 	*/
 	// === Write changes to file
-	if _, err := file.Seek(0, 0); err != nil {
+	if _, err = file.Seek(0, 0); err != nil {
 		return err
 	}
 
-	if _, err := rw.Write(output.Bytes()); err != nil {
+	if _, err = rw.Write(output.Bytes()); err != nil {
 		return err
 	}
 
-	if err := rw.Writer.Flush(); err != nil {
+	if err = rw.Writer.Flush(); err != nil {
 		return err
 	}
 
@@ -200,7 +226,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 			var header, year string
 
 			// Search the year.
-			if n := bytes.Index(line, bCopyright); n != -1 {
+			if bytes.Index(line, bCopyright) != -1 {
 				s := bytes.Split(line, bCopyright, -1)
 				s = bytes.Fields(s[1]) // All after of "Copyright"
 				year = string(s[0])    // The first one, so the year.
@@ -290,28 +316,28 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 		}
 	*/
 	// === Write changes to file
-	if _, err := file.Seek(0, 0); err != nil {
+	if _, err = file.Seek(0, 0); err != nil {
 		return err
 	}
 
-	if _, err := rw.Write(output.Bytes()); err != nil {
+	if _, err = rw.Write(output.Bytes()); err != nil {
 		return err
 	}
 
-	if err := rw.Writer.Flush(); err != nil {
+	if err = rw.Writer.Flush(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func replaceCode(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
+func replaceGoFile(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
 	return _replaceSourceFile(fname, true, bCommentCode, packageName,
 		tag, update)
 }
 
 func replaceMakefile(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
-	return _replaceSourceFile(fname, false, bCommentMakefile, packageName,
+	return _replaceSourceFile(fname, false, bCommentMake, packageName,
 		tag, update)
 }
 
