@@ -89,12 +89,12 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 					}
 
 					// === Get the second line to change the header
-					line2, err := rw.ReadSlice('\n')
+					line, err := rw.ReadSlice('\n')
 					if err != nil {
 						return err
 					}
 
-					if reHeader.Match(line2) {
+					if reHeader.Match(line) {
 					println("HEADER")
 						newHeader := header(string(new))
 						_, err := output.Write([]byte(newHeader))
@@ -142,33 +142,7 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 		}
 	}
 
-	// === Get the remaining of the buffer.
-	end := make([]byte, rw.Reader.Buffered())
-	if _, err := rw.Read(end); err != nil {
-		return err
-	}
-
-	if _, err = output.Write(end); err != nil {
-		return err
-	}
-
-	// === Write changes to file
-
-	// Set the new size of file.
-	if err = file.Truncate(int64(len(output.Bytes()))); err != nil {
-		return err
-	}
-
-	// Offset at the beggining of file.
-	if _, err = file.Seek(0, 0); err != nil {
-		return err
-	}
-
-	// Write buffer to file.
-	if _, err = rw.Write(output.Bytes()); err != nil {
-		return err
-	}
-	if err = rw.Writer.Flush(); err != nil {
+	if err := rewrite(file, rw, &output); err != nil {
 		return err
 	}
 
@@ -304,9 +278,34 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 		}
 	}
 
+	if err := rewrite(file, rw, &output); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func replaceGoFile(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
+	return _replaceSourceFile(fname, true, bCommentCode, packageName,
+		tag, update)
+}
+
+func replaceMakefile(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
+	return _replaceSourceFile(fname, false, bCommentMake, packageName,
+		tag, update)
+}
+
+
+// === Utility
+// ===
+
+/* Get the remaining of file buffer to add it to output buffer. Finally it is
+saved into original file.
+*/
+func rewrite(file *os.File, rw *bufio.ReadWriter, output *bytes.Buffer) (err os.Error) {
 	// === Get the remaining of the buffer.
 	end := make([]byte, rw.Reader.Buffered())
-	if _, err := rw.Read(end); err != nil {
+	if _, err = rw.Read(end); err != nil {
 		return err
 	}
 
@@ -335,15 +334,5 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 	}
 
 	return nil
-}
-
-func replaceGoFile(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
-	return _replaceSourceFile(fname, true, bCommentCode, packageName,
-		tag, update)
-}
-
-func replaceMakefile(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
-	return _replaceSourceFile(fname, false, bCommentMake, packageName,
-		tag, update)
 }
 
