@@ -29,7 +29,7 @@ var (
 )
 
 // Regular expressions
-var reHeader = regexp.MustCompile(fmt.Sprint(`^`, CHAR_HEADER, `+$`))
+var reHeader = regexp.MustCompile(fmt.Sprintf("^%s+\n", CHAR_HEADER))
 
 
 /* Replaces the project name on file `fname`. */
@@ -38,8 +38,8 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 	var isReadme bool
 	var output bytes.Buffer
 
-	reFirstOldName := regexp.MustCompile(fmt.Sprint(`^`, old, '\n'))
-	reLineOldName := regexp.MustCompile(fmt.Sprint(`["*'/, .]`, old, `["*'/, .]`))
+	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", old))
+	reLineOldName := regexp.MustCompile(fmt.Sprintf("[\"*'/, .]%s[\"*'/, .]", old))
 	reOldName := regexp.MustCompile(old)
 
 	if strings.HasPrefix(fname, README) {
@@ -67,15 +67,15 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 
 	for {
 		line, err := rw.ReadSlice('\n')
-		if err != nil {
-			if err == os.EOF {
-				break
-			} else {
-				return err
-			}
+		if err == os.EOF {
+			break
 		}
 
+		// Write the line of the separator and exits of loop.
 		if !isReadme && bytes.Index(line, bEndOfNotice) != -1 {
+			if _, err := output.Write(line); err != nil {
+				return err
+			}
 			break
 		}
 
@@ -87,15 +87,15 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 					if _, err := output.Write(newLine); err != nil {
 						return err
 					}
-					println("project header changed")
 
 					// === Get the second line to change the header
-					line, err := rw.ReadSlice('\n')
+					line2, err := rw.ReadSlice('\n')
 					if err != nil {
 						return err
 					}
 
-					if reHeader.Match(line) {
+					if reHeader.Match(line2) {
+					println("HEADER")
 						newHeader := header(string(new))
 						_, err := output.Write([]byte(newHeader))
 						err = output.WriteByte('\n')
@@ -123,14 +123,12 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 				if _, err := output.Write(newLine); err != nil {
 					return err
 				}
-				println("package name changed")
 				continue
 			}
 		}
 
 		if isReadme && update["License"] && bytes.Index(line, bOldLicense) != -1 {
 			newLine := bytes.Replace(line, bOldLicense, bNewLicense, 1)
-			println("license changed")
 
 			if _, err := output.Write(newLine); err != nil {
 				return err
@@ -142,29 +140,34 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 		if _, err := output.Write(line); err != nil {
 			return err
 		}
-
 	}
 
-	/*
-		// === Get the remaining of the buffer.
-		end := make([]byte, rw.Reader.Buffered())
-		if _, err := rw.Read(end); err != nil {
-			return err
-		}
+	// === Get the remaining of the buffer.
+	end := make([]byte, rw.Reader.Buffered())
+	if _, err := rw.Read(end); err != nil {
+		return err
+	}
 
-		if _, err = output.Write(end); err != nil {
-			return err
-		}
-	*/
+	if _, err = output.Write(end); err != nil {
+		return err
+	}
+
 	// === Write changes to file
+
+	// Set the new size of file.
+	if err = file.Truncate(int64(len(output.Bytes()))); err != nil {
+		return err
+	}
+
+	// Offset at the beggining of file.
 	if _, err = file.Seek(0, 0); err != nil {
 		return err
 	}
 
+	// Write buffer to file.
 	if _, err = rw.Write(output.Bytes()); err != nil {
 		return err
 	}
-
 	if err = rw.Writer.Flush(); err != nil {
 		return err
 	}
@@ -213,12 +216,8 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 
 	for {
 		line, err := rw.ReadSlice('\n')
-		if err != nil {
-			if err == os.EOF {
-				break
-			} else {
-				return err
-			}
+		if err == os.EOF {
+			break
 		}
 
 		// The header.
@@ -304,26 +303,33 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 			}
 		}
 	}
-	/*
-		// === Get the remaining of the buffer.
-		end := make([]byte, rw.Reader.Buffered())
-		if _, err := rw.Read(end); err != nil {
-			return err
-		}
 
-		if _, err = output.Write(end); err != nil {
-			return err
-		}
-	*/
+	// === Get the remaining of the buffer.
+	end := make([]byte, rw.Reader.Buffered())
+	if _, err := rw.Read(end); err != nil {
+		return err
+	}
+
+	if _, err = output.Write(end); err != nil {
+		return err
+	}
+
 	// === Write changes to file
+
+	// Set the new size of file.
+	if err = file.Truncate(int64(len(output.Bytes()))); err != nil {
+		return err
+	}
+
+	// Offset at the beggining of file.
 	if _, err = file.Seek(0, 0); err != nil {
 		return err
 	}
 
+	// Write buffer to file.
 	if _, err = rw.Write(output.Bytes()); err != nil {
 		return err
 	}
-
 	if err = rw.Writer.Flush(); err != nil {
 		return err
 	}

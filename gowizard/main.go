@@ -196,7 +196,7 @@ func updateProject() {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
-				fmt.Printf("%s: file updated: %q\n", argv0, fname)
+				fmt.Printf("file updated: %q\n", fname)
 			}
 		}
 
@@ -208,7 +208,7 @@ func updateProject() {
 			fmt.Fprintf(os.Stderr,
 				"%s: file %q not updated: %s\n", argv0, fname, err)
 		} else if *fVerbose {
-			fmt.Printf("%s: file updated: %q\n", argv0, fname)
+			fmt.Printf("file updated: %q\n", fname)
 		}
 	}
 
@@ -223,7 +223,7 @@ func updateProject() {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
-				fmt.Printf("%s: file updated: %q\n", argv0, fname)
+				fmt.Printf("file updated: %q\n", fname)
 			}
 		}
 	}
