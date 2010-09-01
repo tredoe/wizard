@@ -232,16 +232,29 @@ func updateProject() {
 	}
 
 	// === License file
-	addLicense(".", tag)
+	if update["License"] {
+		addLicense(".", tag)
 
-}
+		if *fVerbose {
+			fmt.Println("file updated: \"LICENSE\"")
+		}
+	}
 
-/*
-	// Rename directory named like the package name.
+	// === Rename directories
 	if update["PackageName"] {
 		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
 			log.Exit(err)
 		}
 	}
-*/
+
+	if update["ProjectName"] {
+		if err := os.Chdir(".."); err != nil {
+			log.Exit(err)
+		}
+
+		if err := os.Rename(cfg.ProjectName, *fProjectName); err != nil {
+			log.Exit(err)
+		}
+	}
+}
 

@@ -374,15 +374,13 @@ func tagsToUpdate() (tag map[string]string, update map[string]bool) {
 
 	if *fLicense == "" {
 		*fLicense = cfg.License
-	} else {
-		if *fLicense != cfg.License {
-			update["License"] = true
-		}
+	} else if *fLicense != cfg.License {
+		update["License"] = true
+
 		if *fLicense == "bsd-3" {
 			tag["author"] = cfg.Author
 		}
 	}
-
 	tag["license"] = listLicense[*fLicense]
 
 	return tag, update
