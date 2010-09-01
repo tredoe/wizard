@@ -34,6 +34,9 @@ const (
 const ERROR = 2 // Exit status code if there is any error
 const README = "README.mkd"
 
+// Get data directory from `$(GOROOT)/lib/$(TARG)`
+var dirData = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
+
 var argv0 = os.Args[0] // Executable name
 var cfg *Metadata
 
@@ -49,6 +52,23 @@ func main() {
 	}
 
 	os.Exit(0)
+}
+
+/* Add license file in directory `dir`. */
+func addLicense(dir string, tag map[string]string) {
+	dirTmpl := dirData + "/license"
+
+	switch *fLicense {
+	case "none":
+		break
+	case "bsd-3":
+		renderNewFile(dir+"/LICENSE", dirTmpl+"/bsd-3.txt", tag)
+	default:
+		if err := copyFile(dir+"/LICENSE",
+			path.Join(dirTmpl, cfg.License+".txt")); err != nil {
+			log.Exit(err)
+		}
+	}
 }
 
 /* Show data on 'tag'. */
@@ -81,10 +101,6 @@ func createProject() {
 		*fAuthor, *fAuthorEmail)
 
 	// === Create directories in lower case
-
-	// Get data directory from `$(GOROOT)/lib/$(TARG)`
-	dirData := path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
-
 	projectName := cfg.ProjectName // Store the name before of change it
 	cfg.ProjectName = strings.ToLower(cfg.ProjectName)
 
@@ -132,21 +148,8 @@ func createProject() {
 		}
 	}
 
-	// === Add license file
-	dirTmpl = dirData + "/license"
-
-	switch *fLicense {
-	case "none":
-		break
-	case "bsd-3":
-		renderNewFile(cfg.ProjectName+"/LICENSE", dirTmpl+"/bsd-3.txt",
-			tag)
-	default:
-		if err := copyFile(cfg.ProjectName+"/LICENSE",
-			path.Join(dirTmpl, cfg.License+".txt")); err != nil {
-			log.Exit(err)
-		}
-	}
+	// === License file
+	addLicense(cfg.ProjectName, tag)
 
 	// === Create file Metadata
 	cfg.ProjectName = projectName
@@ -227,6 +230,9 @@ func updateProject() {
 			}
 		}
 	}
+
+	// === License file
+	addLicense(".", tag)
 
 }
 

@@ -54,7 +54,7 @@ func usage() {
 Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 	[-Package-name -org]
 
-       gowizard -u [-Project-name -Package-name -License]
+       gowizard -u [-Project-name -Package-name -License] [-org]
 
 `)
 	flag.PrintDefaults()
@@ -129,7 +129,7 @@ func loadConfig() {
 // ===
 
 /* Common checking. */
-func checkCommon(errors bool) {
+func checkCommon(errors, update bool) {
 	// === License
 	*fLicense = strings.ToLower(*fLicense)
 	if _, present := listLicense[*fLicense]; !present {
@@ -141,6 +141,10 @@ func checkCommon(errors bool) {
 	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
 		fmt.Fprintf(os.Stderr,
 			"%s: license 'bsd-3' requires an organization as author\n", argv0)
+		if update {
+			fmt.Fprintf(os.Stderr,
+			"\tThe author name for the license is got from metadata file\n")
+		}
 		errors = true
 	}
 
@@ -182,7 +186,7 @@ func checkAtCreate() {
 		errors = true
 	}
 
-	checkCommon(errors)
+	checkCommon(errors, false)
 }
 
 /* Checking at update project. */
@@ -197,7 +201,7 @@ func checkAtUpdate() {
 	}
 
 	if *fLicense != "" {
-		checkCommon(errors)
+		checkCommon(errors, true)
 	}
 }
 
@@ -370,9 +374,15 @@ func tagsToUpdate() (tag map[string]string, update map[string]bool) {
 
 	if *fLicense == "" {
 		*fLicense = cfg.License
-	} else if *fLicense != cfg.License {
-		update["License"] = true
+	} else {
+		if *fLicense != cfg.License {
+			update["License"] = true
+		}
+		if *fLicense == "bsd-3" {
+			tag["author"] = cfg.Author
+		}
 	}
+
 	tag["license"] = listLicense[*fLicense]
 
 	return tag, update
