@@ -143,7 +143,7 @@ func checkCommon(errors, update bool) {
 			"%s: license 'bsd-3' requires an organization as author\n", argv0)
 		if update {
 			fmt.Fprintf(os.Stderr,
-			"\tThe author name for the license is got from metadata file\n")
+				"\tThe author name for the license is got from metadata file\n")
 		}
 		errors = true
 	}

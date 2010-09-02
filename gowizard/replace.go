@@ -95,7 +95,7 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 					}
 
 					if reHeader.Match(line) {
-					println("HEADER")
+						println("HEADER")
 						newHeader := header(string(new))
 						_, err := output.Write([]byte(newHeader))
 						err = output.WriteByte('\n')
