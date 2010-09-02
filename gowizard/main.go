@@ -187,42 +187,6 @@ func updateProject() {
 		debug(tag)
 	}
 
-	if *fVerbose {
-		fmt.Println("  = Directories renamed\n")
-	}
-
-	// === Rename directories
-	if update["ProjectName"] {
-		if err := os.Chdir(".."); err != nil {
-			log.Exit(err)
-		}
-
-		cfgProjectName := strings.ToLower(cfg.ProjectName)
-		projectName := strings.ToLower(*fProjectName)
-
-		if err := os.Rename(cfgProjectName, projectName); err != nil {
-			log.Exit(err)
-		} else if *fVerbose {
-			fmt.Printf(" * Project: %q -> %q\n", cfgProjectName, projectName)
-		}
-
-		if err := os.Chdir(projectName); err != nil {
-			log.Exit(err)
-		}
-
-		cfg.ProjectName = *fProjectName // Metadata
-	}
-
-	if update["PackageName"] {
-		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
-			log.Exit(err)
-		} else if *fVerbose {
-			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
-		}
-
-		cfg.PackageName = *fPackageName // Metadata
-	}
-
 	// === Update source code files
 	bPackageName := []byte(tag["package_name"])
 	bProjectName := []byte(tag["project_name"])
@@ -282,16 +246,49 @@ func updateProject() {
 
 	// === Print messages
 	if *fVerbose {
-		fmt.Println("\n  = Files updated\n")
+		fmt.Println("  = Files updated\n")
 
 		for _, file := range filesUpdated {
 			fmt.Printf(" * %s\n", file)
 		}
 	}
 
+	if *fVerbose {
+		fmt.Println("\n  = Directories renamed\n")
+	}
+
+	// === Rename directories
+	if update["PackageName"] {
+		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
+			log.Exit(err)
+		} else if *fVerbose {
+			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
+		}
+
+		cfg.PackageName = *fPackageName // Metadata
+	}
+
+	if update["ProjectName"] {
+		if err := os.Chdir(".."); err != nil {
+			log.Exit(err)
+		}
+
+		cfgProjectName := strings.ToLower(cfg.ProjectName)
+		projectName := strings.ToLower(*fProjectName)
+
+		if err := os.Rename(cfgProjectName, projectName); err != nil {
+			log.Exit(err)
+		} else if *fVerbose {
+			fmt.Printf(" * Project: %q -> %q\n", cfgProjectName, projectName)
+		}
+
+		cfg.ProjectName = *fProjectName // Metadata
+	}
+
 	// === File Metadata
-	backup(_FILE_NAME)
-	if err := cfg.WriteINI("."); err != nil {
+	backup(path.Join(cfg.ProjectName, _FILE_NAME))
+
+	if err := cfg.WriteINI(cfg.ProjectName); err != nil {
 		log.Exit(err)
 	}
 }
