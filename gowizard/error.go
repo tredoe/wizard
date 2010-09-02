@@ -24,11 +24,3 @@ var (
 	errNoHeader = &error{"gowizard: no header with copyright"}
 )
 
-/*
-type goFileError string
-
-func (self goFileError) String() string {
-	return "gowizard: no Go source files in '" + string(self) + "'"
-}
-*/
-
