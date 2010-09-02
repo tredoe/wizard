@@ -355,8 +355,11 @@ func tagsToUpdate() (tag map[string]string, update map[string]bool) {
 		"package_name": *fPackageName,
 	}
 
+	*fProjecType = cfg.ProjectType
+	setNames()
+
 	if *fProjectName == "" {
-		tag["project_name"] = cfg.ProjectName
+		tag["project_name"] = strings.ToLower(cfg.ProjectName)
 	} else if *fProjectName != cfg.ProjectName {
 		update["ProjectName"] = true
 		tag["_project_header"] = header(*fProjectName)

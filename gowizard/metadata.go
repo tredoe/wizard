@@ -47,6 +47,7 @@ import (
 
 
 const _FILE_NAME = "Metadata"
+const _VERSION = "1.1"
 
 // Available project types
 var listProject = map[string]string{
@@ -127,7 +128,7 @@ AuthorEmail string) *Metadata {
 	_Metadata := new(Metadata)
 	_Metadata.file = config.NewFile()
 
-	_Metadata.MetadataVersion = "1.1"
+	_Metadata.MetadataVersion = _VERSION
 	_Metadata.ProjectType = ProjectType
 	_Metadata.ProjectName = ProjectName
 	_Metadata.PackageName = PackageName
@@ -146,6 +147,8 @@ func ReadMetadata() (*Metadata, os.Error) {
 	}
 
 	_Metadata := new(Metadata)
+
+	_Metadata.MetadataVersion = _VERSION
 	_Metadata.file = file
 
 	// === Section 'default' has several required fields.

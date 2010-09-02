@@ -187,6 +187,42 @@ func updateProject() {
 		debug(tag)
 	}
 
+	if *fVerbose {
+		fmt.Println("  = Directories renamed\n")
+	}
+
+	// === Rename directories
+	if update["ProjectName"] {
+		if err := os.Chdir(".."); err != nil {
+			log.Exit(err)
+		}
+
+		cfgProjectName := strings.ToLower(cfg.ProjectName)
+		projectName := strings.ToLower(*fProjectName)
+
+		if err := os.Rename(cfgProjectName, projectName); err != nil {
+			log.Exit(err)
+		} else if *fVerbose {
+			fmt.Printf(" * Project: %q -> %q\n", cfgProjectName, projectName)
+		}
+
+		if err := os.Chdir(projectName); err != nil {
+			log.Exit(err)
+		}
+
+		cfg.ProjectName = *fProjectName // Metadata
+	}
+
+	if update["PackageName"] {
+		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
+			log.Exit(err)
+		} else if *fVerbose {
+			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
+		}
+
+		cfg.PackageName = *fPackageName // Metadata
+	}
+
 	// === Update source code files
 	bPackageName := []byte(tag["package_name"])
 	bProjectName := []byte(tag["project_name"])
@@ -240,39 +276,23 @@ func updateProject() {
 		if *fVerbose {
 			filesUpdated.Push("LICENSE")
 		}
+
+		cfg.License = *fLicense // Metadata
 	}
 
 	// === Print messages
 	if *fVerbose {
-		fmt.Println("  = Files updated\n")
+		fmt.Println("\n  = Files updated\n")
 
 		for _, file := range filesUpdated {
 			fmt.Printf(" * %s\n", file)
 		}
-
-		fmt.Println("\n  = Directories renamed\n")
 	}
 
-	// === Rename directories
-	if update["PackageName"] {
-		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
-			log.Exit(err)
-		} else if *fVerbose {
-			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
-		}
+	// === File Metadata
+	backup(_FILE_NAME)
+	if err := cfg.WriteINI("."); err != nil {
+		log.Exit(err)
 	}
-
-	if update["ProjectName"] {
-		if err := os.Chdir(".."); err != nil {
-			log.Exit(err)
-		}
-
-		if err := os.Rename(cfg.ProjectName, *fProjectName); err != nil {
-			log.Exit(err)
-		} else if *fVerbose {
-			fmt.Printf(" * project: %q -> %q\n", cfg.ProjectName, *fProjectName)
-		}
-	}
-
 }
 
