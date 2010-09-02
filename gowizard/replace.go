@@ -38,7 +38,7 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 	var isReadme bool
 	var output bytes.Buffer
 
-	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", old))
+	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s", old))
 	reLineOldName := regexp.MustCompile(fmt.Sprintf("[\"*'/, .]%s[\"*'/, .]", old))
 	reOldName := regexp.MustCompile(old)
 
@@ -83,6 +83,7 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 			if isFirstLine {
 
 				if reFirstOldName.Match(line) {
+fmt.Println("In")
 					newLine := reFirstOldName.ReplaceAll(line, new)
 					if _, err := output.Write(newLine); err != nil {
 						return err
@@ -93,9 +94,9 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 					if err != nil {
 						return err
 					}
-
+fmt.Println(line, '=')
 					if reHeader.Match(line) {
-						println("HEADER")
+println("HEADER")
 						newHeader := header(string(new))
 						_, err := output.Write([]byte(newHeader))
 						err = output.WriteByte('\n')
@@ -103,7 +104,7 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 						if err != nil {
 							return err
 						}
-						println("header changed")
+println("header changed")
 					}
 				} else {
 					if _, err := output.Write(line); err != nil {
