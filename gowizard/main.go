@@ -10,6 +10,7 @@
 package main
 
 import (
+	"container/vector"
 	"fmt"
 	"log"
 	"os"
@@ -175,6 +176,7 @@ func createProject() {
 /* Updates some values from a project already created. */
 func updateProject() {
 	var err os.Error
+	var filesUpdated vector.StringVector
 
 	if cfg, err = ReadMetadata(); err != nil {
 		log.Exit(err)
@@ -199,7 +201,7 @@ func updateProject() {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
-				fmt.Printf("file updated: %q\n", fname)
+				filesUpdated.Push(fname)
 			}
 		}
 
@@ -211,7 +213,7 @@ func updateProject() {
 			fmt.Fprintf(os.Stderr,
 				"%s: file %q not updated: %s\n", argv0, fname, err)
 		} else if *fVerbose {
-			fmt.Printf("file updated: %q\n", fname)
+			filesUpdated.Push(fname)
 		}
 	}
 
@@ -226,7 +228,7 @@ func updateProject() {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
-				fmt.Printf("file updated: %q\n", fname)
+				filesUpdated.Push(fname)
 			}
 		}
 	}
@@ -236,14 +238,27 @@ func updateProject() {
 		addLicense(".", tag)
 
 		if *fVerbose {
-			fmt.Println("file updated: \"LICENSE\"")
+			filesUpdated.Push("LICENSE")
 		}
+	}
+
+	// === Print messages
+	if *fVerbose {
+		fmt.Println("  = Files updated\n")
+
+		for _, file := range filesUpdated {
+			fmt.Printf(" * %s\n", file)
+		}
+
+		fmt.Println("\n  = Directories renamed\n")
 	}
 
 	// === Rename directories
 	if update["PackageName"] {
 		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
 			log.Exit(err)
+		} else if *fVerbose {
+			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
 		}
 	}
 
@@ -254,7 +269,10 @@ func updateProject() {
 
 		if err := os.Rename(cfg.ProjectName, *fProjectName); err != nil {
 			log.Exit(err)
+		} else if *fVerbose {
+			fmt.Printf(" * project: %q -> %q\n", cfg.ProjectName, *fProjectName)
 		}
 	}
+
 }
 
