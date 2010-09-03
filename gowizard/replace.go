@@ -38,7 +38,7 @@ func replaceTextFile(fname, old string, new []byte, tag map[string]string, updat
 	var isReadme bool
 	var output bytes.Buffer
 
-	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s", old))
+	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", old))
 	reLineOldName := regexp.MustCompile(fmt.Sprintf("[\"*'/, .]%s[\"*'/, .]", old))
 	reOldName := regexp.MustCompile(old)
 
