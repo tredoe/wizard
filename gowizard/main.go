@@ -286,9 +286,10 @@ func updateProject() {
 	}
 
 	// === File Metadata
-	backup(path.Join(cfg.ProjectName, _FILE_NAME))
+	projectName := strings.ToLower(cfg.ProjectName)
+	backup(path.Join(projectName, _FILE_NAME))
 
-	if err := cfg.WriteINI(cfg.ProjectName); err != nil {
+	if err := cfg.WriteINI(projectName); err != nil {
 		log.Exit(err)
 	}
 }
