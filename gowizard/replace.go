@@ -18,7 +18,7 @@ import (
 	"strings"
 )
 
-// Text to search.
+// Text to search
 var (
 	charCodeComment = []byte(CHAR_CODE_COMMENT)
 	charMakeComment = []byte(CHAR_MAKE_COMMENT)
@@ -28,7 +28,7 @@ var (
 	pkgInMakefile   = []byte("TARG=")
 )
 
-// Regular expressions
+// Header under of the project name.
 var reHeader = regexp.MustCompile(fmt.Sprintf("^%c+\n", CHAR_HEADER))
 
 

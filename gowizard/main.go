@@ -171,7 +171,7 @@ func createProject() {
 
 /* Updates some values from a project already created. */
 func updateProject() {
-	var filesUpdated vector.StringVector
+	var updatedFiles vector.StringVector
 
 	// 'cfg' has the old values.
 	cfg, err := ReadMetadata()
@@ -229,7 +229,7 @@ func updateProject() {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
-				filesUpdated.Push(fname)
+				updatedFiles.Push(fname)
 			}
 		}
 
@@ -241,7 +241,7 @@ func updateProject() {
 			fmt.Fprintf(os.Stderr,
 				"%s: file %q not updated: %s\n", argv0, fname, err)
 		} else if *fVerbose {
-			filesUpdated.Push(fname)
+			updatedFiles.Push(fname)
 		}
 	}
 
@@ -257,7 +257,7 @@ func updateProject() {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
-				filesUpdated.Push(fname)
+				updatedFiles.Push(fname)
 			}
 		}
 	}
@@ -267,7 +267,7 @@ func updateProject() {
 		addLicense(".", tag)
 
 		if *fVerbose {
-			filesUpdated.Push("LICENSE")
+			updatedFiles.Push("LICENSE")
 		}
 
 		cfg.License = *fLicense // Metadata
@@ -289,10 +289,10 @@ func updateProject() {
 
 	// === Print messages
 	if *fVerbose {
-		filesUpdated.Push(_META_FILE)
+		updatedFiles.Push(_META_FILE)
 		fmt.Println("\n  = Files updated\n")
 
-		for _, file := range filesUpdated {
+		for _, file := range updatedFiles {
 			fmt.Printf(" * %s\n", file)
 		}
 	}
