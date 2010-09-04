@@ -173,19 +173,19 @@ func ReadMetadata() (*Metadata, os.Error) {
 		return nil, MetadataFieldError("license")
 	}
 
-	if s, err := file.String("base", "author"); err == nil {
+	if s, err := file.String("main", "author"); err == nil {
 		_Metadata.Author = s
 	}
-	if s, err := file.String("base", "author-email"); err == nil {
+	if s, err := file.String("main", "author-email"); err == nil {
 		_Metadata.AuthorEmail = s
 	}
-	if s, err := file.String("base", "version"); err == nil {
+	if s, err := file.String("main", "version"); err == nil {
 		_Metadata.Version = s
 	}
-	if s, err := file.String("base", "summary"); err == nil {
+	if s, err := file.String("main", "summary"); err == nil {
 		_Metadata.Summary = s
 	}
-	if s, err := file.String("base", "download-url"); err == nil {
+	if s, err := file.String("main", "download-url"); err == nil {
 		_Metadata.DownloadURL = s
 	}
 
@@ -216,7 +216,7 @@ func (self *Metadata) WriteINI(dir string) os.Error {
 		"License",
 	}
 
-	base := []string{
+	main := []string{
 		"Version",
 		"Summary",
 		"DownloadURL",
@@ -237,9 +237,9 @@ func (self *Metadata) WriteINI(dir string) os.Error {
 		self.file.AddOption("", name, value)
 	}
 
-	for i := 0; i < len(base); i++ {
-		name, value := reflectMetadata.name_value(base[i])
-		self.file.AddOption("base", name, value)
+	for i := 0; i < len(main); i++ {
+		name, value := reflectMetadata.name_value(main[i])
+		self.file.AddOption("main", name, value)
 	}
 
 	for i := 0; i < len(optional); i++ {
