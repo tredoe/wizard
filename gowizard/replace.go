@@ -29,7 +29,7 @@ var (
 )
 
 // Regular expressions
-var reHeader = regexp.MustCompile(fmt.Sprintf("^%s+\n", CHAR_HEADER))
+var reHeader = regexp.MustCompile(fmt.Sprintf("^%c+\n", CHAR_HEADER))
 
 
 /* Replaces the project name on file `fname`. */
@@ -85,9 +85,11 @@ tag map[string]string, update map[string]bool) (err os.Error) {
 			if isFirstLine {
 
 				if reFirstOldName.Match(line) {
-					fmt.Println("In")
 					newLine := reFirstOldName.ReplaceAll(line, projectName)
-					if _, err := output.Write(newLine); err != nil {
+					_, err := output.Write(newLine)
+					err = output.WriteByte('\n')
+
+					if err != nil {
 						return err
 					}
 
@@ -96,9 +98,8 @@ tag map[string]string, update map[string]bool) (err os.Error) {
 					if err != nil {
 						return err
 					}
-					fmt.Println(line, '=')
+
 					if reHeader.Match(line) {
-						println("HEADER")
 						newHeader := header(string(projectName))
 						_, err := output.Write([]byte(newHeader))
 						err = output.WriteByte('\n')
@@ -106,7 +107,6 @@ tag map[string]string, update map[string]bool) (err os.Error) {
 						if err != nil {
 							return err
 						}
-						println("header changed")
 					}
 				} else {
 					if _, err := output.Write(line); err != nil {
