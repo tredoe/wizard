@@ -185,15 +185,47 @@ func updateProject() {
 		debug(tag)
 	}
 
+	// === Rename directories
+	if *fVerbose && (update["ProjectName"] || update["PackageName"]) {
+		fmt.Println("  = Directories renamed\n")
+	}
+
+	if update["ProjectName"] {
+		if err := os.Chdir(".."); err != nil {
+			log.Exit(err)
+		}
+
+		oldProjectName := strings.ToLower(cfg.ProjectName)
+
+		if err := os.Rename(oldProjectName, *fProjectName); err != nil {
+			log.Exit(err)
+		} else if *fVerbose {
+			fmt.Printf(" * Project: %q -> %q\n", oldProjectName, *fProjectName)
+		}
+
+		// Do 'chdir' in new project directory.
+		if err := os.Chdir(*fProjectName); err != nil {
+			log.Exit(err)
+		}
+	}
+
+	if update["PackageName"] {
+		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
+			log.Exit(err)
+		} else if *fVerbose {
+			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
+		}
+	}
+
 	// === Update source code files
 	if update["ProjectName"] || update["License"] || update["PackageInCode"] {
-		bPackageName := []byte(tag["package_name"])
-		files := finderGo(cfg.PackageName)
+		packageName := []byte(tag["package_name"])
+		files := finderGo(*fPackageName)
 
 		for _, fname := range files {
 			backup(fname)
 
-			if err := replaceGoFile(fname, bPackageName, cfg, tag, update); err != nil {
+			if err := replaceGoFile(fname, packageName, cfg, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
@@ -202,10 +234,10 @@ func updateProject() {
 		}
 
 		// === Update Makefile
-		fname := path.Join(cfg.PackageName, "Makefile")
+		fname := path.Join(*fPackageName, "Makefile")
 		backup(fname)
 
-		if err := replaceMakefile(fname, bPackageName, cfg, tag, update); err != nil {
+		if err := replaceMakefile(fname, packageName, cfg, tag, update); err != nil {
 			fmt.Fprintf(os.Stderr,
 				"%s: file %q not updated: %s\n", argv0, fname, err)
 		} else if *fVerbose {
@@ -215,13 +247,13 @@ func updateProject() {
 
 	// === Update text files with extension 'mkd'
 	if update["ProjectName"] || update["License"] {
-		bProjectName := []byte(tag["project_name"])
+		projectName := []byte(tag["project_name"])
 		files := finderMkd(".")
 
 		for _, fname := range files {
 			backup(fname)
 
-			if err := replaceTextFile(fname, bProjectName, cfg, tag, update); err != nil {
+			if err := replaceTextFile(fname, projectName, cfg, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
@@ -241,51 +273,28 @@ func updateProject() {
 		cfg.License = *fLicense // Metadata
 	}
 
+	// === Metadata file
+	backup(_META_FILE)
+
+	if update["ProjectName"] {
+		cfg.ProjectName = tag["project_name"]
+	}
+	if update["PackageName"] {
+		cfg.PackageName = *fPackageName
+	}
+
+	if err := cfg.WriteINI("."); err != nil {
+		log.Exit(err)
+	}
+
 	// === Print messages
 	if *fVerbose {
-		fmt.Println("  = Files updated\n")
+		filesUpdated.Push(_META_FILE)
+		fmt.Println("\n  = Files updated\n")
 
 		for _, file := range filesUpdated {
 			fmt.Printf(" * %s\n", file)
 		}
-	}
-
-	if *fVerbose {
-		fmt.Println("\n  = Directories renamed\n")
-	}
-
-	// === Rename directories
-	if update["PackageName"] {
-		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
-			log.Exit(err)
-		} else if *fVerbose {
-			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
-		}
-
-		cfg.PackageName = *fPackageName // Metadata
-	}
-
-	if update["ProjectName"] {
-		if err := os.Chdir(".."); err != nil {
-			log.Exit(err)
-		}
-
-		oldProjectName := strings.ToLower(cfg.ProjectName)
-
-		if err := os.Rename(oldProjectName, *fProjectName); err != nil {
-			log.Exit(err)
-		} else if *fVerbose {
-			fmt.Printf(" * Project: %q -> %q\n", oldProjectName, *fProjectName)
-		}
-
-		cfg.ProjectName = tag["project_name"] // Metadata
-	}
-
-	// === File Metadata
-	backup(path.Join(*fProjectName, _META_FILE))
-
-	if err := cfg.WriteINI(*fProjectName); err != nil {
-		log.Exit(err)
 	}
 }
 
