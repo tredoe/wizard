@@ -29,7 +29,7 @@ var (
 	fPackageName = flag.String("Package-name", "", "The name of the package.")
 	fLicense     = flag.String("License", "", "The license covering the package.")
 	fAuthor      = flag.String("Author", "",
-		"A string containing the author's name at a minimucfg.")
+		"A string containing the author's name at a minimum.")
 	fAuthorEmail = flag.String("Author-email", "",
 		"A string containing the author's e-mail address.")
 
@@ -129,7 +129,7 @@ func loadConfig() {
 // ===
 
 /* Common checking. */
-func checkCommon(errors, update bool) {
+func checkCommon(errors bool) {
 	// === License
 	*fLicense = strings.ToLower(*fLicense)
 	if _, present := listLicense[*fLicense]; !present {
@@ -141,7 +141,7 @@ func checkCommon(errors, update bool) {
 	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
 		fmt.Fprintf(os.Stderr,
 			"%s: license 'bsd-3' requires an organization as author\n", argv0)
-		if update {
+		if *fUpdate {
 			fmt.Fprintf(os.Stderr,
 				"\tThe author name for the license is got from metadata file\n")
 		}
@@ -186,7 +186,7 @@ func checkAtCreate() {
 		errors = true
 	}
 
-	checkCommon(errors, false)
+	checkCommon(errors)
 }
 
 /* Checking at update project. */
@@ -201,7 +201,7 @@ func checkAtUpdate() {
 	}
 
 	if *fLicense != "" {
-		checkCommon(errors, true)
+		checkCommon(errors)
 	}
 }
 
@@ -272,6 +272,8 @@ func interactive() {
 /* Set names for both project and package. */
 func setNames() {
 	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
+
+	// The project name is not changed to lower case to add it so to the tag.
 	*fProjectName = strings.TrimSpace(*fProjectName)
 
 	switch *fProjecType {
@@ -280,6 +282,7 @@ func setNames() {
 		if *fPackageName == "" {
 			*fPackageName = strings.ToLower(*fProjectName)
 		}
+	// For libraries (packages)
 	default:
 		if *fPackageName == "" {
 			// The package name is created:
@@ -308,6 +311,9 @@ func tagsToCreate() map[string]string {
 		"vcs":             *fVCS,
 		"_project_header": header(*fProjectName),
 	}
+
+	// Now, the project name can be changed to lower case.
+	*fProjectName = strings.ToLower(*fProjectName)
 
 	if *fAuthorIsOrg {
 		value = "ok"
@@ -347,21 +353,24 @@ If the flags are empty then they are set with metadata values.
 If flags are not empty then is indicated in map 'update' since they are the
 values to change.
 */
-func tagsToUpdate() (tag map[string]string, update map[string]bool) {
+func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool) {
 	update = map[string]bool{}
+
+	// setNames() Needs to know the 'ProjectType'
+	*fProjecType = cfg.ProjectType
+	setNames()
 
 	tag = map[string]string{
 		"project_name": *fProjectName,
 		"package_name": *fPackageName,
 	}
 
-	*fProjecType = cfg.ProjectType
-	setNames()
-
 	if *fProjectName == "" {
-		tag["project_name"] = strings.ToLower(cfg.ProjectName)
+		tag["project_name"] = cfg.ProjectName
 	} else if *fProjectName != cfg.ProjectName {
 		update["ProjectName"] = true
+
+		*fProjectName = strings.ToLower(*fProjectName)
 		tag["_project_header"] = header(*fProjectName)
 	}
 

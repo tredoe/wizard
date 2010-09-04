@@ -37,8 +37,8 @@ By default, the package name (*-Package-name*) for a program (app, tool) is
 named as the project name. For other types of project, it is removed "go-" from
 project name.
 
-The flag *-vcs* indicates the version control system to use, and it is used to
-add the appropriate ignore file.
+The flag *-vcs* indicates the version control system to use, which allows to add
+the appropriate ignore file.
 
 Useful flags:
 
@@ -51,6 +51,8 @@ It is possible to update a project already created; to get it, *gowizard* has to
 be run in the project directory (where the file Metadata). It is used the flag
 *-u*, and the values that can be changed are *-Project-name*, *-Package-name*
 and *-License*.
+
+Note that files are backed up adding "~" to the file name.
 
 Example:
 

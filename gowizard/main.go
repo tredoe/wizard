@@ -39,7 +39,6 @@ const README = "README.mkd"
 var dirData = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 
 var argv0 = os.Args[0] // Executable name
-var cfg *Metadata
 
 
 // === Main program execution
@@ -66,7 +65,7 @@ func addLicense(dir string, tag map[string]string) {
 		renderNewFile(dir+"/LICENSE", dirTmpl+"/bsd-3.txt", tag)
 	default:
 		if err := copyFile(dir+"/LICENSE",
-			path.Join(dirTmpl, cfg.License+".txt")); err != nil {
+			path.Join(dirTmpl, *fLicense+".txt")); err != nil {
 			log.Exit(err)
 		}
 	}
@@ -98,20 +97,14 @@ func createProject() {
 
 	headerCodeFile, headerMakefile := renderAllHeaders(tag, "")
 
-	cfg = NewMetadata(*fProjecType, *fProjectName, *fPackageName, *fLicense,
-		*fAuthor, *fAuthorEmail)
-
 	// === Create directories in lower case
-	projectName := cfg.ProjectName // Store the name before of change it
-	cfg.ProjectName = strings.ToLower(cfg.ProjectName)
-
-	dirApp := path.Join(cfg.ProjectName, cfg.PackageName)
+	dirApp := path.Join(*fProjectName, *fPackageName)
 	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
 	// === Render project files
 	renderNesting(dirApp+"/Makefile", headerMakefile, tmplMakefile, tag)
 
-	switch cfg.ProjectType {
+	switch *fProjecType {
 	case "lib", "cgo":
 		renderNesting(dirApp+"/main.go", headerCodeFile, tmplPkgMain, tag)
 		renderNesting(dirApp+"/main_test.go", headerCodeFile, tmplTest, tag)
@@ -122,15 +115,15 @@ func createProject() {
 	// === Render common files
 	dirTmpl := dirData + "/tmpl" // Templates base directory
 
-	renderFile(cfg.ProjectName, dirTmpl+"/NEWS.mkd", tag)
-	renderFile(cfg.ProjectName, dirTmpl+"/README.mkd", tag)
+	renderFile(*fProjectName, dirTmpl+"/NEWS.mkd", tag)
+	renderFile(*fProjectName, dirTmpl+"/README.mkd", tag)
 
-	if strings.HasPrefix(cfg.License, "cc0") {
-		renderNewFile(cfg.ProjectName+"/AUTHORS.mkd",
+	if strings.HasPrefix(*fLicense, "cc0") {
+		renderNewFile(*fProjectName+"/AUTHORS.mkd",
 			dirTmpl+"/AUTHORS-cc0.mkd", tag)
 	} else {
-		renderFile(cfg.ProjectName, dirTmpl+"/AUTHORS.mkd", tag)
-		renderFile(cfg.ProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
+		renderFile(*fProjectName, dirTmpl+"/AUTHORS.mkd", tag)
+		renderFile(*fProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
 	}
 
 	// === Add file related to VCS
@@ -139,22 +132,25 @@ func createProject() {
 		break
 	// File CHANGES is only necessary when is not used a VCS.
 	case "none":
-		renderFile(cfg.ProjectName, dirTmpl+"/CHANGES.mkd", tag)
+		renderFile(*fProjectName, dirTmpl+"/CHANGES.mkd", tag)
 	default:
 		fileIgnore := *fVCS + "ignore"
 
-		if err := copyFile(path.Join(cfg.ProjectName, "."+fileIgnore),
+		if err := copyFile(path.Join(*fProjectName, "."+fileIgnore),
 			path.Join(dirTmpl, fileIgnore)); err != nil {
 			log.Exit(err)
 		}
 	}
 
 	// === License file
-	addLicense(cfg.ProjectName, tag)
+	addLicense(*fProjectName, tag)
 
 	// === Create file Metadata
-	cfg.ProjectName = projectName
-	if err := cfg.WriteINI(strings.ToLower(projectName)); err != nil {
+	// tag["project_name"] has the original name (no in lower case).
+	cfg := NewMetadata(*fProjecType, tag["project_name"], *fPackageName,
+		*fLicense, *fAuthor, *fAuthorEmail)
+
+	if err := cfg.WriteINI(*fProjectName); err != nil {
 		log.Exit(err)
 	}
 
@@ -175,29 +171,29 @@ func createProject() {
 
 /* Updates some values from a project already created. */
 func updateProject() {
-	var err os.Error
 	var filesUpdated vector.StringVector
 
-	if cfg, err = ReadMetadata(); err != nil {
+	// 'cfg' has the old values.
+	cfg, err := ReadMetadata()
+	if err != nil {
 		log.Exit(err)
 	}
 
-	tag, update := tagsToUpdate()
+	// 'tag' and the flags have the new values.
+	tag, update := tagsToUpdate(cfg)
 	if *fDebug {
 		debug(tag)
 	}
 
 	// === Update source code files
-	bPackageName := []byte(tag["package_name"])
-	bProjectName := []byte(tag["project_name"])
-
 	if update["ProjectName"] || update["License"] || update["PackageInCode"] {
+		bPackageName := []byte(tag["package_name"])
 		files := finderGo(cfg.PackageName)
 
 		for _, fname := range files {
 			backup(fname)
 
-			if err := replaceGoFile(fname, bPackageName, tag, update); err != nil {
+			if err := replaceGoFile(fname, bPackageName, cfg, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
@@ -209,7 +205,7 @@ func updateProject() {
 		fname := path.Join(cfg.PackageName, "Makefile")
 		backup(fname)
 
-		if err := replaceMakefile(fname, bPackageName, tag, update); err != nil {
+		if err := replaceMakefile(fname, bPackageName, cfg, tag, update); err != nil {
 			fmt.Fprintf(os.Stderr,
 				"%s: file %q not updated: %s\n", argv0, fname, err)
 		} else if *fVerbose {
@@ -219,12 +215,13 @@ func updateProject() {
 
 	// === Update text files with extension 'mkd'
 	if update["ProjectName"] || update["License"] {
+		bProjectName := []byte(tag["project_name"])
 		files := finderMkd(".")
 
 		for _, fname := range files {
 			backup(fname)
 
-			if err := replaceTextFile(fname, cfg.ProjectName, bProjectName, tag, update); err != nil {
+			if err := replaceTextFile(fname, bProjectName, cfg, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
@@ -274,22 +271,20 @@ func updateProject() {
 		}
 
 		cfgProjectName := strings.ToLower(cfg.ProjectName)
-		projectName := strings.ToLower(*fProjectName)
 
-		if err := os.Rename(cfgProjectName, projectName); err != nil {
+		if err := os.Rename(cfgProjectName, *fProjectName); err != nil {
 			log.Exit(err)
 		} else if *fVerbose {
-			fmt.Printf(" * Project: %q -> %q\n", cfgProjectName, projectName)
+			fmt.Printf(" * Project: %q -> %q\n", cfgProjectName, *fProjectName)
 		}
 
-		cfg.ProjectName = *fProjectName // Metadata
+		cfg.ProjectName = tag["project_name"] // Metadata
 	}
 
 	// === File Metadata
-	projectName := strings.ToLower(cfg.ProjectName)
-	backup(path.Join(projectName, _FILE_NAME))
+	backup(path.Join(*fProjectName, _FILE_NAME))
 
-	if err := cfg.WriteINI(projectName); err != nil {
+	if err := cfg.WriteINI(*fProjectName); err != nil {
 		log.Exit(err)
 	}
 }

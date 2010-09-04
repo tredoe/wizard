@@ -33,11 +33,13 @@ var reHeader = regexp.MustCompile(fmt.Sprintf("^%s+\n", CHAR_HEADER))
 
 
 /* Replaces the project name on file `fname`. */
-func replaceTextFile(fname, old string, new []byte, tag map[string]string, update map[string]bool) (err os.Error) {
+func replaceTextFile(fname string, new []byte, cfg *Metadata,
+tag map[string]string, update map[string]bool) (err os.Error) {
 	var bOldLicense, bNewLicense []byte
 	var isReadme bool
 	var output bytes.Buffer
 
+	old := cfg.ProjectName
 	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", old))
 	reLineOldName := regexp.MustCompile(fmt.Sprintf("[\"*'/, .]%s[\"*'/, .]", old))
 	reOldName := regexp.MustCompile(old)
@@ -151,7 +153,8 @@ println("header changed")
 }
 
 /* Base to replace header and package name. */
-func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
+func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []byte,
+cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 	var output bytes.Buffer
 
 	// === Read file
@@ -225,6 +228,9 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 
 		// The package line is after of header.
 		if skipHeader || endHeader {
+			if !update["PackageInCode"] {
+				break
+			}
 
 			if isCodeFile {
 				// When the line is found, then adds the new package name.
@@ -242,7 +248,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 
 					break
 				}
-				// Makefile
+			// Makefile
 			} else {
 				if bytes.HasPrefix(line, bPkgInMakefile) {
 					// Simple argument without full path to install via goinstall.
@@ -286,14 +292,16 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 	return nil
 }
 
-func replaceGoFile(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
+func replaceGoFile(fname string, packageName []byte, cfg *Metadata,
+tag map[string]string, update map[string]bool) (err os.Error) {
 	return _replaceSourceFile(fname, true, bCommentCode, packageName,
-		tag, update)
+		cfg, tag, update)
 }
 
-func replaceMakefile(fname string, packageName []byte, tag map[string]string, update map[string]bool) (err os.Error) {
+func replaceMakefile(fname string, packageName []byte, cfg *Metadata,
+tag map[string]string, update map[string]bool) (err os.Error) {
 	return _replaceSourceFile(fname, false, bCommentMake, packageName,
-		tag, update)
+		cfg, tag, update)
 }
 
 
