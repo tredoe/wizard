@@ -20,12 +20,12 @@ import (
 
 // Text to search.
 var (
-	bCommentCode   = []byte(CHAR_COMMENT_CODE)
-	bCommentMake   = []byte(CHAR_COMMENT_MAKE)
-	bCopyright     = []byte("opyright ")
-	bEndOfNotice   = []byte("* * *")
-	bPkgInCode     = []byte("package ")
-	bPkgInMakefile = []byte("TARG=")
+	charCodeComment = []byte(CHAR_CODE_COMMENT)
+	charMakeComment = []byte(CHAR_MAKE_COMMENT)
+	copyright       = []byte("opyright ")
+	endOfNotice     = []byte("* * *")
+	pkgInCode       = []byte("package ")
+	pkgInMakefile   = []byte("TARG=")
 )
 
 // Regular expressions
@@ -33,24 +33,24 @@ var reHeader = regexp.MustCompile(fmt.Sprintf("^%s+\n", CHAR_HEADER))
 
 
 /* Replaces the project name on file `fname`. */
-func replaceTextFile(fname string, new []byte, cfg *Metadata,
+func replaceTextFile(fname string, projectName []byte, cfg *Metadata,
 tag map[string]string, update map[string]bool) (err os.Error) {
-	var bOldLicense, bNewLicense []byte
 	var isReadme bool
+	var oldLicense, newLicense []byte
 	var output bytes.Buffer
 
-	old := cfg.ProjectName
-	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", old))
-	reLineOldName := regexp.MustCompile(fmt.Sprintf("[\"*'/, .]%s[\"*'/, .]", old))
-	reOldName := regexp.MustCompile(old)
+	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", cfg.ProjectName))
+	reLineOldName := regexp.MustCompile(
+		fmt.Sprintf("[\"*'/, .]%s[\"*'/, .]", cfg.ProjectName))
+	reOldName := regexp.MustCompile(cfg.ProjectName)
 
 	if strings.HasPrefix(fname, README) {
 		isReadme = true
 	}
 
 	if isReadme && update["License"] {
-		bOldLicense = []byte(listLicense[cfg.License])
-		bNewLicense = []byte(tag["license"])
+		oldLicense = []byte(listLicense[cfg.License])
+		newLicense = []byte(tag["license"])
 	}
 
 	// === Read file
@@ -74,7 +74,7 @@ tag map[string]string, update map[string]bool) (err os.Error) {
 		}
 
 		// Write the line of the separator and exits of loop.
-		if !isReadme && bytes.Index(line, bEndOfNotice) != -1 {
+		if !isReadme && bytes.Index(line, endOfNotice) != -1 {
 			if _, err := output.Write(line); err != nil {
 				return err
 			}
@@ -85,8 +85,8 @@ tag map[string]string, update map[string]bool) (err os.Error) {
 			if isFirstLine {
 
 				if reFirstOldName.Match(line) {
-fmt.Println("In")
-					newLine := reFirstOldName.ReplaceAll(line, new)
+					fmt.Println("In")
+					newLine := reFirstOldName.ReplaceAll(line, projectName)
 					if _, err := output.Write(newLine); err != nil {
 						return err
 					}
@@ -96,17 +96,17 @@ fmt.Println("In")
 					if err != nil {
 						return err
 					}
-fmt.Println(line, '=')
+					fmt.Println(line, '=')
 					if reHeader.Match(line) {
-println("HEADER")
-						newHeader := header(string(new))
+						println("HEADER")
+						newHeader := header(string(projectName))
 						_, err := output.Write([]byte(newHeader))
 						err = output.WriteByte('\n')
 
 						if err != nil {
 							return err
 						}
-println("header changed")
+						println("header changed")
 					}
 				} else {
 					if _, err := output.Write(line); err != nil {
@@ -122,7 +122,7 @@ println("header changed")
 
 			// Search the old name of the project name.
 			if reLineOldName.Match(line) {
-				newLine := reOldName.ReplaceAll(line, new)
+				newLine := reOldName.ReplaceAll(line, projectName)
 				if _, err := output.Write(newLine); err != nil {
 					return err
 				}
@@ -130,8 +130,8 @@ println("header changed")
 			}
 		}
 
-		if isReadme && update["License"] && bytes.Index(line, bOldLicense) != -1 {
-			newLine := bytes.Replace(line, bOldLicense, bNewLicense, 1)
+		if isReadme && update["License"] && bytes.Index(line, oldLicense) != -1 {
+			newLine := bytes.Replace(line, oldLicense, newLicense, 1)
 
 			if _, err := output.Write(newLine); err != nil {
 				return err
@@ -203,8 +203,8 @@ cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 			var header, year string
 
 			// Search the year.
-			if bytes.Index(line, bCopyright) != -1 {
-				s := bytes.Split(line, bCopyright, -1)
+			if bytes.Index(line, copyright) != -1 {
+				s := bytes.Split(line, copyright, -1)
 				s = bytes.Fields(s[1]) // All after of "Copyright"
 				year = string(s[0])    // The first one, so the year.
 			}
@@ -234,10 +234,10 @@ cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 
 			if isCodeFile {
 				// When the line is found, then adds the new package name.
-				if bytes.HasPrefix(line, bPkgInCode) {
+				if bytes.HasPrefix(line, pkgInCode) {
 
 					if !bytes.HasSuffix(line, packageName) {
-						_, err := output.Write(bPkgInCode)
+						_, err := output.Write(pkgInCode)
 						_, err = output.Write(packageName)
 						err = output.WriteByte('\n')
 
@@ -248,9 +248,9 @@ cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 
 					break
 				}
-			// Makefile
+				// Makefile
 			} else {
-				if bytes.HasPrefix(line, bPkgInMakefile) {
+				if bytes.HasPrefix(line, pkgInMakefile) {
 					// Simple argument without full path to install via goinstall.
 					if bytes.IndexByte(line, '/') != -1 {
 						// Add character of new line for that the package name
@@ -265,7 +265,7 @@ cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 							return err
 						}
 					} else {
-						_, err := output.Write(bPkgInMakefile)
+						_, err := output.Write(pkgInMakefile)
 						_, err = output.Write(packageName)
 						err = output.WriteByte('\n')
 
@@ -294,13 +294,13 @@ cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 
 func replaceGoFile(fname string, packageName []byte, cfg *Metadata,
 tag map[string]string, update map[string]bool) (err os.Error) {
-	return _replaceSourceFile(fname, true, bCommentCode, packageName,
+	return _replaceSourceFile(fname, true, charCodeComment, packageName,
 		cfg, tag, update)
 }
 
 func replaceMakefile(fname string, packageName []byte, cfg *Metadata,
 tag map[string]string, update map[string]bool) (err os.Error) {
-	return _replaceSourceFile(fname, false, bCommentMake, packageName,
+	return _replaceSourceFile(fname, false, charMakeComment, packageName,
 		cfg, tag, update)
 }
 

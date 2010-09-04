@@ -27,8 +27,8 @@ const (
 
 // Characters
 const (
-	CHAR_COMMENT_CODE = "//" // For comments in source code files
-	CHAR_COMMENT_MAKE = "#"  // For comments in file Makefile
+	CHAR_CODE_COMMENT = "//" // For comments in source code files
+	CHAR_MAKE_COMMENT = "#"  // For comments in file Makefile
 	CHAR_HEADER       = '='  // Header under the project name
 )
 
@@ -270,19 +270,19 @@ func updateProject() {
 			log.Exit(err)
 		}
 
-		cfgProjectName := strings.ToLower(cfg.ProjectName)
+		oldProjectName := strings.ToLower(cfg.ProjectName)
 
-		if err := os.Rename(cfgProjectName, *fProjectName); err != nil {
+		if err := os.Rename(oldProjectName, *fProjectName); err != nil {
 			log.Exit(err)
 		} else if *fVerbose {
-			fmt.Printf(" * Project: %q -> %q\n", cfgProjectName, *fProjectName)
+			fmt.Printf(" * Project: %q -> %q\n", oldProjectName, *fProjectName)
 		}
 
 		cfg.ProjectName = tag["project_name"] // Metadata
 	}
 
 	// === File Metadata
-	backup(path.Join(*fProjectName, _FILE_NAME))
+	backup(path.Join(*fProjectName, _META_FILE))
 
 	if err := cfg.WriteINI(*fProjectName); err != nil {
 		log.Exit(err)
