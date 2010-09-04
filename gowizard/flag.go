@@ -14,12 +14,16 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 
 	"github.com/kless/go-readin/readin"
+	"github.com/kless/goconfig/config"
 )
 
+
+const USER_CONFIG = ".gowizard" // Configuration file per user
 
 // Flags for the command line
 var (
@@ -63,7 +67,7 @@ Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 
 /* Loads configuration from flags.
 
-Return tags for templates.
+Return tags for the templates.
 */
 func loadConfig() {
 	// Generic flags
@@ -84,6 +88,11 @@ func loadConfig() {
 
 	if len(os.Args) == 1 {
 		usage()
+	}
+
+	// === Get configuration per user
+	if !*fUpdate {
+		userConfig()
 	}
 
 	// === Options
@@ -396,5 +405,62 @@ func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool)
 	tag["license"] = listLicense[*fLicense]
 
 	return tag, update
+}
+
+/* Load configuration per user, if any. */
+func userConfig() {
+	var errors bool
+
+	home, err := os.Getenverror("HOME")
+	if err != nil {
+		if *fDebug {
+			fmt.Fprintf(os.Stderr, "\n%s: %s: HOME\n\n", argv0, err)
+		}
+		return
+	}
+
+	pathUserConfig := path.Join(home, USER_CONFIG)
+
+	// To know if the file exist.
+	_, err = os.Stat(pathUserConfig)
+	if err != nil {
+		if *fDebug {
+			fmt.Fprintf(os.Stderr, "\n%s: %s\n\n", argv0, err)
+		}
+		return
+	}
+
+	file, err := config.ReadFile(pathUserConfig)
+	if err != nil {
+		if *fDebug {
+			fmt.Fprintf(os.Stderr, "\n%s: %s\n", argv0, err)
+		}
+		return
+	}
+
+	// === Get fields
+	*fAuthor, err = file.String("default", "author")
+	if err != nil {
+		errors = true
+		fmt.Fprintf(os.Stderr, "%s: %s: author\n", argv0, err)
+	}
+
+	*fAuthorEmail, err = file.String("default", "author-email")
+	if err != nil {
+		errors = true
+		fmt.Fprintf(os.Stderr, "%s: %s: author-email\n", argv0, err)
+	}
+
+	*fLicense, err = file.String("default", "license")
+	if err != nil {
+		errors = true
+		fmt.Fprintf(os.Stderr, "%s: %s: license\n", argv0, err)
+	}
+
+	if errors {
+		os.Exit(ERROR)
+	}
+
+
 }
 
