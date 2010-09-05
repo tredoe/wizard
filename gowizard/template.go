@@ -10,7 +10,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -123,7 +122,7 @@ renderMakefile bool) (headerCodeFile, headerMakefile string) {
 
 	switch licenseName {
 	case "apache":
-		tmplHeader := fmt.Sprint(tmplCopyright, tmplApache)
+		tmplHeader := tmplCopyright + tmplApache
 
 		if renderCodeFile {
 			tag["comment"] = CHAR_CODE_COMMENT
@@ -134,7 +133,7 @@ renderMakefile bool) (headerCodeFile, headerMakefile string) {
 			headerMakefile = parse(tmplHeader, tag)
 		}
 	case "bsd":
-		tmplHeader := fmt.Sprint(tmplCopyright, tmplBSD)
+		tmplHeader := tmplCopyright + tmplBSD
 
 		if renderCodeFile {
 			tag["comment"] = CHAR_CODE_COMMENT
@@ -154,7 +153,7 @@ renderMakefile bool) (headerCodeFile, headerMakefile string) {
 			headerMakefile = parse(tmplCC0, tag)
 		}
 	case "gpl", "agpl":
-		tmplHeader := fmt.Sprint(tmplCopyright, tmplGNU)
+		tmplHeader := tmplCopyright + tmplGNU
 
 		if licenseName == "agpl" {
 			tag["Affero"] = "Affero"
@@ -171,7 +170,7 @@ renderMakefile bool) (headerCodeFile, headerMakefile string) {
 			headerMakefile = parse(tmplHeader, tag)
 		}
 	case "none":
-		tmplHeader := fmt.Sprint(tmplCopyright, "\n")
+		tmplHeader := tmplCopyright + "\n"
 
 		if renderCodeFile {
 			tag["comment"] = CHAR_CODE_COMMENT

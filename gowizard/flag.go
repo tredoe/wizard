@@ -240,7 +240,7 @@ func interactive() {
 
 	for _, k := range interactiveFlags {
 		f := flag.Lookup(k)
-		text := fmt.Sprintf("+ %s", strings.TrimRight(f.Usage, "."))
+		text := "+ " + strings.TrimRight(f.Usage, ".")
 
 		switch k {
 		case "Package-name":
@@ -480,8 +480,7 @@ func userConfig() {
 			if i == 0 {
 				s = val
 			} else {
-				//s += ", " + val
-				s = fmt.Sprintf("%s, %s", s, val)
+				s += ", " + val
 			}
 		}
 
