@@ -33,6 +33,8 @@ The file is created in the installation process using `make config`; its name is
 
 ## Operating instructions
 
+### Create
+
 The required flags to build a new project are *-Project-type*, *-Project-name*,
 *-License* ,*-Author*, *-Author-email* and *-vcs*; *-Author-email* is not
 necessary when the author is an organization (*-org*).
@@ -44,6 +46,15 @@ project name.
 The flag *-vcs* indicates the version control system to use, which allows to add
 the appropriate ignore file.
 
+Example:
+
+	$ gowizard -Project-name=goFoo -Author="John Foo" -Author-email="e@mail.com"
+	-Project-type=lib -License=gpl-3 -vcs=git
+
+If the configuration file has been set, then it could be shorter:
+
+	$ gowizard -Project-name=goFoo -Project-type=lib
+
 Useful flags:
 
 + ***-i***: the interactive mode is a simple way to get all required
@@ -51,18 +62,22 @@ information, showing the required choices for the flags that need it.
 
 + ***-d***: prints both values to pass to the templates.
 
+### Update
+
 It is possible to update a project already created; to get it, *gowizard* has to
 be run in the project directory (where the file Metadata). It is used the flag
 *-u*, and the values that can be changed are *-Project-name*, *-Package-name*
 and *-License*.
 
+So that the header comments in source code files are updated correctly, the
+notices of copyright and license have to be separated of another comments by at
+least one blank line.
+
 Note that files are backed up adding "~" to the file name.
 
 Example:
 
-	$ gowizard -Project-name=goFoo -Author="John Foo" -Author-email="e@mail.com"
-	-Project-type=lib -License=gpl-3 -vcs=git && cd gofoo
-
+	$ cd gofoo
 	$ gowizard -u -Project-name=goBar -License=bsd-2 -v
 
 ### Suggestions about naming
