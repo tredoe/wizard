@@ -28,7 +28,7 @@ var (
 	pkgInMakefile   = []byte("TARG=")
 )
 
-// Header under of the project name.
+// Header under the project name.
 var reHeader = regexp.MustCompile(fmt.Sprintf("^%c+\n", CHAR_HEADER))
 
 

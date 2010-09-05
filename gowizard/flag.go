@@ -10,6 +10,7 @@
 package main
 
 import (
+	"container/vector"
 	"flag"
 	"fmt"
 	"log"
@@ -409,8 +410,6 @@ func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool)
 
 /* Load configuration per user, if any. */
 func userConfig() {
-	var errors bool
-
 	home, err := os.Getenverror("HOME")
 	if err != nil {
 		if *fDebug {
@@ -438,28 +437,50 @@ func userConfig() {
 		return
 	}
 
-	// === Get fields
+	// === Get values
+	var errors bool
+	var errKeys vector.StringVector
+
 	*fAuthor, err = file.String("default", "author")
 	if err != nil {
 		errors = true
-		fmt.Fprintf(os.Stderr, "%s: %s: author\n", argv0, err)
+		errKeys.Push("author")
 	}
 
 	*fAuthorEmail, err = file.String("default", "author-email")
 	if err != nil {
 		errors = true
-		fmt.Fprintf(os.Stderr, "%s: %s: author-email\n", argv0, err)
+		errKeys.Push("author-email")
 	}
 
 	*fLicense, err = file.String("default", "license")
 	if err != nil {
 		errors = true
-		fmt.Fprintf(os.Stderr, "%s: %s: license\n", argv0, err)
+		errKeys.Push("license")
+	}
+
+	*fVCS, err = file.String("default", "vcs")
+	if err != nil {
+		errors = true
+		errKeys.Push("vcs")
 	}
 
 	if errors {
+		s := ""
+
+		for i, val := range errKeys {
+			if i == 0 {
+				s = val
+			} else {
+				//s += ", " + val
+				s = fmt.Sprintf("%s, %s", s, val)
+			}
+		}
+
+		fmt.Fprintf(os.Stderr, "%s: %s: %s\n", argv0, err, s)
 		os.Exit(ERROR)
 	}
+
 
 
 }

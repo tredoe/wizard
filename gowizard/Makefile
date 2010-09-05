@@ -22,10 +22,16 @@ GOFILES=\
 
 include $(GOROOT)/src/Make.cmd
 
+# Copy both templates and licenses to the system.
 data:
 	[ -d $(GOROOT)/lib/$(TARG) ] || mkdir $(GOROOT)/lib/$(TARG)
 	cp -R ../data/* $(GOROOT)/lib/$(TARG)/
 
+# Add a configuration file to the current user.
+config:
+	cp $(GOROOT)/lib/$(TARG)/config/user $(HOME)/.gowizard
+
+# === Installation
 install: install-default
 
 install-default:

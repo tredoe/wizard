@@ -19,12 +19,16 @@ documentation in directory *doc*.
 
 	$ git clone git://github.com/kless/gowizard.git
 	$ cd gowizard/gowizard && sudo -E make install
-	$ make data ; cd -
+	$ make data ; make config ; cd -
 
 
 ## Configuration
 
-**ToDo**: both flags *-Author* and *-Author-email* could be read from a file.
+The flags *-Author*, *-Author-email*, *-License*, and *-vcs* can be read from a
+configuration file per user.
+
+The file is created in the installation process using `make config`; its name is
+*.gowizard* and is placed in your home directory.
 
 
 ## Operating instructions
