@@ -18,20 +18,6 @@ import (
 	"strings"
 )
 
-// Text to search
-var (
-	charCodeComment = []byte(CHAR_CODE_COMMENT)
-	charMakeComment = []byte(CHAR_MAKE_COMMENT)
-	copyright       = []byte("opyright ")
-	endOfNotice     = []byte("* * *")
-	LF              = []byte{'\n'}
-	pkgInCode       = []byte("package ")
-	pkgInMakefile   = []byte("TARG=")
-)
-
-// Header under the project name.
-var reHeader = regexp.MustCompile(fmt.Sprintf("^%c+\n", CHAR_HEADER))
-
 
 /* Replaces the project name on file `fname`. */
 func replaceTextFile(fname string, projectName []byte, cfg *Metadata,
@@ -39,6 +25,13 @@ tag map[string]string, update map[string]bool) (err os.Error) {
 	var isReadme bool
 	var oldLicense, newLicense []byte
 	var output bytes.Buffer
+
+	// Text to search
+	endOfNotice := []byte("* * *")
+
+	// === Regular expressions
+	// Header under the project name.
+	reHeader := regexp.MustCompile(fmt.Sprintf("^%c+\n", CHAR_HEADER))
 
 	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", cfg.ProjectName))
 	reLineOldName := regexp.MustCompile(
@@ -157,6 +150,14 @@ tag map[string]string, update map[string]bool) (err os.Error) {
 func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []byte,
 cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 	var output bytes.Buffer
+
+	// Text to search
+	var (
+		copyright     = []byte("opyright ")
+		LF            = []byte{'\n'}
+		pkgInCode     = []byte("package ")
+		pkgInMakefile = []byte("TARG=")
+	)
 
 	// === Read file
 	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
@@ -288,14 +289,14 @@ cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 
 func replaceGoFile(fname string, packageName []byte, cfg *Metadata,
 tag map[string]string, update map[string]bool) (err os.Error) {
-	return _replaceSourceFile(fname, true, charCodeComment, packageName,
-		cfg, tag, update)
+	return _replaceSourceFile(fname, true, []byte(CHAR_CODE_COMMENT),
+		packageName, cfg, tag, update)
 }
 
 func replaceMakefile(fname string, packageName []byte, cfg *Metadata,
 tag map[string]string, update map[string]bool) (err os.Error) {
-	return _replaceSourceFile(fname, false, charMakeComment, packageName,
-		cfg, tag, update)
+	return _replaceSourceFile(fname, false, []byte(CHAR_MAKE_COMMENT),
+		packageName, cfg, tag, update)
 }
 
 
