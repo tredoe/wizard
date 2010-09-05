@@ -413,7 +413,7 @@ func userConfig() {
 	home, err := os.Getenverror("HOME")
 	if err != nil {
 		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\n%s: %s: HOME\n\n", argv0, err)
+			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s: HOME\n\n", argv0, err)
 		}
 		return
 	}
@@ -424,7 +424,7 @@ func userConfig() {
 	_, err = os.Stat(pathUserConfig)
 	if err != nil {
 		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\n%s: %s\n\n", argv0, err)
+			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s\n\n", argv0, err)
 		}
 		return
 	}
@@ -432,7 +432,7 @@ func userConfig() {
 	file, err := config.ReadFile(pathUserConfig)
 	if err != nil {
 		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\n%s: %s\n", argv0, err)
+			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s\n\n", argv0, err)
 		}
 		return
 	}
@@ -441,28 +441,36 @@ func userConfig() {
 	var errors bool
 	var errKeys vector.StringVector
 
-	*fAuthor, err = file.String("default", "author")
-	if err != nil {
-		errors = true
-		errKeys.Push("author")
+	if *fAuthor == "" {
+		*fAuthor, err = file.String("default", "author")
+		if err != nil {
+			errors = true
+			errKeys.Push("author")
+		}
 	}
 
-	*fAuthorEmail, err = file.String("default", "author-email")
-	if err != nil {
-		errors = true
-		errKeys.Push("author-email")
+	if *fAuthorEmail == "" {
+		*fAuthorEmail, err = file.String("default", "author-email")
+		if err != nil {
+			errors = true
+			errKeys.Push("author-email")
+		}
 	}
 
-	*fLicense, err = file.String("default", "license")
-	if err != nil {
-		errors = true
-		errKeys.Push("license")
+	if *fLicense == "" {
+		*fLicense, err = file.String("default", "license")
+		if err != nil {
+			errors = true
+			errKeys.Push("license")
+		}
 	}
 
-	*fVCS, err = file.String("default", "vcs")
-	if err != nil {
-		errors = true
-		errKeys.Push("vcs")
+	if *fVCS == "" {
+		*fVCS, err = file.String("default", "vcs")
+		if err != nil {
+			errors = true
+			errKeys.Push("vcs")
+		}
 	}
 
 	if errors {
@@ -480,8 +488,5 @@ func userConfig() {
 		fmt.Fprintf(os.Stderr, "%s: %s: %s\n", argv0, err, s)
 		os.Exit(ERROR)
 	}
-
-
-
 }
 

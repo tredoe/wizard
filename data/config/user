@@ -1,5 +1,6 @@
 # "gowizard" configuration.
 
+[default]
 author: 
 author-email: 
 license: 
