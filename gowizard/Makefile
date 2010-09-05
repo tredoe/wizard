@@ -29,11 +29,17 @@ data:
 
 # Add a configuration file to the current user.
 config:
+ifdef HOME
 	cp $(GOROOT)/lib/$(TARG)/config/user $(HOME)/.gowizard
+else
+	@echo "Environment variable 'HOME' is not set"
+endif
 
-# === Installation
-install: install-default
-
-install-default:
+# Installation
+install:
+ifndef GOBIN
+	mv $(TARG) $(GOROOT)/bin/$(TARG)
+else
 	mv $(TARG) $(GOBIN)/$(TARG)
+endif
 
