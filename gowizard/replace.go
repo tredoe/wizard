@@ -24,6 +24,7 @@ var (
 	charMakeComment = []byte(CHAR_MAKE_COMMENT)
 	copyright       = []byte("opyright ")
 	endOfNotice     = []byte("* * *")
+	LF              = []byte{'\n'}
 	pkgInCode       = []byte("package ")
 	pkgInMakefile   = []byte("TARG=")
 )
@@ -169,20 +170,13 @@ cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
 
 	// === Check if the first bytes are comment characters.
-	for i, _ := range comment {
-		firstByte, err := rw.ReadByte()
-		if err != nil {
-			return err
-		}
-
-		if firstByte != comment[i] {
-			return errNoHeader
-		}
+	fileComment, err := rw.Peek(len(comment))
+	if err != nil {
+		return err
 	}
 
-	// Backs to the beginning
-	for i := 0; i < len(comment); i++ {
-		rw.UnreadByte()
+	if !bytes.Equal(comment, fileComment) {
+		return errNoHeader
 	}
 
 	// === Read line to line
@@ -210,7 +204,7 @@ cfg *Metadata, tag map[string]string, update map[string]bool) (err os.Error) {
 			}
 
 			// End of header.
-			if !bytes.HasPrefix(line, comment) {
+			if bytes.Equal(line, LF) {
 				endHeader = true
 
 				// Insert the new header using the year that it just be got.
