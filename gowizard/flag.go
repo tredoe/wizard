@@ -118,6 +118,11 @@ func loadConfig() {
 		}
 	}
 
+	// Exit if it is not on interactive way
+	if !*fInteractive && (*fListProject || *fListLicense || *fListVCS) {
+		os.Exit(0)
+	}
+
 	if !*fUpdate {
 		if *fInteractive {
 			interactive()
@@ -235,7 +240,7 @@ func interactive() {
 		"vcs",
 	}
 
-	fmt.Println("  = Interactive\n")
+	fmt.Println("\n  = Interactive\n")
 	readin.DefaultIndent = "  "
 
 	for _, k := range interactiveFlags {
