@@ -47,6 +47,7 @@ var (
 
 // Available version control systems
 var listVCS = map[string]string{
+	"bzr":   "Bazaar",
 	"git":   "Git",
 	"hg":    "Mercurial",
 	"other": "other VCS",

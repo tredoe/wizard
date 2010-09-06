@@ -62,7 +62,7 @@ const (
 `
 )
 
-/* For source code files. */
+// For source code files
 const (
 	tmplCmdMain = `package main
 
@@ -115,6 +115,20 @@ GOFILES=\
 
 include $(GOROOT)/src/Make.{{.section project_is_lib}}pkg{{.or}}cmd{{.end}}
 
+`
+)
+
+// Ignore file
+var (
+	tmplIgnore = `*~
+_*
+
+# Go
+*.o
+*.a
+*.[568vq]
+[568vq].out
+main
 `
 )
 

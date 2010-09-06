@@ -12,6 +12,7 @@ package main
 import (
 	"container/vector"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -134,10 +135,14 @@ func createProject() {
 	case "none":
 		renderFile(*fProjectName, dirTmpl+"/CHANGES.mkd", tag)
 	default:
-		fileIgnore := *fVCS + "ignore"
+		ignoreFile := "." + *fVCS + "ignore"
 
-		if err := copyFile(path.Join(*fProjectName, "."+fileIgnore),
-			path.Join(dirTmpl, fileIgnore)); err != nil {
+		if *fVCS == "hg" {
+			tmplIgnore = "syntax: glob\n" + tmplIgnore
+		}
+
+		if err := ioutil.WriteFile(path.Join(*fProjectName, ignoreFile),
+		[]byte(tmplIgnore), PERM_FILE); err != nil {
 			log.Exit(err)
 		}
 	}
