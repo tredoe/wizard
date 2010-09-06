@@ -118,7 +118,7 @@ include $(GOROOT)/src/Make.{{.section project_is_lib}}pkg{{.or}}cmd{{.end}}
 `
 )
 
-// Ignore file
+// === Ignore file
 var (
 	tmplIgnore = `*~
 _*
@@ -131,4 +131,6 @@ _*
 main
 `
 )
+
+const hgIgnoreTop = "syntax: glob\n"
 

@@ -138,7 +138,7 @@ func createProject() {
 		ignoreFile := "." + *fVCS + "ignore"
 
 		if *fVCS == "hg" {
-			tmplIgnore = "syntax: glob\n" + tmplIgnore
+			tmplIgnore = hgIgnoreTop + tmplIgnore
 		}
 
 		if err := ioutil.WriteFile(path.Join(*fProjectName, ignoreFile),
