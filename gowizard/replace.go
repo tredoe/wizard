@@ -301,7 +301,27 @@ tag map[string]string, update map[string]bool) os.Error {
 
 /* Replaces the project name from URL configured in the Version Control System. */
 func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error {
+	var isHeader bool
 	var output bytes.Buffer
+	var header, option_1, option_2 []byte
+
+	// === Text to search
+	oldProjec := []byte("/" + oldProjectName)
+	newProjec := []byte("/" + newProjectName)
+
+	if vcs == "git" {
+		header = []byte("[remote \"origin\"]\n")
+		option_1 = []byte("\turl =")
+		oldProjec = []byte(oldProjectName + ".git")
+		newProjec = []byte(newProjectName + ".git")
+	} else if vcs == "hg" {
+		header = []byte("[paths]\n")
+		option_1 = []byte("default-push =")
+		option_2 = []byte("default =")
+	} else if vcs == "bzr" {
+		option_1 = []byte("push_location =")
+		option_2 = []byte("parent_location =")
+	}
 
 	// === Read file
 	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
@@ -314,31 +334,21 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 	// === Buffered I/O
 	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
 
-	// === Read line to line
-	var isSection bool
-
-	if vcs == "git" {
-		// Text to search
-		var (
-			section   = []byte("[remote \"origin\"]\n")
-			start     = []byte("\turl =")
-			oldProjec = []byte(oldProjectName + ".git")
-			newProjec = []byte(newProjectName + ".git")
-		)
-
+	if len(option_2) == 0 {
+		// Read line to line
 		for {
 			line, err := rw.ReadSlice('\n')
 			if err == os.EOF {
 				break
 			}
 
-			// Section found
-			if !isSection && bytes.Equal(line, section) {
-				isSection = true
+			// Header found
+			if !isHeader && bytes.Equal(line, header) {
+				isHeader = true
 			}
 
 			// Line found
-			if isSection && bytes.HasPrefix(line, start) {
+			if isHeader && bytes.HasPrefix(line, option_1) {
 				newLine := bytes.Replace(line, oldProjec, newProjec, 1)
 
 				if _, err := output.Write(newLine); err != nil {
@@ -352,25 +362,18 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 				return err
 			}
 		}
-	} else if vcs == "hg" {
-		var hasPushPath, isLine bool
-
-		// Text to search
-		var (
-			section    = []byte("[paths]\n")
-			start      = []byte("default =")
-			start_push = []byte("default-push =")
-			oldProjec  = []byte(oldProjectName)
-			newProjec  = []byte(newProjectName)
-		)
+	// Could have two options
+	} else {
+		var isOption_1, isLine bool
 
 		isRound_1 := true
 
+		// In the first, is searched `option_1` else `option_2`.
 		for {
 			line, err := rw.ReadSlice('\n')
 			if err == os.EOF {
 				if isRound_1 {
-					isRound_1 = false
+					isRound_1, isHeader, isLine = false, false, false
 
 					// === Reload the file again.
 					if _, err := file.Seek(0, 0); err != nil {
@@ -385,26 +388,26 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 				}
 			}
 
-			// Section found
-			if !isSection && bytes.Equal(line, section) {
-				isSection = true
+			// Header found
+			if !isHeader && (len(header) == 0 || bytes.Equal(line, header)) {
+				isHeader = true
 			}
 
-			if isRound_1 && isSection && bytes.HasPrefix(line, start_push) {
-				hasPushPath = true
+			if isRound_1 && isHeader && bytes.HasPrefix(line, option_1) {
+				isOption_1 = true
 			}
 
 			// Round 2
 			if !isRound_1 {
-				if isSection {
-					if hasPushPath {
+				if isHeader {
+					if isOption_1 {
 						// Push line found
-						if bytes.HasPrefix(line, start_push) {
+						if bytes.HasPrefix(line, option_1) {
 							isLine = true
 						}
 					} else {
 						// Line found
-						if bytes.HasPrefix(line, start) {
+						if bytes.HasPrefix(line, option_2) {
 							isLine = true
 						}
 					}
@@ -425,7 +428,6 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 				}
 			}
 		}
-
 	}
 
 	if err := rewrite(file, rw, &output); err != nil {

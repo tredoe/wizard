@@ -178,8 +178,9 @@ func createProject() {
 func updateProject() {
 	var updatedFiles vector.StringVector
 
-	// VCS configuration files
+	// VCS configuration files to push to a server.
 	var configVCS = map[string]string{
+		"bzr": ".bzr/branch/branch.conf",
 		"git": ".git/config",
 		"hg":  ".hg/hgrc",
 	}
