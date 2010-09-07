@@ -153,7 +153,7 @@ func createProject() {
 	// === Create file Metadata
 	// tag["project_name"] has the original name (no in lower case).
 	cfg := NewMetadata(*fProjecType, tag["project_name"], *fPackageName,
-		*fLicense, *fAuthor, *fAuthorEmail)
+		*fLicense, *fAuthor, *fAuthorEmail, *fVCS)
 
 	if err := cfg.WriteINI(*fProjectName); err != nil {
 		log.Exit(err)
@@ -177,6 +177,12 @@ func createProject() {
 /* Updates some values from a project already created. */
 func updateProject() {
 	var updatedFiles vector.StringVector
+
+	// VCS configuration files
+	var configVCS = map[string]string{
+		"git": ".git/config",
+		"hg":  ".hg/hgrc",
+	}
 
 	// 'cfg' has the old values.
 	cfg, err := ReadMetadata()
@@ -211,6 +217,21 @@ func updateProject() {
 		// Do 'chdir' in new project directory.
 		if err := os.Chdir(*fProjectName); err != nil {
 			log.Exit(err)
+		}
+
+		// === Rename URL in the VCS
+		if cfg.VCS != "other" && cfg.VCS != "none" {
+			fname := configVCS[cfg.VCS]
+			backup(fname)
+
+			if err := replaceVCS_URL(fname, strings.ToLower(cfg.ProjectName),
+			*fProjectName, cfg.VCS); err != nil {
+				log.Exit(err)
+			}
+
+			if *fVerbose {
+				updatedFiles.Push(fname)
+			}
 		}
 	}
 

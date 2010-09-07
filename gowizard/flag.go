@@ -45,15 +45,6 @@ var (
 	fVCS         = flag.String("vcs", "", "Version control system")
 )
 
-// Available version control systems
-var listVCS = map[string]string{
-	"bzr":   "Bazaar",
-	"git":   "Git",
-	"hg":    "Mercurial",
-	"other": "other VCS",
-	"none":  "none",
-}
-
 
 func usage() {
 	fmt.Fprintf(os.Stderr, `

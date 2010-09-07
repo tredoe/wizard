@@ -118,7 +118,7 @@ include $(GOROOT)/src/Make.{{.section project_is_lib}}pkg{{.or}}cmd{{.end}}
 `
 )
 
-// === Ignore file
+// === Ignore file for VCS
 var (
 	tmplIgnore = `*~
 _*

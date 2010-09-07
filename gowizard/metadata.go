@@ -49,7 +49,7 @@ import (
 const _META_FILE = "Metadata"
 const _VERSION = "1.1"
 
-// Available project types
+// Project types
 var listProject = map[string]string{
 	"tool": "Development tool",
 	"app":  "Program",
@@ -66,6 +66,15 @@ var listLicense = map[string]string{
 	"gpl-3":    "GNU General Public License, version 3 or later",
 	"agpl-3":   "GNU Affero General Public License, version 3 or later",
 	"none":     "Proprietary License",
+}
+
+// Version control systems (VCS)
+var listVCS = map[string]string{
+	"bzr":   "Bazaar",
+	"git":   "Git",
+	"hg":    "Mercurial",
+	"other": "other VCS",
+	"none":  "none",
 }
 
 
@@ -95,7 +104,7 @@ added to pages on packages index:
 The field 'Name' has been substituted by 'Project-name' and 'Package-name'.
 The field 'License' needs a value from the map 'license'.
 
-It has been added 'Project-type'.
+It has been added 'Project-type', and 'VCS'.
 
 For 'Classifier' see on http://pypi.python.org/pypi?%3Aaction=list_classifiers
 */
@@ -110,6 +119,7 @@ type Metadata struct {
 	Author          string
 	AuthorEmail     string "Author-email"
 	License         string
+	VCS             string
 
 	// === Optional
 	Platform string
@@ -124,7 +134,7 @@ type Metadata struct {
 
 /* Creates a new metadata with the basic fields to build the project. */
 func NewMetadata(ProjectType, ProjectName, PackageName, License, Author,
-AuthorEmail string) *Metadata {
+AuthorEmail, vcs string) *Metadata {
 	_Metadata := new(Metadata)
 	_Metadata.file = config.NewFile()
 
@@ -135,6 +145,7 @@ AuthorEmail string) *Metadata {
 	_Metadata.License = License
 	_Metadata.Author = Author
 	_Metadata.AuthorEmail = AuthorEmail
+	_Metadata.VCS = vcs
 
 	return _Metadata
 }
@@ -152,50 +163,66 @@ func ReadMetadata() (*Metadata, os.Error) {
 	_Metadata.file = file
 
 	// === Section 'default' has several required fields.
-	if s, err := file.String("default", "project-type"); err == nil {
+	section := "default"
+
+	field := "project-type"
+	if s, err := file.String(section, field); err == nil {
 		_Metadata.ProjectType = s
 	} else {
-		return nil, MetadataFieldError("project-type")
+		return nil, MetadataFieldError(field)
 	}
-	if s, err := file.String("default", "project-name"); err == nil {
+	field = "project-name"
+	if s, err := file.String(section, field); err == nil {
 		_Metadata.ProjectName = s
 	} else {
-		return nil, MetadataFieldError("project-name")
+		return nil, MetadataFieldError(field)
 	}
-	if s, err := file.String("default", "package-name"); err == nil {
+	field = "package-name"
+	if s, err := file.String(section, field); err == nil {
 		_Metadata.PackageName = s
 	} else {
-		return nil, MetadataFieldError("package-name")
+		return nil, MetadataFieldError(field)
 	}
-	if s, err := file.String("default", "license"); err == nil {
+	field = "license"
+	if s, err := file.String(section, field); err == nil {
 		_Metadata.License = s
 	} else {
-		return nil, MetadataFieldError("license")
+		return nil, MetadataFieldError(field)
+	}
+	field = "vcs"
+	if s, err := file.String(section, field); err == nil {
+		_Metadata.VCS = s
+	} else {
+		return nil, MetadataFieldError(field)
 	}
 
-	if s, err := file.String("main", "author"); err == nil {
+	section = "main"
+	// ===
+	if s, err := file.String(section, "author"); err == nil {
 		_Metadata.Author = s
 	}
-	if s, err := file.String("main", "author-email"); err == nil {
+	if s, err := file.String(section, "author-email"); err == nil {
 		_Metadata.AuthorEmail = s
 	}
-	if s, err := file.String("main", "version"); err == nil {
+	if s, err := file.String(section, "version"); err == nil {
 		_Metadata.Version = s
 	}
-	if s, err := file.String("main", "summary"); err == nil {
+	if s, err := file.String(section, "summary"); err == nil {
 		_Metadata.Summary = s
 	}
-	if s, err := file.String("main", "download-url"); err == nil {
+	if s, err := file.String(section, "download-url"); err == nil {
 		_Metadata.DownloadURL = s
 	}
 
-	if s, err := file.String("optional", "platform"); err == nil {
+	section = "optional"
+	// ===
+	if s, err := file.String(section, "platform"); err == nil {
 		_Metadata.Platform = s
 	}
-	if s, err := file.String("optional", "keywords"); err == nil {
+	if s, err := file.String(section, "keywords"); err == nil {
 		_Metadata.Keywords = s
 	}
-	if s, err := file.String("optional", "home-page"); err == nil {
+	if s, err := file.String(section, "home-page"); err == nil {
 		_Metadata.HomePage = s
 	}
 
@@ -214,6 +241,7 @@ func (self *Metadata) WriteINI(dir string) os.Error {
 		"ProjectName",
 		"PackageName",
 		"License",
+		"VCS",
 	}
 
 	main := []string{

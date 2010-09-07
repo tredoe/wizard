@@ -299,6 +299,142 @@ tag map[string]string, update map[string]bool) os.Error {
 		packageName, cfg, tag, update)
 }
 
+/* Replaces the project name from URL configured in the Version Control System. */
+func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error {
+	var output bytes.Buffer
+
+	// === Read file
+	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	// === Buffered I/O
+	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
+
+	// === Read line to line
+	var isSection bool
+
+	if vcs == "git" {
+		// Text to search
+		var (
+			section   = []byte("[remote \"origin\"]\n")
+			start     = []byte("\turl =")
+			oldProjec = []byte(oldProjectName + ".git")
+			newProjec = []byte(newProjectName + ".git")
+		)
+
+		for {
+			line, err := rw.ReadSlice('\n')
+			if err == os.EOF {
+				break
+			}
+
+			// Section found
+			if !isSection && bytes.Equal(line, section) {
+				isSection = true
+			}
+
+			// Line found
+			if isSection && bytes.HasPrefix(line, start) {
+				newLine := bytes.Replace(line, oldProjec, newProjec, 1)
+
+				if _, err := output.Write(newLine); err != nil {
+					return err
+				}
+				break
+			}
+
+			// Add the another lines.
+			if _, err := output.Write(line); err != nil {
+				return err
+			}
+		}
+	} else if vcs == "hg" {
+		var hasPushPath, isLine bool
+
+		// Text to search
+		var (
+			section    = []byte("[paths]\n")
+			start      = []byte("default =")
+			start_push = []byte("default-push =")
+			oldProjec  = []byte(oldProjectName)
+			newProjec  = []byte(newProjectName)
+		)
+
+		isRound_1 := true
+
+		for {
+			line, err := rw.ReadSlice('\n')
+			if err == os.EOF {
+				if isRound_1 {
+					isRound_1 = false
+
+					// === Reload the file again.
+					if _, err := file.Seek(0, 0); err != nil {
+						return err
+					}
+
+					rw.Reader = bufio.NewReader(file)
+					line, _ = rw.ReadSlice('\n')
+				// Round 2
+				} else {
+					break
+				}
+			}
+
+			// Section found
+			if !isSection && bytes.Equal(line, section) {
+				isSection = true
+			}
+
+			if isRound_1 && isSection && bytes.HasPrefix(line, start_push) {
+				hasPushPath = true
+			}
+
+			// Round 2
+			if !isRound_1 {
+				if isSection {
+					if hasPushPath {
+						// Push line found
+						if bytes.HasPrefix(line, start_push) {
+							isLine = true
+						}
+					} else {
+						// Line found
+						if bytes.HasPrefix(line, start) {
+							isLine = true
+						}
+					}
+				}
+
+				if isLine {
+					newLine := bytes.Replace(line, oldProjec, newProjec, 1)
+
+					if _, err := output.Write(newLine); err != nil {
+						return err
+					}
+					break
+				}
+
+				// Add the another lines.
+				if _, err := output.Write(line); err != nil {
+					return err
+				}
+			}
+		}
+
+	}
+
+	if err := rewrite(file, rw, &output); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 
 // === Utility
 // ===
