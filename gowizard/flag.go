@@ -447,7 +447,7 @@ func userConfig() {
 	var errKeys vector.StringVector
 
 	if *fAuthor == "" {
-		*fAuthor, err = file.String("default", "author")
+		*fAuthor, err = file.String("DEFAULT", "author")
 		if err != nil {
 			errors = true
 			errKeys.Push("author")
@@ -455,7 +455,7 @@ func userConfig() {
 	}
 
 	if *fAuthorEmail == "" {
-		*fAuthorEmail, err = file.String("default", "author-email")
+		*fAuthorEmail, err = file.String("DEFAULT", "author-email")
 		if err != nil {
 			errors = true
 			errKeys.Push("author-email")
@@ -463,7 +463,7 @@ func userConfig() {
 	}
 
 	if *fLicense == "" {
-		*fLicense, err = file.String("default", "license")
+		*fLicense, err = file.String("DEFAULT", "license")
 		if err != nil {
 			errors = true
 			errKeys.Push("license")
@@ -471,7 +471,7 @@ func userConfig() {
 	}
 
 	if *fVCS == "" {
-		*fVCS, err = file.String("default", "vcs")
+		*fVCS, err = file.String("DEFAULT", "vcs")
 		if err != nil {
 			errors = true
 			errKeys.Push("vcs")

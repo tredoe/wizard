@@ -82,7 +82,7 @@ var listVCS = map[string]string{
 type MetadataFieldError string
 
 func (self MetadataFieldError) String() string {
-	return "metadata: section default has not field '" + string(self) + "'"
+	return "metadata: default section has not field '" + string(self) + "'"
 }
 
 
@@ -109,24 +109,24 @@ It has been added 'Project-type', and 'VCS'.
 For 'Classifier' see on http://pypi.python.org/pypi?%3Aaction=list_classifiers
 */
 type Metadata struct {
-	MetadataVersion string "Metadata-Version" // Version of the file format
-	ProjectType     string "Project-type"
-	ProjectName     string "Project-name"
-	PackageName     string "Package-name"
-	Version         string
-	Summary         string
-	DownloadURL     string "Download-URL"
-	Author          string
-	AuthorEmail     string "Author-email"
-	License         string
-	VCS             string
+	MetadataVersion string "metadata-version" // Version of the file format
+	ProjectType     string "project-type"
+	ProjectName     string "project-name"
+	PackageName     string "package-name"
+	Version         string "version"
+	Summary         string "summary"
+	DownloadURL     string "download-url"
+	Author          string "author"
+	AuthorEmail     string "author-email"
+	License         string "license"
+	VCS             string "vcs"
 
 	// === Optional
-	Platform string
-	//Description string
-	Keywords string
-	HomePage string "Home-page"
-	//Classifier  []string
+	Platform string "platform"
+	//Description string "description"
+	Keywords string "keywords"
+	HomePage string "home-page"
+	//Classifier  []string "classifier"
 
 	// Config file
 	file *config.File
