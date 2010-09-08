@@ -162,8 +162,8 @@ func ReadMetadata() (*Metadata, os.Error) {
 	_Metadata.MetadataVersion = _VERSION
 	_Metadata.file = file
 
-	// === Section 'default' has several required fields.
-	section := "default"
+	// === Section 'DEFAULT' has several required fields.
+	section := "DEFAULT"
 
 	field := "project-type"
 	if s, err := file.String(section, field); err == nil {
@@ -196,7 +196,7 @@ func ReadMetadata() (*Metadata, os.Error) {
 		return nil, MetadataFieldError(field)
 	}
 
-	section = "main"
+	section = "MAIN"
 	// ===
 	if s, err := file.String(section, "author"); err == nil {
 		_Metadata.Author = s
@@ -214,7 +214,7 @@ func ReadMetadata() (*Metadata, os.Error) {
 		_Metadata.DownloadURL = s
 	}
 
-	section = "optional"
+	section = "OPTIONAL"
 	// ===
 	if s, err := file.String(section, "platform"); err == nil {
 		_Metadata.Platform = s
@@ -267,12 +267,12 @@ func (self *Metadata) WriteINI(dir string) os.Error {
 
 	for i := 0; i < len(main); i++ {
 		name, value := reflectMetadata.name_value(main[i])
-		self.file.AddOption("main", name, value)
+		self.file.AddOption("MAIN", name, value)
 	}
 
 	for i := 0; i < len(optional); i++ {
 		name, value := reflectMetadata.name_value(optional[i])
-		self.file.AddOption("optional", name, value)
+		self.file.AddOption("OPTIONAL", name, value)
 	}
 
 	filePath := path.Join(dir, _META_FILE)
