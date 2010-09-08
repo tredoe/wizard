@@ -434,7 +434,7 @@ func userConfig() {
 		return
 	}
 
-	file, err := config.ReadFile(pathUserConfig)
+	cfg, err := config.ReadDefault(pathUserConfig)
 	if err != nil {
 		if *fDebug {
 			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s\n\n", argv0, err)
@@ -447,7 +447,7 @@ func userConfig() {
 	var errKeys vector.StringVector
 
 	if *fAuthor == "" {
-		*fAuthor, err = file.String("DEFAULT", "author")
+		*fAuthor, err = cfg.String("DEFAULT", "author")
 		if err != nil {
 			errors = true
 			errKeys.Push("author")
@@ -455,7 +455,7 @@ func userConfig() {
 	}
 
 	if *fAuthorEmail == "" {
-		*fAuthorEmail, err = file.String("DEFAULT", "author-email")
+		*fAuthorEmail, err = cfg.String("DEFAULT", "author-email")
 		if err != nil {
 			errors = true
 			errKeys.Push("author-email")
@@ -463,7 +463,7 @@ func userConfig() {
 	}
 
 	if *fLicense == "" {
-		*fLicense, err = file.String("DEFAULT", "license")
+		*fLicense, err = cfg.String("DEFAULT", "license")
 		if err != nil {
 			errors = true
 			errKeys.Push("license")
@@ -471,7 +471,7 @@ func userConfig() {
 	}
 
 	if *fVCS == "" {
-		*fVCS, err = file.String("DEFAULT", "vcs")
+		*fVCS, err = cfg.String("DEFAULT", "vcs")
 		if err != nil {
 			errors = true
 			errKeys.Push("vcs")

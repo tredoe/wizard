@@ -128,15 +128,15 @@ type Metadata struct {
 	HomePage string "home-page"
 	//Classifier  []string "classifier"
 
-	// Config file
-	file *config.File
+	// Configuration file
+	cfg *config.Config
 }
 
 /* Creates a new metadata with the basic fields to build the project. */
 func NewMetadata(ProjectType, ProjectName, PackageName, License, Author,
 AuthorEmail, vcs string) *Metadata {
 	_Metadata := new(Metadata)
-	_Metadata.file = config.NewFile()
+	_Metadata.cfg = config.NewDefault()
 
 	_Metadata.MetadataVersion = _VERSION
 	_Metadata.ProjectType = ProjectType
@@ -152,7 +152,7 @@ AuthorEmail, vcs string) *Metadata {
 
 /* Reads metadata file. */
 func ReadMetadata() (*Metadata, os.Error) {
-	file, err := config.ReadFile(_META_FILE)
+	cfg, err := config.ReadDefault(_META_FILE)
 	if err != nil {
 		return nil, err
 	}
@@ -160,37 +160,37 @@ func ReadMetadata() (*Metadata, os.Error) {
 	_Metadata := new(Metadata)
 
 	_Metadata.MetadataVersion = _VERSION
-	_Metadata.file = file
+	_Metadata.cfg = cfg
 
 	// === Section 'DEFAULT' has several required fields.
 	section := "DEFAULT"
 
 	field := "project-type"
-	if s, err := file.String(section, field); err == nil {
+	if s, err := cfg.String(section, field); err == nil {
 		_Metadata.ProjectType = s
 	} else {
 		return nil, MetadataFieldError(field)
 	}
 	field = "project-name"
-	if s, err := file.String(section, field); err == nil {
+	if s, err := cfg.String(section, field); err == nil {
 		_Metadata.ProjectName = s
 	} else {
 		return nil, MetadataFieldError(field)
 	}
 	field = "package-name"
-	if s, err := file.String(section, field); err == nil {
+	if s, err := cfg.String(section, field); err == nil {
 		_Metadata.PackageName = s
 	} else {
 		return nil, MetadataFieldError(field)
 	}
 	field = "license"
-	if s, err := file.String(section, field); err == nil {
+	if s, err := cfg.String(section, field); err == nil {
 		_Metadata.License = s
 	} else {
 		return nil, MetadataFieldError(field)
 	}
 	field = "vcs"
-	if s, err := file.String(section, field); err == nil {
+	if s, err := cfg.String(section, field); err == nil {
 		_Metadata.VCS = s
 	} else {
 		return nil, MetadataFieldError(field)
@@ -198,31 +198,31 @@ func ReadMetadata() (*Metadata, os.Error) {
 
 	section = "MAIN"
 	// ===
-	if s, err := file.String(section, "author"); err == nil {
+	if s, err := cfg.String(section, "author"); err == nil {
 		_Metadata.Author = s
 	}
-	if s, err := file.String(section, "author-email"); err == nil {
+	if s, err := cfg.String(section, "author-email"); err == nil {
 		_Metadata.AuthorEmail = s
 	}
-	if s, err := file.String(section, "version"); err == nil {
+	if s, err := cfg.String(section, "version"); err == nil {
 		_Metadata.Version = s
 	}
-	if s, err := file.String(section, "summary"); err == nil {
+	if s, err := cfg.String(section, "summary"); err == nil {
 		_Metadata.Summary = s
 	}
-	if s, err := file.String(section, "download-url"); err == nil {
+	if s, err := cfg.String(section, "download-url"); err == nil {
 		_Metadata.DownloadURL = s
 	}
 
 	section = "OPTIONAL"
 	// ===
-	if s, err := file.String(section, "platform"); err == nil {
+	if s, err := cfg.String(section, "platform"); err == nil {
 		_Metadata.Platform = s
 	}
-	if s, err := file.String(section, "keywords"); err == nil {
+	if s, err := cfg.String(section, "keywords"); err == nil {
 		_Metadata.Keywords = s
 	}
-	if s, err := file.String(section, "home-page"); err == nil {
+	if s, err := cfg.String(section, "home-page"); err == nil {
 		_Metadata.HomePage = s
 	}
 
@@ -262,21 +262,21 @@ func (self *Metadata) WriteINI(dir string) os.Error {
 
 	for i := 0; i < len(default_); i++ {
 		name, value := reflectMetadata.name_value(default_[i])
-		self.file.AddOption("", name, value)
+		self.cfg.AddOption("", name, value)
 	}
 
 	for i := 0; i < len(main); i++ {
 		name, value := reflectMetadata.name_value(main[i])
-		self.file.AddOption("MAIN", name, value)
+		self.cfg.AddOption("MAIN", name, value)
 	}
 
 	for i := 0; i < len(optional); i++ {
 		name, value := reflectMetadata.name_value(optional[i])
-		self.file.AddOption("OPTIONAL", name, value)
+		self.cfg.AddOption("OPTIONAL", name, value)
 	}
 
 	filePath := path.Join(dir, _META_FILE)
-	if err := self.file.WriteFile(filePath, PERM_FILE, header); err != nil {
+	if err := self.cfg.WriteFile(filePath, PERM_FILE, header); err != nil {
 		return err
 	}
 
