@@ -32,12 +32,11 @@ func arrayKeys(m map[string]string) []string {
 }
 
 /* Creates a backup of a file. */
-func backup(fname string) {
+func backup(fname string) (ok bool) {
 	if err := copyFile(fname+"~", fname); err != nil {
-		fmt.Fprintf(os.Stderr,
-			"%s: file %q could not be backed up: %s\n", argv0, fname, err)
-		os.Exit(ERROR)
+		return false
 	}
+	return true
 }
 
 /* Copies a file from source to destination. */

@@ -418,10 +418,18 @@ func userConfig() {
 	pathUserConfig := path.Join(home, USER_CONFIG)
 
 	// To know if the file exist.
-	_, err = os.Stat(pathUserConfig)
+	info, err := os.Stat(pathUserConfig)
 	if err != nil {
 		if *fDebug {
 			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s\n\n", argv0, err)
+		}
+		return
+	}
+
+	if !info.IsRegular() {
+		if *fDebug {
+			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s is not a file\n\n",
+				argv0, pathUserConfig)
 		}
 		return
 	}

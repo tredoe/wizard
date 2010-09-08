@@ -176,7 +176,7 @@ func createProject() {
 
 /* Updates some values from a project already created. */
 func updateProject() {
-	var updatedFiles vector.StringVector
+	var updatedFiles, errorFiles vector.StringVector
 
 	// VCS configuration files to push to a server.
 	var configVCS = map[string]string{
@@ -221,10 +221,9 @@ func updateProject() {
 		}
 
 		// === Rename URL in the VCS
-		if cfg.VCS != "other" && cfg.VCS != "none" {
-			fname := configVCS[cfg.VCS]
-			backup(fname)
+		fname := configVCS[cfg.VCS]
 
+		if cfg.VCS != "other" && cfg.VCS != "none" && backup(fname) {
 			if err := replaceVCS_URL(fname, strings.ToLower(cfg.ProjectName),
 			*fProjectName, cfg.VCS); err != nil {
 				log.Exit(err)
@@ -250,25 +249,31 @@ func updateProject() {
 		files := finderGo(*fPackageName)
 
 		for _, fname := range files {
-			backup(fname)
+			if backup(fname) {
 
-			if err := replaceGoFile(fname, packageName, cfg, tag, update); err != nil {
-				fmt.Fprintf(os.Stderr,
-					"%s: file %q not updated: %s\n", argv0, fname, err)
-			} else if *fVerbose {
-				updatedFiles.Push(fname)
+				if err := replaceGoFile(fname, packageName, cfg, tag, update); err != nil {
+					fmt.Fprintf(os.Stderr,
+						"%s: file %q not updated: %s\n", argv0, fname, err)
+				} else if *fVerbose {
+					updatedFiles.Push(fname)
+				}
+			} else {
+				errorFiles.Push(fname)
 			}
 		}
 
 		// === Update Makefile
 		fname := path.Join(*fPackageName, "Makefile")
-		backup(fname)
 
-		if err := replaceMakefile(fname, packageName, cfg, tag, update); err != nil {
-			fmt.Fprintf(os.Stderr,
-				"%s: file %q not updated: %s\n", argv0, fname, err)
-		} else if *fVerbose {
-			updatedFiles.Push(fname)
+		if backup(fname) {
+			if err := replaceMakefile(fname, packageName, cfg, tag, update); err != nil {
+				fmt.Fprintf(os.Stderr,
+					"%s: file %q not updated: %s\n", argv0, fname, err)
+			} else if *fVerbose {
+				updatedFiles.Push(fname)
+			}
+		} else {
+			errorFiles.Push(fname)
 		}
 	}
 
@@ -278,13 +283,16 @@ func updateProject() {
 		files := finderMkd(".")
 
 		for _, fname := range files {
-			backup(fname)
+			if backup(fname) {
 
-			if err := replaceTextFile(fname, projectName, cfg, tag, update); err != nil {
-				fmt.Fprintf(os.Stderr,
-					"%s: file %q not updated: %s\n", argv0, fname, err)
-			} else if *fVerbose {
-				updatedFiles.Push(fname)
+				if err := replaceTextFile(fname, projectName, cfg, tag, update); err != nil {
+					fmt.Fprintf(os.Stderr,
+						"%s: file %q not updated: %s\n", argv0, fname, err)
+				} else if *fVerbose {
+					updatedFiles.Push(fname)
+				}
+			} else {
+				errorFiles.Push(fname)
 			}
 		}
 	}
@@ -301,17 +309,19 @@ func updateProject() {
 	}
 
 	// === Metadata file
-	backup(_META_FILE)
+	if backup(_META_FILE) {
+		if update["ProjectName"] {
+			cfg.ProjectName = tag["project_name"]
+		}
+		if update["PackageName"] {
+			cfg.PackageName = *fPackageName
+		}
 
-	if update["ProjectName"] {
-		cfg.ProjectName = tag["project_name"]
-	}
-	if update["PackageName"] {
-		cfg.PackageName = *fPackageName
-	}
-
-	if err := cfg.WriteINI("."); err != nil {
-		log.Exit(err)
+		if err := cfg.WriteINI("."); err != nil {
+			log.Exit(err)
+		}
+	} else {
+		errorFiles.Push(_META_FILE)
 	}
 
 	// === Print messages
@@ -322,6 +332,21 @@ func updateProject() {
 		for _, file := range updatedFiles {
 			fmt.Printf(" * %s\n", file)
 		}
+	}
+
+	if len(errorFiles) != 0 {
+		files := ""
+
+		for i, file := range errorFiles {
+			if i == 0 {
+				files = file
+			} else {
+				files += ", " + file
+			}
+		}
+
+		fmt.Fprintf(os.Stderr,
+			"%s: could not be backed up: %s\n", argv0, files)
 	}
 }
 
