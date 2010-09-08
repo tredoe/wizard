@@ -251,7 +251,8 @@ func updateProject() {
 		for _, fname := range files {
 			if backup(fname) {
 
-				if err := replaceGoFile(fname, packageName, cfg, tag, update); err != nil {
+				if err := replaceGoFile(
+				fname, packageName, cfg, tag, update); err != nil {
 					fmt.Fprintf(os.Stderr,
 						"%s: file %q not updated: %s\n", argv0, fname, err)
 				} else if *fVerbose {
@@ -266,7 +267,8 @@ func updateProject() {
 		fname := path.Join(*fPackageName, "Makefile")
 
 		if backup(fname) {
-			if err := replaceMakefile(fname, packageName, cfg, tag, update); err != nil {
+			if err := replaceMakefile(
+			fname, packageName, cfg, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
@@ -285,7 +287,8 @@ func updateProject() {
 		for _, fname := range files {
 			if backup(fname) {
 
-				if err := replaceTextFile(fname, projectName, cfg, tag, update); err != nil {
+				if err := replaceTextFile(
+				fname, projectName, cfg, tag, update); err != nil {
 					fmt.Fprintf(os.Stderr,
 						"%s: file %q not updated: %s\n", argv0, fname, err)
 				} else if *fVerbose {
@@ -345,8 +348,7 @@ func updateProject() {
 			}
 		}
 
-		fmt.Fprintf(os.Stderr,
-			"%s: could not be backed up: %s\n", argv0, files)
+		fmt.Fprintf(os.Stderr, "%s: could not be backed up: %s\n", argv0, files)
 	}
 }
 
