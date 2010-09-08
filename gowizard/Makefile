@@ -24,7 +24,7 @@ include $(GOROOT)/src/Make.cmd
 
 # Copy both templates and licenses to the system.
 data:
-	[ -d $(GOROOT)/lib/$(TARG) ] || mkdir $(GOROOT)/lib/$(TARG)
+	@ [ -d $(GOROOT)/lib/$(TARG) ] || mkdir $(GOROOT)/lib/$(TARG)
 	cp -R ../data/* $(GOROOT)/lib/$(TARG)/
 
 # Add a configuration file to the current user.
@@ -32,7 +32,7 @@ config:
 ifdef HOME
 	cp $(GOROOT)/lib/$(TARG)/config/user $(HOME)/.gowizard
 else
-	@echo "Environment variable 'HOME' is not set"
+	@ echo "Environment variable 'HOME' is not set"
 endif
 
 # Installation

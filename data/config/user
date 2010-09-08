@@ -1,6 +1,6 @@
-# "gowizard" configuration.
+# gowizard configuration
 
-[default]
+[DEFAULT]
 author: 
 author-email: 
 license: 
