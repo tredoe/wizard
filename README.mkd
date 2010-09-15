@@ -90,8 +90,8 @@ for Go, the packages themselves need not be.
 Copyright notices only need the year the file was created, so don't add new
 years.
 
-**Warning:** Don't edit section *default* in file Metadata; they are necessary
-to update them, if were necessary.
+**Warning:** Don't edit section *CORE* in file Metadata, since it is necessary
+to update it, if were necessary.
 
 
 ## Copyright and licensing

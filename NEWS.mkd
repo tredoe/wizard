@@ -13,4 +13,19 @@ listed below.*
 
 * * *
 
+### 2010-09-15  v0.9.5
+
++ Added option *bazaar* for the version control.
+
++ At update a project, is replaced the URL in VCS configuration file.
+
++ Updated *goconfig* API.
+
++ In Metadata, the section *DEFAULT* has been renamed to *CORE* and the another
+sections are in title case; it has been added option *vcs* in section *CORE*.
+
+
+### 2010-09-05  v0.9
+
++ Initial release.
 
