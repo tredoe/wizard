@@ -243,7 +243,7 @@ cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 
 					break
 				}
-				// Makefile
+			// Makefile
 			} else {
 				if bytes.HasPrefix(line, pkgInMakefile) {
 					// Simple argument without full path to install via goinstall.

@@ -1,0 +1,20 @@
+#/usr/bin/env bash
+set -ev
+
+## Install dependencies
+goinstall github.com/kless/goconfig/config
+goinstall github.com/kless/go-readin/readin
+
+## Build the command
+cd gowizard; make install
+
+## Install templates and licenses
+make data
+
+## Install configuration file
+make config
+
+cd -
+
+## Install succeeded!
+

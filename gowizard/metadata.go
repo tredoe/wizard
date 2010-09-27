@@ -295,10 +295,10 @@ type reflectStruct struct {
 
 /* Gets structs that represent the type 'Metadata'. */
 func (self *Metadata) getStruct() *reflectStruct {
-	v := reflect.NewValue(self).(*reflect.PtrValue)
+	ptrValue := reflect.NewValue(self).(*reflect.PtrValue)
 
-	strType := v.Elem().Type().(*reflect.StructType)
-	strValue := v.Elem().(*reflect.StructValue)
+	strType := ptrValue.Elem().Type().(*reflect.StructType)
+	strValue := ptrValue.Elem().(*reflect.StructValue)
 
 	return &reflectStruct{strType, strValue}
 }

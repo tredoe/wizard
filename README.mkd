@@ -14,12 +14,8 @@ documentation in directory *doc*.
 
 ## Installation
 
-	$ [sudo -E] goinstall github.com/kless/goconfig/config
-	$ [sudo -E] goinstall github.com/kless/go-readin/readin
-
-	$ git clone git://github.com/kless/gowizard.git
-	$ cd gowizard/gowizard && sudo -E make install
-	$ make data ; make config ; cd -
+	> git clone git://github.com/kless/gowizard.git
+	> cd gowizard && bash INSTALL.sh && cd -
 
 
 ## Configuration
@@ -48,12 +44,12 @@ the appropriate ignore file.
 
 Example:
 
-	$ gowizard -Project-name=goFoo -Author="John Foo" -Author-email="e@mail.com"
+	> gowizard -Project-name=goFoo -Author="John Foo" -Author-email="e@mail.com"
 	-Project-type=lib -License=gpl-3 -vcs=git
 
 If the configuration file has been set, then it could be shorter:
 
-	$ gowizard -Project-name=goFoo -Project-type=lib
+	> gowizard -Project-name=goFoo -Project-type=lib
 
 Useful flags:
 
@@ -77,8 +73,8 @@ Note that files are backed up adding "~" to the file name.
 
 Example:
 
-	$ cd gofoo
-	$ gowizard -u -Project-name=goBar -License=bsd-2 -v
+	> cd gofoo
+	> gowizard -u -Project-name=goBar -License=bsd-2 -v
 
 ### Suggestions about naming
 
