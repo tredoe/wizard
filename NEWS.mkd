@@ -13,6 +13,15 @@ listed below.*
 
 * * *
 
+### 2010-10-??  v0.9.6
+
++ The directory name for the command source is named "cmd".
+
++ The user configuration file is only added if it doesn't exist.
+
++ Changed to line comments.
+
+
 ### 2010-09-15  v0.9.5
 
 + Added option *bazaar* for the version control.

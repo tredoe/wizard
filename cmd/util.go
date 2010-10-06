@@ -18,7 +18,7 @@ import (
 )
 
 
-/* Gets an array from map keys. */
+// Gets an array from map keys.
 func arrayKeys(m map[string]string) []string {
 	a := make([]string, len(m))
 
@@ -31,7 +31,7 @@ func arrayKeys(m map[string]string) []string {
 	return a
 }
 
-/* Creates a backup of a file. */
+// Creates a backup of a file.
 func backup(fname string) (ok bool) {
 	if err := copyFile(fname+"~", fname); err != nil {
 		return false
@@ -39,7 +39,7 @@ func backup(fname string) (ok bool) {
 	return true
 }
 
-/* Copies a file from source to destination. */
+// Copies a file from source to destination.
 func copyFile(destination, source string) os.Error {
 	src, err := ioutil.ReadFile(source)
 	if err != nil {
@@ -54,8 +54,7 @@ func copyFile(destination, source string) os.Error {
 	return nil
 }
 
-/* Create a string of characters with length of `name` to use it under that name.
- */
+// Creates a string of characters with length of `name` to use it under that name.
 func header(name string) string {
 	header := make([]byte, len(name))
 
@@ -85,7 +84,7 @@ func newFinder(ext string) *finder {
 	return _finder
 }
 
-/* Skip directories created on compilation. */
+// Skips directories created on compilation.
 func (self *finder) VisitDir(path string, f *os.FileInfo) bool {
 	dirName := f.Name
 
@@ -96,7 +95,7 @@ func (self *finder) VisitDir(path string, f *os.FileInfo) bool {
 	return true
 }
 
-/* Adds all files to the list, according to the extension. */
+// Adds all files to the list, according to the extension.
 func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 	name := f.Name
 
@@ -110,7 +109,7 @@ func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 
 // ===
 
-/* Base to find all files with extension `ext` on path `pathName`. */
+// Base to find all files with extension `ext` on path `pathName`.
 func _finder(ext string, pathName string) []string {
 	finder := newFinder(ext)
 	path.Walk(pathName, finder, nil)
@@ -125,12 +124,12 @@ func _finder(ext string, pathName string) []string {
 	return finder.files
 }
 
-/* Find all Go source files. */
+// Finds all Go source files.
 func finderGo(pathName string) []string {
 	return _finder(".go", pathName)
 }
 
-/* Find all markup text files, except README. */
+// Finds all markup text files, except README.
 func finderMkd(pathName string) []string {
 	return _finder(".mkd", pathName)
 }

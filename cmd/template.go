@@ -79,7 +79,7 @@ func parseFile(filename string, data interface{}) string {
 // === Utility
 // ===
 
-/* Renders template nesting both tmplHeader and content. */
+// Renders template nesting both tmplHeader and content.
 func renderNesting(destination, tmplHeader, template string,
 tag map[string]string) {
 	renderContent := parse(template, tag)
@@ -89,18 +89,18 @@ tag map[string]string) {
 }
 
 
-/* Base to rendering single files. */
+// Base to rendering single files.
 func _renderFile(destination, template string, tag map[string]string) {
 	render := parseFile(template, tag)
 	ioutil.WriteFile(destination, []byte(render), PERM_FILE)
 }
 
-/* Renders a single file. */
+// Renders a single file.
 func renderFile(destination, template string, tag map[string]string) {
 	_renderFile(path.Join(destination, path.Base(template)), template, tag)
 }
 
-/* Renders a single file, but uses a new name. */
+// Renders a single file, but uses a new name.
 func renderNewFile(destination, template string, tag map[string]string) {
 	_renderFile(destination, template, tag)
 }
@@ -109,9 +109,8 @@ func renderNewFile(destination, template string, tag map[string]string) {
 // === Render of header
 // ===
 
-/* Base to render the headers of source code files according to the license.
-If `year` is nil then gets the actual year.
-*/
+// Base to render the headers of source code files according to the license.
+// If `year` is nil then gets the actual year.
 func _renderHeader(tag map[string]string, year string, renderCodeFile,
 renderMakefile bool) (headerCodeFile, headerMakefile string) {
 	licenseName := strings.Split(*fLicense, "-", -1)[0]

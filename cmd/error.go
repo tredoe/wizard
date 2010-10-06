@@ -7,8 +7,6 @@
 // OR CONDITIONS OF ANY KIND, either express or implied. See the License
 // for more details.
 
-/* Errors introduced by this package. */
-
 package main
 
 import (
@@ -21,6 +19,6 @@ type error struct {
 }
 
 var (
-	errNoHeader = &error{"gowizard: no header with copyright"}
+	errNoHeader = &error{"no header with copyright"}
 )
 

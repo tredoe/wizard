@@ -54,8 +54,10 @@ func main() {
 
 	os.Exit(0)
 }
+// ===
 
-/* Add license file in directory `dir`. */
+
+// Adds license file in directory `dir`.
 func addLicense(dir string, tag map[string]string) {
 	dirTmpl := dirData + "/license"
 
@@ -72,7 +74,7 @@ func addLicense(dir string, tag map[string]string) {
 	}
 }
 
-/* Show data on 'tag'. */
+// Shows data on 'tag'.
 func debug(tag map[string]string) {
 	fmt.Println("  = Debug\n")
 
@@ -86,10 +88,7 @@ func debug(tag map[string]string) {
 	os.Exit(0)
 }
 
-// ===
-
-
-/* Creates a new project. */
+// Creates a new project.
 func createProject() {
 	tag := tagsToCreate()
 	if *fDebug {
@@ -179,7 +178,7 @@ func createProject() {
 	}
 }
 
-/* Updates some values from a project already created. */
+// Updates some values from a project already created.
 func updateProject() {
 	var updatedFiles, errorFiles vector.StringVector
 

@@ -19,7 +19,7 @@ import (
 )
 
 
-/* Replaces the project name on file `fname`. */
+// Replaces the project name on file `fname`.
 func replaceTextFile(fname string, projectName []byte, cfg *Metadata,
 tag map[string]string, update map[string]bool) os.Error {
 	var isReadme bool
@@ -146,7 +146,7 @@ tag map[string]string, update map[string]bool) os.Error {
 	return nil
 }
 
-/* Base to replace header and package name. */
+// Base to replace both header and package name.
 func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []byte,
 cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 	var output bytes.Buffer
@@ -167,7 +167,7 @@ cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 
 	defer file.Close()
 
-	// === Buffered I/O
+	// Buffered I/O
 	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
 
 	// === Check if the first bytes are comment characters.
@@ -299,7 +299,7 @@ tag map[string]string, update map[string]bool) os.Error {
 		packageName, cfg, tag, update)
 }
 
-/* Replaces the project name from URL configured in the Version Control System. */
+// Replaces the project name from URL configured in the Version Control System.
 func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error {
 	var isHeader bool
 	var output bytes.Buffer
@@ -331,7 +331,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 
 	defer file.Close()
 
-	// === Buffered I/O
+	// Buffered I/O
 	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
 
 	if len(option_2) == 0 {
@@ -441,9 +441,8 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 // === Utility
 // ===
 
-/* Get the remaining of file buffer to add it to output buffer. Finally it is
-saved into original file.
-*/
+// Gets the remaining of file buffer to add it to the output buffer. Finally
+// it is saved in the original file.
 func rewrite(file *os.File, rw *bufio.ReadWriter, output *bytes.Buffer) os.Error {
 	// === Get the remaining of the buffer.
 	end := make([]byte, rw.Reader.Buffered())

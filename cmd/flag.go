@@ -58,10 +58,7 @@ Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 	os.Exit(ERROR)
 }
 
-/* Loads configuration from flags.
-
-Return tags for the templates.
-*/
+// Loads configuration from flags and it returns tags for templates.
 func loadConfig() {
 	// Generic flags
 	var (
@@ -83,7 +80,7 @@ func loadConfig() {
 		usage()
 	}
 
-	// === Get configuration per user
+	// Get configuration per user
 	if !*fUpdate {
 		userConfig()
 	}
@@ -95,14 +92,12 @@ func loadConfig() {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
-
 	if *fListLicense {
 		fmt.Println("  = Licenses\n")
 		for k, v := range listLicense {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
-
 	if *fListVCS {
 		fmt.Println("  = Version control systems\n")
 		for k, v := range listVCS {
@@ -135,7 +130,7 @@ func loadConfig() {
 // === Checking
 // ===
 
-/* Common checking. */
+// Common checking.
 func checkCommon(errors bool) {
 	// === License
 	*fLicense = strings.ToLower(*fLicense)
@@ -160,7 +155,7 @@ func checkCommon(errors bool) {
 	}
 }
 
-/* Checking at create project. */
+// Checks at creating project.
 func checkAtCreate() {
 	var errors bool
 
@@ -196,7 +191,7 @@ func checkAtCreate() {
 	checkCommon(errors)
 }
 
-/* Checking at update project. */
+// Checks at updating project.
 func checkAtUpdate() {
 	var errors bool
 
@@ -215,7 +210,7 @@ func checkAtUpdate() {
 // ===
 
 
-/* Interactive mode. */
+// Interactive mode.
 func interactive() {
 	var input string
 	var err os.Error
@@ -276,7 +271,7 @@ func interactive() {
 	fmt.Println()
 }
 
-/* Set names for both project and package. */
+// Sets names for both project and package.
 func setNames() {
 	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
 
@@ -305,7 +300,7 @@ func setNames() {
 	}
 }
 
-/* Create tags to pass to the templates. Used at creating new project. */
+// Creates tags to pass them to templates. Used at creating a new project.
 func tagsToCreate() map[string]string {
 	var value string
 
@@ -346,12 +341,11 @@ func tagsToCreate() map[string]string {
 	return tag
 }
 
-/* Create tags to pass to the templates. Used at updating a project.
-
-If the flags are empty then they are set with metadata values.
-If flags are not empty then is indicated in map 'update' since they are the
-values to change.
-*/
+// Creates tags to pass them to templates. Used at updating a project.
+//
+// If the flags are empty then they are set with metadata values.
+// If flags are not empty then is indicated in map 'update' since they are the
+// values to change.
 func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool) {
 	update = map[string]bool{}
 
@@ -397,7 +391,7 @@ func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool)
 	return tag, update
 }
 
-/* Load configuration per user, if any. */
+// Loads configuration per user, if any.
 func userConfig() {
 	home, err := os.Getenverror("HOME")
 	if err != nil {
@@ -445,7 +439,6 @@ func userConfig() {
 			errKeys.Push("author")
 		}
 	}
-
 	if *fAuthorEmail == "" {
 		*fAuthorEmail, err = cfg.String("DEFAULT", "author-email")
 		if err != nil {
@@ -453,7 +446,6 @@ func userConfig() {
 			errKeys.Push("author-email")
 		}
 	}
-
 	if *fLicense == "" {
 		*fLicense, err = cfg.String("DEFAULT", "license")
 		if err != nil {
@@ -461,7 +453,6 @@ func userConfig() {
 			errKeys.Push("license")
 		}
 	}
-
 	if *fVCS == "" {
 		*fVCS, err = cfg.String("DEFAULT", "vcs")
 		if err != nil {
