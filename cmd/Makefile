@@ -11,7 +11,7 @@ include $(GOROOT)/src/Make.inc
 
 TARG=gowizard
 GOFILES=\
-	main.go\
+	gowizard.go\
 	error.go\
 	flag.go\
 	metadata.go\
@@ -30,7 +30,7 @@ data:
 # Add a configuration file to the current user.
 config:
 ifdef HOME
-	cp $(GOROOT)/lib/$(TARG)/config/user $(HOME)/.gowizard
+	[ -f $(HOME)/.gowizard ] || cp $(GOROOT)/lib/$(TARG)/config/user $(HOME)/.gowizard
 else
 	@ echo "Environment variable 'HOME' is not set"
 endif

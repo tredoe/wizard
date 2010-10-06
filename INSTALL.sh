@@ -6,7 +6,7 @@ goinstall github.com/kless/goconfig/config
 goinstall github.com/kless/go-readin/readin
 
 ## Build the command
-cd gowizard; make install
+cd cmd; make install
 
 ## Install templates and licenses
 make data
