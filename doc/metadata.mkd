@@ -1,0 +1,56 @@
+Metadata
+========
+
+Based on Metadata for Python Software Packages.
+
+Description of fields that are not set via *flag*:
+
++ ***Version:*** A string containing the package's version number.
+
++ ***Summary:*** A one-line summary of what the package does.
+
++ ***Download-URL***: A string containing the URL from which this version of the
+	package can be downloaded.
+
++ ***Platform***: A comma-separated list of platform specifications, summarizing
+	the operating systems supported by the package which are not listed
+	in the "Operating System" Trove classifiers.
+
++ ***Description***: A longer description of the package that can run to several
+	paragraphs.
+
++ ***Keywords***: A list of additional keywords to be used to assist searching
+	for the package in a larger catalog.
+
++ ***Home-page***: A string containing the URL for the package's home page.
+
++ ***Classifier***: Each entry is a string giving a single classification value
+	for the package.
+
+
+## Versión 1.1
+
+[pep-0314](http://www.python.org/dev/peps/pep-0314/)
+
+The next fields have not been taken:
+
++ ***Supported-Platform***
++ ***Requires***
++ ***Provides***
++ ***Obsoletes***
+
+Neither the next ones because they are only useful on Python since they are
+added to pages on packages index:
+
++ ***Description***
++ ***Classifier***
+
+The field ***Name*** has been substituted by ***Project-name*** and
+***Package-name***.  
+The field ***License*** needs a value from the map *license*.
+
+It has been added ***Project-type***, and ***VCS***.
+
+For *Classifier* see on [http://pypi.python.org/pypi?%3Aaction=list_classifiers](
+http://pypi.python.org/pypi?%3Aaction=list_classifiers).
+

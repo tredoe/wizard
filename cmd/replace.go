@@ -55,7 +55,7 @@ tag map[string]string, update map[string]bool) os.Error {
 
 	defer file.Close()
 
-	// === Buffered I/O
+	// Buffered I/O
 	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
 
 	// === Read line to line
