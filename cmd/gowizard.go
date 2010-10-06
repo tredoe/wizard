@@ -98,19 +98,24 @@ func createProject() {
 
 	headerCodeFile, headerMakefile := renderAllHeaders(tag, "")
 
-	// === Create directories in lower case
-	dirApp := path.Join(*fProjectName, *fPackageName)
-	os.MkdirAll(dirApp, PERM_DIRECTORY)
-
 	// === Render project files
-	renderNesting(dirApp+"/Makefile", headerMakefile, tmplMakefile, tag)
+	var dirApp string // To create directories in lower case.
 
 	switch *fProjecType {
 	case "lib", "cgo":
+		dirApp = path.Join(*fProjectName, *fPackageName)
+		os.MkdirAll(dirApp, PERM_DIRECTORY)
+
 		renderNesting(dirApp+"/main.go", headerCodeFile, tmplPkgMain, tag)
 		renderNesting(dirApp+"/main_test.go", headerCodeFile, tmplTest, tag)
+		renderNesting(dirApp+"/Makefile", headerMakefile, tmplPkgMakefile, tag)
 	case "app", "tool":
-		renderNesting(dirApp+"/main.go", headerCodeFile, tmplCmdMain, tag)
+		dirApp = path.Join(*fProjectName, "cmd")
+		os.MkdirAll(dirApp, PERM_DIRECTORY)
+
+		renderNesting(path.Join(dirApp, *fPackageName)+".go",
+			headerCodeFile, tmplCmdMain, tag)
+		renderNesting(dirApp+"/Makefile", headerMakefile, tmplCmdMakefile, tag)
 	}
 
 	// === Render common files
