@@ -14,7 +14,5 @@ make data
 ## Install configuration file
 make config
 
-cd -
-
 ## Install succeeded!
 
