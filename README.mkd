@@ -20,11 +20,9 @@ documentation in directory *doc*.
 
 ## Configuration
 
-The flags *-Author*, *-Author-email*, *-License*, and *-vcs* can be read from a
-configuration file per user.
-
-The file is created in the installation process using `make config`; its name is
-*.gowizard* and is placed in your home directory.
+The file named ***.gowizard*** is created during installation in your home
+directory. It allows set the flags *-Author*, *-Author-email*, *-License*, and
+*-vcs*, with a value by default.
 
 
 ## Operating instructions
