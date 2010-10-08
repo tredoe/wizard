@@ -20,11 +20,10 @@ import (
 
 
 // Replaces the project name on file `fname`.
-func replaceTextFile(fname string, projectName []byte, cfg *Metadata,
-tag map[string]string, update map[string]bool) os.Error {
+func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 	var isReadme bool
 	var oldLicense, newLicense []byte
-	var output bytes.Buffer
+	output := new(bytes.Buffer)
 
 	// Text to search
 	endOfNotice := []byte("* * *")
@@ -139,7 +138,7 @@ tag map[string]string, update map[string]bool) os.Error {
 		}
 	}
 
-	if err := rewrite(file, rw, &output); err != nil {
+	if err := rewrite(file, rw, output); err != nil {
 		return err
 	}
 
@@ -147,17 +146,14 @@ tag map[string]string, update map[string]bool) os.Error {
 }
 
 // Base to replace both header and package name.
-func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []byte,
-cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
-	var output bytes.Buffer
+func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []byte, cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
+	output := new(bytes.Buffer)
 
 	// Text to search
-	var (
-		copyright     = []byte("opyright ")
-		LF            = []byte{'\n'}
-		pkgInCode     = []byte("package ")
-		pkgInMakefile = []byte("TARG=")
-	)
+	copyright := []byte("opyright ")
+	LF := []byte{'\n'}
+	pkgInCode := []byte("package ")
+	pkgInMakefile := []byte("TARG=")
 
 	// === Read file
 	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
@@ -243,7 +239,7 @@ cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 
 					break
 				}
-			// Makefile
+				// Makefile
 			} else {
 				if bytes.HasPrefix(line, pkgInMakefile) {
 					// Simple argument without full path to install via goinstall.
@@ -280,21 +276,19 @@ cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 		}
 	}
 
-	if err := rewrite(file, rw, &output); err != nil {
+	if err := rewrite(file, rw, output); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func replaceGoFile(fname string, packageName []byte, cfg *Metadata,
-tag map[string]string, update map[string]bool) os.Error {
+func replaceGoFile(fname string, packageName []byte, cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 	return _replaceSourceFile(fname, true, []byte(CHAR_CODE_COMMENT),
 		packageName, cfg, tag, update)
 }
 
-func replaceMakefile(fname string, packageName []byte, cfg *Metadata,
-tag map[string]string, update map[string]bool) os.Error {
+func replaceMakefile(fname string, packageName []byte, cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 	return _replaceSourceFile(fname, false, []byte(CHAR_MAKE_COMMENT),
 		packageName, cfg, tag, update)
 }
@@ -302,8 +296,8 @@ tag map[string]string, update map[string]bool) os.Error {
 // Replaces the project name from URL configured in the Version Control System.
 func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error {
 	var isHeader bool
-	var output bytes.Buffer
 	var header, option_1, option_2 []byte
+	output := new(bytes.Buffer)
 
 	// === Text to search
 	oldProjec := []byte("/" + oldProjectName)
@@ -362,7 +356,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 				return err
 			}
 		}
-	// Could have two options
+		// Could have two options
 	} else {
 		var isOption_1, isLine bool
 
@@ -382,7 +376,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 
 					rw.Reader = bufio.NewReader(file)
 					line, _ = rw.ReadSlice('\n')
-				// Round 2
+					// Round 2
 				} else {
 					break
 				}
@@ -430,7 +424,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 		}
 	}
 
-	if err := rewrite(file, rw, &output); err != nil {
+	if err := rewrite(file, rw, output); err != nil {
 		return err
 	}
 

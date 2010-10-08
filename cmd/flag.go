@@ -60,17 +60,15 @@ Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 
 // Loads configuration from flags and it returns tags for templates.
 func loadConfig() {
-	// Generic flags
-	var (
-		fInteractive = flag.Bool("i", false, "Interactive mode")
+	// === Generic flags
+	fInteractive := flag.Bool("i", false, "Interactive mode")
 
-		fListLicense = flag.Bool("ll", false,
-			"Show the list of licenses for the flag 'License'")
-		fListProject = flag.Bool("lp", false,
-			"Show the list of project types for the flag 'Project-type'")
-		fListVCS = flag.Bool("lv", false,
-			"Show the list of version control systems")
-	)
+	fListLicense := flag.Bool("ll", false,
+		"Show the list of licenses for the flag 'License'")
+	fListProject := flag.Bool("lp", false,
+		"Show the list of project types for the flag 'Project-type'")
+	fListVCS := flag.Bool("lv", false,
+		"Show the list of version control systems")
 
 	// === Parse the flags
 	flag.Usage = usage
@@ -216,7 +214,7 @@ func interactive() {
 	var err os.Error
 
 	// Sorted flags
-	var interactiveFlags = []string{
+	interactiveFlags := []string{
 		"org",
 		"Project-type",
 		"Project-name",
@@ -430,7 +428,7 @@ func userConfig() {
 
 	// === Get values
 	var errors bool
-	var errKeys vector.StringVector
+	errKeys := new(vector.StringVector)
 
 	if *fAuthor == "" {
 		*fAuthor, err = cfg.String("DEFAULT", "author")
@@ -464,7 +462,7 @@ func userConfig() {
 	if errors {
 		s := ""
 
-		for i, val := range errKeys {
+		for i, val := range *errKeys {
 			if i == 0 {
 				s = val
 			} else {

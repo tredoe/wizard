@@ -146,7 +146,7 @@ func createProject() {
 		}
 
 		if err := ioutil.WriteFile(path.Join(*fProjectName, ignoreFile),
-		[]byte(tmplIgnore), PERM_FILE); err != nil {
+			[]byte(tmplIgnore), PERM_FILE); err != nil {
 			log.Exit(err)
 		}
 	}
@@ -180,10 +180,11 @@ func createProject() {
 
 // Updates some values from a project already created.
 func updateProject() {
-	var updatedFiles, errorFiles vector.StringVector
+	updatedFiles := new(vector.StringVector)
+	errorFiles := new(vector.StringVector)
 
 	// VCS configuration files to push to a server.
-	var configVCS = map[string]string{
+	configVCS := map[string]string{
 		"bzr": ".bzr/branch/branch.conf",
 		"git": ".git/config",
 		"hg":  ".hg/hgrc",
@@ -229,7 +230,7 @@ func updateProject() {
 
 		if cfg.VCS != "other" && cfg.VCS != "none" && backup(fname) {
 			if err := replaceVCS_URL(fname, strings.ToLower(cfg.ProjectName),
-			*fProjectName, cfg.VCS); err != nil {
+				*fProjectName, cfg.VCS); err != nil {
 				log.Exit(err)
 			}
 
@@ -256,7 +257,7 @@ func updateProject() {
 			if backup(fname) {
 
 				if err := replaceGoFile(
-				fname, packageName, cfg, tag, update); err != nil {
+					fname, packageName, cfg, tag, update); err != nil {
 					fmt.Fprintf(os.Stderr,
 						"%s: file %q not updated: %s\n", argv0, fname, err)
 				} else if *fVerbose {
@@ -272,7 +273,7 @@ func updateProject() {
 
 		if backup(fname) {
 			if err := replaceMakefile(
-			fname, packageName, cfg, tag, update); err != nil {
+				fname, packageName, cfg, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
 					"%s: file %q not updated: %s\n", argv0, fname, err)
 			} else if *fVerbose {
@@ -292,7 +293,7 @@ func updateProject() {
 			if backup(fname) {
 
 				if err := replaceTextFile(
-				fname, projectName, cfg, tag, update); err != nil {
+					fname, projectName, cfg, tag, update); err != nil {
 					fmt.Fprintf(os.Stderr,
 						"%s: file %q not updated: %s\n", argv0, fname, err)
 				} else if *fVerbose {
@@ -336,15 +337,15 @@ func updateProject() {
 		updatedFiles.Push(_META_FILE)
 		fmt.Println("\n  = Files updated\n")
 
-		for _, file := range updatedFiles {
+		for _, file := range *updatedFiles {
 			fmt.Printf(" * %s\n", file)
 		}
 	}
 
-	if len(errorFiles) != 0 {
+	if len(*errorFiles) != 0 {
 		files := ""
 
-		for i, file := range errorFiles {
+		for i, file := range *errorFiles {
 			if i == 0 {
 				files = file
 			} else {
