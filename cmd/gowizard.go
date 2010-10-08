@@ -342,7 +342,7 @@ func updateProject() {
 		}
 	}
 
-	if len(*errorFiles) != 0 {
+	if errorFiles.Len() != 0 {
 		files := ""
 
 		for i, file := range *errorFiles {
