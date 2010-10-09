@@ -30,7 +30,7 @@ data:
 # Add a configuration file to the current user.
 config:
 ifdef HOME
-	[ -f $(HOME)/.gowizard ] || cp $(GOROOT)/lib/$(TARG)/config/user $(HOME)/.gowizard
+	[ -f $(HOME)/.gowizard ] || cp $(GOROOT)/lib/$(TARG)/copy/user.cfg $(HOME)/.gowizard
 else
 	@ echo "Environment variable 'HOME' is not set"
 endif

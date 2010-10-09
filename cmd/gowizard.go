@@ -42,21 +42,6 @@ var dirData = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 var argv0 = os.Args[0] // Executable name
 
 
-// === Main program execution
-func main() {
-	loadConfig()
-
-	if !*fUpdate {
-		createProject()
-	} else {
-		updateProject()
-	}
-
-	os.Exit(0)
-}
-// ===
-
-
 // Adds license file in directory `dir`.
 func addLicense(dir string, tag map[string]string) {
 	dirTmpl := dirData + "/license"
@@ -115,6 +100,8 @@ func createProject() {
 		renderNesting(path.Join(dirApp, *fPackageName)+".go",
 			headerCodeFile, tmplCmdMain, tag)
 		renderNesting(dirApp+"/Makefile", headerMakefile, tmplCmdMakefile, tag)
+
+		copyFile(*fProjectName+"/Install.sh", dirData+"/copy/Install.sh")
 	}
 
 	// === Render common files
@@ -355,5 +342,20 @@ func updateProject() {
 
 		fmt.Fprintf(os.Stderr, "%s: could not be backed up: %s\n", argv0, files)
 	}
+}
+
+// === Main program execution
+// ===
+
+func main() {
+	loadConfig()
+
+	if !*fUpdate {
+		createProject()
+	} else {
+		updateProject()
+	}
+
+	os.Exit(0)
 }
 
