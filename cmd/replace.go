@@ -19,23 +19,31 @@ import (
 )
 
 
+// Text to search
+var (
+	LF            = []byte{'\n'}
+	copyright     = []byte("opyright ")
+	endOfNotice   = []byte("* * *")
+	pkgInCode     = []byte("package ")
+	pkgInMakefile = []byte("TARG=")
+)
+
+// Header under the project name.
+var reHeader = regexp.MustCompile(fmt.Sprintf("^%c+\n", CHAR_HEADER))
+
+
 // Replaces the project name on file `fname`.
 func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 	var isReadme bool
 	var oldLicense, newLicense []byte
 	output := new(bytes.Buffer)
 
-	// Text to search
-	endOfNotice := []byte("* * *")
-
 	// === Regular expressions
-	// Header under the project name.
-	reHeader := regexp.MustCompile(fmt.Sprintf("^%c+\n", CHAR_HEADER))
-
-	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", cfg.ProjectName))
-	reLineOldName := regexp.MustCompile(
-		fmt.Sprintf("[\"*'/, .]%s[\"*'/, .]", cfg.ProjectName))
 	reOldName := regexp.MustCompile(cfg.ProjectName)
+	reFirstOldName := regexp.MustCompile(fmt.Sprintf("^%s\n", cfg.ProjectName))
+	reLineOldName := regexp.MustCompile(fmt.Sprintf("[\"*'/, .]%s[\"*'/, .]",
+		cfg.ProjectName))
+	// ===
 
 	if strings.HasPrefix(fname, README) {
 		isReadme = true
@@ -68,9 +76,7 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 
 		// Write the line of the separator and exits of loop.
 		if !isReadme && bytes.Index(line, endOfNotice) != -1 {
-			if _, err := output.Write(line); err != nil {
-				return err
-			}
+			output.Write(line)
 			break
 		}
 
@@ -79,12 +85,8 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 
 				if reFirstOldName.Match(line) {
 					newLine := reFirstOldName.ReplaceAll(line, projectName)
-					_, err := output.Write(newLine)
-					err = output.WriteByte('\n')
-
-					if err != nil {
-						return err
-					}
+					output.Write(newLine)
+					output.WriteByte('\n')
 
 					// === Get the second line to change the header
 					line, err := rw.ReadSlice('\n')
@@ -94,17 +96,11 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 
 					if reHeader.Match(line) {
 						newHeader := header(string(projectName))
-						_, err := output.Write([]byte(newHeader))
-						err = output.WriteByte('\n')
-
-						if err != nil {
-							return err
-						}
+						output.Write([]byte(newHeader))
+						output.WriteByte('\n')
 					}
 				} else {
-					if _, err := output.Write(line); err != nil {
-						return err
-					}
+					output.Write(line)
 				}
 
 				isFirstLine = false
@@ -116,9 +112,7 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 			// Search the old name of the project name.
 			if reLineOldName.Match(line) {
 				newLine := reOldName.ReplaceAll(line, projectName)
-				if _, err := output.Write(newLine); err != nil {
-					return err
-				}
+				output.Write(newLine)
 				continue
 			}
 		}
@@ -126,16 +120,12 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 		if isReadme && update["License"] && bytes.Index(line, oldLicense) != -1 {
 			newLine := bytes.Replace(line, oldLicense, newLicense, 1)
 
-			if _, err := output.Write(newLine); err != nil {
-				return err
-			}
+			output.Write(newLine)
 			continue
 		}
 
 		// Add lines that have not matched.
-		if _, err := output.Write(line); err != nil {
-			return err
-		}
+		output.Write(line)
 	}
 
 	if err := rewrite(file, rw, output); err != nil {
@@ -148,12 +138,6 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 // Base to replace both header and package name.
 func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []byte, cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 	output := new(bytes.Buffer)
-
-	// Text to search
-	copyright := []byte("opyright ")
-	LF := []byte{'\n'}
-	pkgInCode := []byte("package ")
-	pkgInMakefile := []byte("TARG=")
 
 	// === Read file
 	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
@@ -211,9 +195,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 					header, _ = renderMakeHeader(tag, year)
 				}
 
-				if _, err := output.Write([]byte(header)); err != nil {
-					return err
-				}
+				output.Write([]byte(header))
 			}
 		}
 
@@ -228,19 +210,14 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 				if bytes.HasPrefix(line, pkgInCode) {
 
 					if !bytes.HasSuffix(line, packageName) {
-						_, err := output.Write(pkgInCode)
-						_, err = output.Write(packageName)
-						err = output.WriteByte('\n')
-
-						if err != nil {
-							return err
-						}
+						output.Write(pkgInCode)
+						output.Write(packageName)
+						output.WriteByte('\n')
 					}
 
 					break
 				}
-				// Makefile
-			} else {
+			} else { // Makefile
 				if bytes.HasPrefix(line, pkgInMakefile) {
 					// Simple argument without full path to install via goinstall.
 					if bytes.IndexByte(line, '/') != -1 {
@@ -249,20 +226,12 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 						old := []byte(cfg.PackageName + "\n")
 						newLine := bytes.Replace(line, old, packageName, 1)
 
-						_, err := output.Write(newLine)
-						err = output.WriteByte('\n')
-
-						if err != nil {
-							return err
-						}
+						output.Write(newLine)
+						output.WriteByte('\n')
 					} else {
-						_, err := output.Write(pkgInMakefile)
-						_, err = output.Write(packageName)
-						err = output.WriteByte('\n')
-
-						if err != nil {
-							return err
-						}
+						output.Write(pkgInMakefile)
+						output.Write(packageName)
+						output.WriteByte('\n')
 					}
 
 					break
@@ -270,9 +239,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 			}
 
 			// Add the another lines.
-			if _, err := output.Write(line); err != nil {
-				return err
-			}
+			output.Write(line)
 		}
 	}
 
@@ -345,16 +312,12 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 			if isHeader && bytes.HasPrefix(line, option_1) {
 				newLine := bytes.Replace(line, oldProjec, newProjec, 1)
 
-				if _, err := output.Write(newLine); err != nil {
-					return err
-				}
+				output.Write(newLine)
 				break
 			}
 
 			// Add the another lines.
-			if _, err := output.Write(line); err != nil {
-				return err
-			}
+			output.Write(line)
 		}
 		// Could have two options
 	} else {
@@ -410,16 +373,12 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 				if isLine {
 					newLine := bytes.Replace(line, oldProjec, newProjec, 1)
 
-					if _, err := output.Write(newLine); err != nil {
-						return err
-					}
+					output.Write(newLine)
 					break
 				}
 
 				// Add the another lines.
-				if _, err := output.Write(line); err != nil {
-					return err
-				}
+				output.Write(line)
 			}
 		}
 	}
@@ -444,9 +403,7 @@ func rewrite(file *os.File, rw *bufio.ReadWriter, output *bytes.Buffer) os.Error
 		return err
 	}
 
-	if _, err := output.Write(end); err != nil {
-		return err
-	}
+	output.Write(end)
 
 	// === Write changes to file
 
@@ -461,9 +418,8 @@ func rewrite(file *os.File, rw *bufio.ReadWriter, output *bytes.Buffer) os.Error
 	}
 
 	// Write buffer to file.
-	if _, err := rw.Write(output.Bytes()); err != nil {
-		return err
-	}
+	rw.Write(output.Bytes())
+
 	if err := rw.Writer.Flush(); err != nil {
 		return err
 	}
