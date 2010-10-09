@@ -56,6 +56,14 @@ func addLicense(dir string, tag map[string]string) {
 			path.Join(dirTmpl, *fLicense+".txt"), PERM_FILE); err != nil {
 			log.Exit(err)
 		}
+
+		// License LGPL must also add the GPL license text.
+		if *fLicense == "lgpl-3" {
+			if err := copyFile(dir+"/LICENSE-GPL",
+				path.Join(dirTmpl, "gpl-3.txt"), PERM_FILE); err != nil {
+				log.Exit(err)
+			}
+		}
 	}
 }
 
@@ -294,6 +302,13 @@ func updateProject() {
 
 	// === License file
 	if update["License"] {
+		// Remove extra file added with license LGPL.
+		if cfg.License == "lgpl-3" {
+			if err := os.Remove("./LICENSE-GPL"); err != nil {
+				log.Exit(err)
+			}
+		}
+
 		addLicense(".", tag)
 
 		if *fVerbose {

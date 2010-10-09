@@ -151,13 +151,16 @@ renderMakefile bool) (headerCodeFile, headerMakefile string) {
 			tag["comment"] = CHAR_MAKE_COMMENT
 			headerMakefile = parse(tmplCC0, tag)
 		}
-	case "gpl", "agpl":
+	case "gpl", "lgpl", "agpl":
 		tmplHeader := tmplCopyright + tmplGNU
+
+		tag["Affero"] = ""
+		tag["Lesser"] = ""
 
 		if licenseName == "agpl" {
 			tag["Affero"] = "Affero"
-		} else {
-			tag["Affero"] = ""
+		} else if licenseName == "lgpl" {
+			tag["Lesser"] = "Lesser"
 		}
 
 		if renderCodeFile {

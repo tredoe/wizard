@@ -36,6 +36,7 @@ var listLicense = map[string]string{
 	"bsd-3":    "New BSD License",
 	"cc0-1":    "Creative Commons CC0, version 1.0 Universal",
 	"gpl-3":    "GNU General Public License, version 3 or later",
+	"lgpl-3":   "GNU Lesser General Public License, version 3 or later",
 	"agpl-3":   "GNU Affero General Public License, version 3 or later",
 	"none":     "Proprietary License",
 }

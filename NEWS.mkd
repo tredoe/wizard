@@ -13,13 +13,17 @@ listed below.*
 
 * * *
 
-### 2010-10-??  v0.9.6
+### 2010-10-??  v0.9.7
 
 + The directory name for the command source is named "cmd".
 
 + The user configuration file is only added if it doesn't exist.
 
 + Changed to line comments.
+
++ At building a command project is added an install script.
+
++ Added GNU Lesser General Public License.
 
 
 ### 2010-09-15  v0.9.5
