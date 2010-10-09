@@ -33,20 +33,20 @@ func arrayKeys(m map[string]string) []string {
 
 // Creates a backup of a file.
 func backup(fname string) (ok bool) {
-	if err := copyFile(fname+"~", fname); err != nil {
+	if err := copyFile(fname+"~", fname, PERM_FILE); err != nil {
 		return false
 	}
 	return true
 }
 
 // Copies a file from source to destination.
-func copyFile(destination, source string) os.Error {
+func copyFile(destination, source string, perm uint32) os.Error {
 	src, err := ioutil.ReadFile(source)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(destination, src, PERM_FILE)
+	err = ioutil.WriteFile(destination, src, perm)
 	if err != nil {
 		return err
 	}

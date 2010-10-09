@@ -53,7 +53,7 @@ func addLicense(dir string, tag map[string]string) {
 		renderNewFile(dir+"/LICENSE", dirTmpl+"/bsd-3.txt", tag)
 	default:
 		if err := copyFile(dir+"/LICENSE",
-			path.Join(dirTmpl, *fLicense+".txt")); err != nil {
+			path.Join(dirTmpl, *fLicense+".txt"), PERM_FILE); err != nil {
 			log.Exit(err)
 		}
 	}
@@ -101,7 +101,7 @@ func createProject() {
 			headerCodeFile, tmplCmdMain, tag)
 		renderNesting(dirApp+"/Makefile", headerMakefile, tmplCmdMakefile, tag)
 
-		copyFile(*fProjectName+"/Install.sh", dirData+"/copy/Install.sh")
+		copyFile(*fProjectName+"/Install.sh", dirData+"/copy/Install.sh", 0755)
 	}
 
 	// === Render common files
