@@ -196,6 +196,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 				}
 
 				output.Write([]byte(header))
+				output.WriteByte('\n')
 			}
 		}
 
