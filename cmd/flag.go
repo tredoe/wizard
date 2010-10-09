@@ -13,7 +13,6 @@ import (
 	"container/vector"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"regexp"
@@ -250,7 +249,7 @@ func interactive() {
 		}
 
 		if err != nil {
-			log.Exit(err)
+			reportExit(err)
 		}
 
 		if k != "org" {

@@ -13,14 +13,11 @@ import (
 	"container/vector"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"strings"
 )
 
-
-const ERROR = 2 // Exit status code if there is any error.
 
 // Permissions
 const (
@@ -65,14 +62,14 @@ func addLicense(dir string, tag map[string]string) {
 	default:
 		if err := copyFile(dir+"/LICENSE",
 			path.Join(dirTmpl, *fLicense+".txt"), PERM_FILE); err != nil {
-			log.Exit(err)
+			reportExit(err)
 		}
 
 		// License LGPL must also add the GPL license text.
 		if *fLicense == "lgpl-3" {
 			if err := copyFile(dir+"/LICENSE-GPL",
 				path.Join(dirTmpl, "gpl-3.txt"), PERM_FILE); err != nil {
-				log.Exit(err)
+				reportExit(err)
 			}
 		}
 	}
@@ -153,7 +150,7 @@ func createProject() {
 
 		if err := ioutil.WriteFile(path.Join(*fProjectName, ignoreFile),
 			[]byte(tmplIgnore), PERM_FILE); err != nil {
-			log.Exit(err)
+			reportExit(err)
 		}
 	}
 
@@ -166,7 +163,7 @@ func createProject() {
 		*fLicense, *fAuthor, *fAuthorEmail, *fVCS)
 
 	if err := cfg.WriteINI(*fProjectName); err != nil {
-		log.Exit(err)
+		reportExit(err)
 	}
 
 	// === Print messages
@@ -192,7 +189,7 @@ func updateProject() {
 	// 'cfg' has the old values.
 	cfg, err := ReadMetadata()
 	if err != nil {
-		log.Exit(err)
+		reportExit(err)
 	}
 
 	// 'tag' and the flags have the new values.
@@ -208,20 +205,20 @@ func updateProject() {
 
 	if update["ProjectName"] {
 		if err := os.Chdir(".."); err != nil {
-			log.Exit(err)
+			reportExit(err)
 		}
 
 		oldProjectName := strings.ToLower(cfg.ProjectName)
 
 		if err := os.Rename(oldProjectName, *fProjectName); err != nil {
-			log.Exit(err)
+			reportExit(err)
 		} else if *fVerbose {
 			fmt.Printf(" * Project: %q -> %q\n", oldProjectName, *fProjectName)
 		}
 
 		// Do 'chdir' in new project directory.
 		if err := os.Chdir(*fProjectName); err != nil {
-			log.Exit(err)
+			reportExit(err)
 		}
 
 		// === Rename URL in the VCS
@@ -230,7 +227,7 @@ func updateProject() {
 		if cfg.VCS != "other" && cfg.VCS != "none" && backup(fname) {
 			if err := replaceVCS_URL(fname, strings.ToLower(cfg.ProjectName),
 				*fProjectName, cfg.VCS); err != nil {
-				log.Exit(err)
+				reportExit(err)
 			}
 
 			if *fVerbose {
@@ -241,7 +238,7 @@ func updateProject() {
 
 	if update["PackageName"] {
 		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
-			log.Exit(err)
+			reportExit(err)
 		} else if *fVerbose {
 			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
 		}
@@ -317,7 +314,7 @@ func updateProject() {
 		// Remove extra file added with license LGPL.
 		if cfg.License == "lgpl-3" {
 			if err := os.Remove("./LICENSE-GPL"); err != nil {
-				log.Exit(err)
+				reportExit(err)
 			}
 		}
 
@@ -340,7 +337,7 @@ func updateProject() {
 		}
 
 		if err := cfg.WriteINI("."); err != nil {
-			log.Exit(err)
+			reportExit(err)
 		}
 	} else {
 		errorFiles.Push(_META_FILE)

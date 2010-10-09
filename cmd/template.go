@@ -11,7 +11,6 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"strconv"
@@ -52,7 +51,7 @@ func parse(str string, data interface{}) string {
 	t.SetDelims("{{", "}}")
 
 	if err := t.Parse(str); err != nil {
-		log.Exit(err)
+		reportExit(err)
 	}
 
 	t.Execute(data, _templateParser)
@@ -67,7 +66,7 @@ func parseFile(filename string, data interface{}) string {
 	t.SetDelims("{{", "}}")
 
 	if err := t.ParseFile(filename); err != nil {
-		log.Exit(err)
+		reportExit(err)
 	}
 
 	t.Execute(data, _templateParser)
