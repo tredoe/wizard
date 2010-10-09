@@ -24,8 +24,6 @@ import (
 )
 
 
-const USER_CONFIG = ".gowizard" // Configuration file per user
-
 // Flags for the command line
 var (
 	// === Metadata
@@ -133,14 +131,13 @@ func checkCommon(errors bool) {
 	// === License
 	*fLicense = strings.ToLower(*fLicense)
 	if _, present := listLicense[*fLicense]; !present {
-		fmt.Fprintf(os.Stderr,
-			"%s: unavailable license: %q\n", argv0, *fLicense)
+		fmt.Fprintf(os.Stderr, "unavailable license: %q\n", *fLicense)
 		errors = true
 	}
 
 	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
 		fmt.Fprintf(os.Stderr,
-			"%s: license 'bsd-3' requires an organization as author\n", argv0)
+			"license 'bsd-3' requires an organization as author\n")
 		if *fUpdate {
 			fmt.Fprintf(os.Stderr,
 				"\tThe author name for the license is got from metadata file\n")
@@ -160,29 +157,25 @@ func checkAtCreate() {
 	// === Necessary fields
 	if *fProjecType == "" || *fProjectName == "" || *fLicense == "" ||
 		*fAuthor == "" || *fVCS == "" {
-		fmt.Fprintf(os.Stderr,
-			"%s: missing required fields to create project\n", argv0)
+		fmt.Fprintf(os.Stderr, "missing required fields to create project\n")
 		usage()
 	}
 	if *fAuthorEmail == "" && !*fAuthorIsOrg {
-		fmt.Fprintf(os.Stderr,
-			"%s: the email address is required for people\n", argv0)
+		fmt.Fprintf(os.Stderr, "the email address is required for people\n")
 		errors = true
 	}
 
 	// === Project type
 	*fProjecType = strings.ToLower(*fProjecType)
 	if _, present := listProject[*fProjecType]; !present {
-		fmt.Fprintf(os.Stderr,
-			"%s: unavailable project type: %q\n", argv0, *fProjecType)
+		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", *fProjecType)
 		errors = true
 	}
 
 	// === VCS
 	*fVCS = strings.ToLower(*fVCS)
 	if _, present := listVCS[*fVCS]; !present {
-		fmt.Fprintf(os.Stderr,
-			"%s: unavailable version control system: %q\n", argv0, *fVCS)
+		fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", *fVCS)
 		errors = true
 	}
 
@@ -195,8 +188,7 @@ func checkAtUpdate() {
 
 	// === Necessary fields
 	if *fProjectName == "" && *fPackageName == "" && *fLicense == "" {
-		fmt.Fprintf(os.Stderr,
-			"%s: missing required fields to update\n", argv0)
+		fmt.Fprintf(os.Stderr, "missing required fields to update\n")
 		usage()
 	}
 
@@ -395,7 +387,7 @@ func userConfig() {
 	home, err := os.Getenverror("HOME")
 	if err != nil {
 		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s: HOME\n\n", argv0, err)
+			fmt.Fprintf(os.Stderr, "\nuserConfig(): %s: HOME\n\n", err)
 		}
 		return
 	}
@@ -406,15 +398,15 @@ func userConfig() {
 	info, err := os.Stat(pathUserConfig)
 	if err != nil {
 		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s\n\n", argv0, err)
+			fmt.Fprintf(os.Stderr, "\nuserConfig(): %s\n\n", err)
 		}
 		return
 	}
 
 	if !info.IsRegular() {
 		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s is not a file\n\n",
-				argv0, pathUserConfig)
+			fmt.Fprintf(os.Stderr, "\nuserConfig(): %s is not a file\n\n",
+				pathUserConfig)
 		}
 		return
 	}
@@ -422,7 +414,7 @@ func userConfig() {
 	cfg, err := config.ReadDefault(pathUserConfig)
 	if err != nil {
 		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\n%s: userConfig(): %s\n\n", argv0, err)
+			fmt.Fprintf(os.Stderr, "\nuserConfig(): %s\n\n", err)
 		}
 		return
 	}
@@ -471,7 +463,7 @@ func userConfig() {
 			}
 		}
 
-		fmt.Fprintf(os.Stderr, "%s: %s: %s\n", argv0, err, s)
+		fmt.Fprintf(os.Stderr, "%s: %s\n", err, s)
 		os.Exit(ERROR)
 	}
 }

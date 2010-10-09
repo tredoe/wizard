@@ -116,8 +116,7 @@ func _finder(ext string, pathName string) []string {
 
 	if len(finder.files) == 0 {
 		fmt.Fprintf(os.Stderr,
-			"%s: no files with extension %q in directory %q\n",
-			argv0, ext, pathName)
+			"no files with extension %q in directory %q\n", ext, pathName)
 		os.Exit(ERROR)
 	}
 

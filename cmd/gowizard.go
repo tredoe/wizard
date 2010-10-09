@@ -20,6 +20,8 @@ import (
 )
 
 
+const ERROR = 2 // Exit status code if there is any error.
+
 // Permissions
 const (
 	PERM_DIRECTORY = 0755
@@ -33,14 +35,22 @@ const (
 	CHAR_HEADER       = '='  // Header under the project name
 )
 
-const ERROR = 2 // Exit status code if there is any error
-const README = "README.mkd"
-const DIR_COMMAND = "cmd" // For when the project is a command application.
+const (
+	DIR_COMMAND = "cmd"       // For when the project is a command application.
+	USER_CONFIG = ".gowizard" // Configuration file per user
+	README      = "README.mkd"
+)
+
 
 // Get data directory from `$(GOROOT)/lib/$(TARG)`
 var dirData = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 
-var argv0 = os.Args[0] // Executable name
+// VCS configuration files to push to a server.
+var configVCS = map[string]string{
+	"bzr": ".bzr/branch/branch.conf",
+	"git": ".git/config",
+	"hg":  ".hg/hgrc",
+}
 
 
 // Adds license file in directory `dir`.
@@ -179,13 +189,6 @@ func updateProject() {
 	updatedFiles := new(vector.StringVector)
 	errorFiles := new(vector.StringVector)
 
-	// VCS configuration files to push to a server.
-	configVCS := map[string]string{
-		"bzr": ".bzr/branch/branch.conf",
-		"git": ".git/config",
-		"hg":  ".hg/hgrc",
-	}
-
 	// 'cfg' has the old values.
 	cfg, err := ReadMetadata()
 	if err != nil {
@@ -266,8 +269,7 @@ func updateProject() {
 
 				if err := replaceGoFile(
 					fname, packageName, cfg, tag, update); err != nil {
-					fmt.Fprintf(os.Stderr,
-						"%s: file %q not updated: %s\n", argv0, fname, err)
+					fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", fname, err)
 				} else if *fVerbose {
 					updatedFiles.Push(fname)
 				}
@@ -281,7 +283,7 @@ func updateProject() {
 			if err := replaceMakefile(
 				pathMakefile, packageName, cfg, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
-					"%s: file %q not updated: %s\n", argv0, pathMakefile, err)
+					"file %q not updated: %s\n", pathMakefile, err)
 			} else if *fVerbose {
 				updatedFiles.Push(pathMakefile)
 			}
@@ -300,8 +302,7 @@ func updateProject() {
 
 				if err := replaceTextFile(
 					fname, projectName, cfg, tag, update); err != nil {
-					fmt.Fprintf(os.Stderr,
-						"%s: file %q not updated: %s\n", argv0, fname, err)
+					fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", fname, err)
 				} else if *fVerbose {
 					updatedFiles.Push(fname)
 				}
@@ -366,7 +367,7 @@ func updateProject() {
 			}
 		}
 
-		fmt.Fprintf(os.Stderr, "%s: could not be backed up: %s\n", argv0, files)
+		fmt.Fprintf(os.Stderr, "could not be backed up: %s\n", files)
 	}
 }
 
