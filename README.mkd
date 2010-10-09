@@ -15,7 +15,7 @@ documentation in directory *doc*.
 ## Installation
 
 	$ git clone git://github.com/kless/gowizard.git
-	$ cd gowizard && ./INSTALL.sh && cd -
+	$ cd gowizard && ./Install.sh && cd -
 
 
 ## Configuration
