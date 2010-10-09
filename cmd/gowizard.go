@@ -35,6 +35,7 @@ const (
 
 const ERROR = 2 // Exit status code if there is any error
 const README = "README.mkd"
+const DIR_COMMAND = "cmd" // For when the project is a command application.
 
 // Get data directory from `$(GOROOT)/lib/$(TARG)`
 var dirData = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
@@ -102,7 +103,7 @@ func createProject() {
 		renderNesting(dirApp+"/main_test.go", headerCodeFile, tmplTest, tag)
 		renderNesting(dirApp+"/Makefile", headerMakefile, tmplPkgMakefile, tag)
 	case "app", "tool":
-		dirApp = path.Join(*fProjectName, "cmd")
+		dirApp = path.Join(*fProjectName, DIR_COMMAND)
 		os.MkdirAll(dirApp, PERM_DIRECTORY)
 
 		renderNesting(path.Join(dirApp, *fPackageName)+".go",
@@ -246,7 +247,19 @@ func updateProject() {
 	// === Update source code files
 	if update["ProjectName"] || update["License"] || update["PackageInCode"] {
 		packageName := []byte(tag["package_name"])
-		files := finderGo(*fPackageName)
+
+		// === Directory of source files can have a different name.
+		var files []string
+		var pathMakefile string
+
+		if tag["project_type"] == "app" || tag["project_type"] == "tool" {
+			files = finderGo(DIR_COMMAND)
+			pathMakefile = path.Join(DIR_COMMAND, "Makefile")
+		} else {
+			files = finderGo(*fPackageName)
+			pathMakefile = path.Join(*fPackageName, "Makefile")
+		}
+		// ===
 
 		for _, fname := range files {
 			if backup(fname) {
@@ -264,18 +277,16 @@ func updateProject() {
 		}
 
 		// === Update Makefile
-		fname := path.Join(*fPackageName, "Makefile")
-
-		if backup(fname) {
+		if backup(pathMakefile) {
 			if err := replaceMakefile(
-				fname, packageName, cfg, tag, update); err != nil {
+				pathMakefile, packageName, cfg, tag, update); err != nil {
 				fmt.Fprintf(os.Stderr,
-					"%s: file %q not updated: %s\n", argv0, fname, err)
+					"%s: file %q not updated: %s\n", argv0, pathMakefile, err)
 			} else if *fVerbose {
-				updatedFiles.Push(fname)
+				updatedFiles.Push(pathMakefile)
 			}
 		} else {
-			errorFiles.Push(fname)
+			errorFiles.Push(pathMakefile)
 		}
 	}
 
