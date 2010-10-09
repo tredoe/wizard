@@ -55,7 +55,7 @@ func copyFile(destination, source string, perm uint32) os.Error {
 }
 
 // Creates a string of characters with length of `name` to use it under that name.
-func header(name string) string {
+func createHeader(name string) string {
 	header := make([]byte, len(name))
 
 	for i, _ := range header {

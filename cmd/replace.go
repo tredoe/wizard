@@ -95,7 +95,7 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 					}
 
 					if reHeader.Match(line) {
-						newHeader := header(string(projectName))
+						newHeader := createHeader(string(projectName))
 						output.Write([]byte(newHeader))
 						output.WriteByte('\n')
 					}

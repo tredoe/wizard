@@ -301,7 +301,7 @@ func tagsToCreate() map[string]string {
 		"author_email":    *fAuthorEmail,
 		"license":         listLicense[*fLicense],
 		"vcs":             *fVCS,
-		"_project_header": header(*fProjectName),
+		"_project_header": createHeader(*fProjectName),
 	}
 
 	// Now, the project name can be changed to lower case.
@@ -355,7 +355,7 @@ func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool)
 		update["ProjectName"] = true
 
 		*fProjectName = strings.ToLower(*fProjectName)
-		tag["_project_header"] = header(*fProjectName)
+		tag["_project_header"] = createHeader(*fProjectName)
 	}
 
 	if *fPackageName == "" {
