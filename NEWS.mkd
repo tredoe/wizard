@@ -13,9 +13,7 @@ listed below.*
 
 * * *
 
-### 2010-10-??  v0.9.7
-
-+ The directory name for the command source is named "cmd".
+### 2010-10-??  v0.9.8
 
 + The user configuration file is only added if it doesn't exist.
 
@@ -24,6 +22,12 @@ listed below.*
 + At building a command project is added an install script.
 
 + Added GNU Lesser General Public License.
+
++ Removed package *log*.
+
++ The source file is named as the package name. The directory of source files is
+named "cmd" when the project is a command application, and it is named as the
+package name when it is a library.
 
 
 ### 2010-09-15  v0.9.5

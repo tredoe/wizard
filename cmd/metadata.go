@@ -23,10 +23,10 @@ const _VERSION = "1.1"
 
 // Project types
 var listProject = map[string]string{
-	"tool": "Development tool",
 	"app":  "Program",
-	"cgo":  "Package that calls C code",
+	"tool": "Development tool",
 	"lib":  "Library",
+	"cgo":  "Package that calls C code",
 }
 
 // Available licenses

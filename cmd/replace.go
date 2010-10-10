@@ -21,11 +21,12 @@ import (
 
 // Text to search
 var (
-	LF            = []byte{'\n'}
-	copyright     = []byte("opyright ")
-	endOfNotice   = []byte("* * *")
-	pkgInCode     = []byte("package ")
-	pkgInMakefile = []byte("TARG=")
+	LF             = []byte{'\n'}
+	copyright      = []byte("opyright ")
+	endOfNotice    = []byte("* * *")
+	pkgInCode      = []byte("package ")
+	pkgInMakefile  = []byte("TARG=")
+	fileInMakefile = []byte("GOFILES=")
 )
 
 // Header under the project name.
@@ -139,6 +140,9 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []byte, cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
 	output := new(bytes.Buffer)
 
+	oldPackageFile := []byte(cfg.PackageName + ".go")
+	newPackageFile := []byte(string(packageName) + ".go")
+
 	// === Read file
 	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
 	if err != nil {
@@ -161,7 +165,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 	}
 
 	// === Read line to line
-	var endHeader, skipHeader bool
+	var endHeader, skipHeader, isFileLine bool
 
 	if !update["ProjectName"] && !update["License"] {
 		skipHeader = true
@@ -219,7 +223,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 					break
 				}
 			} else { // Makefile
-				if bytes.HasPrefix(line, pkgInMakefile) {
+				if !isFileLine && bytes.HasPrefix(line, pkgInMakefile) {
 					// Simple argument without full path to install via goinstall.
 					if bytes.IndexByte(line, '/') != -1 {
 						// Add character of new line for that the package name
@@ -235,6 +239,15 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 						output.WriteByte('\n')
 					}
 
+					continue
+				}
+
+				if !isFileLine && bytes.HasPrefix(line, fileInMakefile) {
+					isFileLine = true
+				}
+				if isFileLine && bytes.Index(line, oldPackageFile) != -1 {
+					newLine := bytes.Replace(line, oldPackageFile, newPackageFile, 1)
+					output.Write(newLine)
 					break
 				}
 			}

@@ -106,8 +106,10 @@ func createProject() {
 		dirApp = path.Join(*fProjectName, *fPackageName)
 		os.MkdirAll(dirApp, PERM_DIRECTORY)
 
-		renderNesting(dirApp+"/main.go", headerCodeFile, tmplPkgMain, tag)
-		renderNesting(dirApp+"/main_test.go", headerCodeFile, tmplTest, tag)
+		renderNesting(path.Join(dirApp, *fPackageName)+".go",
+			headerCodeFile, tmplPkgMain, tag)
+		renderNesting(path.Join(dirApp, *fPackageName)+"_test.go",
+			headerCodeFile, tmplTest, tag)
 		renderNesting(dirApp+"/Makefile", headerMakefile, tmplPkgMakefile, tag)
 	case "app", "tool":
 		dirApp = path.Join(*fProjectName, DIR_COMMAND)
@@ -200,7 +202,7 @@ func updateProject() {
 
 	// === Rename directories
 	if *fVerbose && (update["ProjectName"] || update["PackageName"]) {
-		fmt.Println("  = Directories renamed\n")
+		fmt.Println(" == Directories renamed")
 	}
 
 	if update["ProjectName"] {
@@ -212,8 +214,9 @@ func updateProject() {
 
 		if err := os.Rename(oldProjectName, *fProjectName); err != nil {
 			reportExit(err)
-		} else if *fVerbose {
-			fmt.Printf(" * Project: %q -> %q\n", oldProjectName, *fProjectName)
+		}
+		if *fVerbose {
+			fmt.Printf(" + Project: %q -> %q\n", oldProjectName, *fProjectName)
 		}
 
 		// Do 'chdir' in new project directory.
@@ -229,18 +232,57 @@ func updateProject() {
 				*fProjectName, cfg.VCS); err != nil {
 				reportExit(err)
 			}
-
 			if *fVerbose {
 				updatedFiles.Push(fname)
 			}
 		}
 	}
 
-	if update["PackageName"] {
+	if update["PackageName"] && (*fProjecType == "lib" || *fProjecType == "cgo") {
 		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
 			reportExit(err)
-		} else if *fVerbose {
-			fmt.Printf(" * Package: %q -> %q\n", cfg.PackageName, *fPackageName)
+		}
+		if *fVerbose {
+			fmt.Printf(" + Package: %q -> %q\n", cfg.PackageName, *fPackageName)
+		}
+	}
+
+	// === Rename source file named as the package
+	if update["PackageName"] {
+		if *fVerbose {
+			fmt.Println("\n == Files renamed")
+		}
+
+		if *fProjecType == "app" || *fProjecType == "tool" {
+			old := path.Join(DIR_COMMAND, cfg.PackageName)+".go"
+			new := path.Join(DIR_COMMAND, *fPackageName)+".go"
+
+			if err := os.Rename(old, new); err != nil {
+				reportExit(err)
+			}
+			if *fVerbose {
+				fmt.Printf(" + %s -> %s\n", old, new)
+			}
+		} else {
+			old := path.Join(*fPackageName, cfg.PackageName)+".go"
+			new := path.Join(*fPackageName, *fPackageName)+".go"
+
+			if err := os.Rename(old, new); err != nil {
+				reportExit(err)
+			}
+			if *fVerbose {
+				fmt.Printf(" + %s -> %s\n", old, new)
+			}
+
+			old = path.Join(*fPackageName, cfg.PackageName)+"_test.go"
+			new = path.Join(*fPackageName, *fPackageName)+"_test.go"
+
+			if err := os.Rename(old, new); err != nil {
+				reportExit(err)
+			}
+			if *fVerbose {
+				fmt.Printf(" + %s -> %s\n", old, new)
+			}
 		}
 	}
 
@@ -252,7 +294,7 @@ func updateProject() {
 		var files []string
 		var pathMakefile string
 
-		if tag["project_type"] == "app" || tag["project_type"] == "tool" {
+		if *fProjecType == "app" || *fProjecType == "tool" {
 			files = finderGo(DIR_COMMAND)
 			pathMakefile = path.Join(DIR_COMMAND, "Makefile")
 		} else {
@@ -346,10 +388,10 @@ func updateProject() {
 	// === Print messages
 	if *fVerbose {
 		updatedFiles.Push(_META_FILE)
-		fmt.Println("\n  = Files updated\n")
+		fmt.Println("\n == Files updated")
 
 		for _, file := range *updatedFiles {
-			fmt.Printf(" * %s\n", file)
+			fmt.Printf(" + %s\n", file)
 		}
 	}
 

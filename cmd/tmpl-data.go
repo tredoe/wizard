@@ -64,29 +64,11 @@ const (
 
 // For source code files
 const (
-	tmplTest = `package {{package_name}}
-
-import (
-	"testing"
-)
-
-
-func Test(t *testing.T) {
-
-}
-
-`
-
 	tmplCmdMain = `package main
 
 import (
 
 )
-
-
-func main() {
-
-}
 
 `
 
@@ -100,8 +82,16 @@ import (
 
 )
 
+`
 
-func () {
+	tmplTest = `package {{package_name}}
+
+import (
+	"testing"
+)
+
+
+func Test(t *testing.T) {
 
 }
 
@@ -121,7 +111,7 @@ include $(GOROOT)/src/Make.cmd
 
 TARG={{package_name}}
 GOFILES=\
-	main.go\
+	{{package_name}}.go\
 
 include $(GOROOT)/src/Make.pkg
 
