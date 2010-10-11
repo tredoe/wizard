@@ -13,7 +13,7 @@ listed below.*
 
 * * *
 
-### 2010-10-??  v0.9.8
+### 2010-10-11  v0.9.8
 
 + The user configuration file is only added if it doesn't exist.
 
@@ -28,6 +28,8 @@ listed below.*
 + The source file is named as the package name. The directory of source files is
 named "cmd" when the project is a command application, and it is named as the
 package name when it is a library.
+
++ Update fields related to the project name in file Metadata.
 
 
 ### 2010-09-15  v0.9.5

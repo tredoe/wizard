@@ -372,6 +372,10 @@ func updateProject() {
 	// === Metadata file
 	if backup(_META_FILE) {
 		if update["ProjectName"] {
+			cfg.DownloadURL = strings.Replace(cfg.DownloadURL, cfg.ProjectName,
+				tag["project_name"], 1)
+			cfg.HomePage = strings.Replace(cfg.HomePage, cfg.ProjectName,
+				tag["project_name"], 1)
 			cfg.ProjectName = tag["project_name"]
 		}
 		if update["PackageName"] {

@@ -343,7 +343,6 @@ func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool)
 	setNames()
 
 	tag = map[string]string{
-//		"project_type": *fProjecType,
 		"project_name": *fProjectName,
 		"package_name": *fPackageName,
 	}
