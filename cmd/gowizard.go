@@ -257,31 +257,29 @@ func updateProject() {
 			old := path.Join(DIR_COMMAND, cfg.PackageName)+".go"
 			new := path.Join(DIR_COMMAND, *fPackageName)+".go"
 
-			if err := os.Rename(old, new); err != nil {
-				reportExit(err)
-			}
-			if *fVerbose {
-				fmt.Printf(" + %s -> %s\n", old, new)
+			// It is possible that it has been deleted by the developer.
+			if err := os.Rename(old, new); err == nil {
+				if *fVerbose {
+					fmt.Printf(" + %s -> %s\n", old, new)
+				}
 			}
 		} else {
 			old := path.Join(*fPackageName, cfg.PackageName)+".go"
 			new := path.Join(*fPackageName, *fPackageName)+".go"
 
-			if err := os.Rename(old, new); err != nil {
-				reportExit(err)
-			}
-			if *fVerbose {
-				fmt.Printf(" + %s -> %s\n", old, new)
+			if err := os.Rename(old, new); err == nil {
+				if *fVerbose {
+					fmt.Printf(" + %s -> %s\n", old, new)
+				}
 			}
 
 			old = path.Join(*fPackageName, cfg.PackageName)+"_test.go"
 			new = path.Join(*fPackageName, *fPackageName)+"_test.go"
 
-			if err := os.Rename(old, new); err != nil {
-				reportExit(err)
-			}
-			if *fVerbose {
-				fmt.Printf(" + %s -> %s\n", old, new)
+			if err := os.Rename(old, new); err == nil {
+				if *fVerbose {
+					fmt.Printf(" + %s -> %s\n", old, new)
+				}
 			}
 		}
 	}
