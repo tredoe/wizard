@@ -231,6 +231,13 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 						old := []byte(cfg.PackageName + "\n")
 						newLine := bytes.Replace(line, old, packageName, 1)
 
+						// ProjectName
+						if update["ProjectName"] {
+							oldProject := []byte("/" + cfg.ProjectName + "/")
+							newLine = bytes.Replace(newLine, oldProject,
+								[]byte("/" + *fProjectName + "/"), 1)
+						}
+
 						output.Write(newLine)
 						output.WriteByte('\n')
 					} else {
