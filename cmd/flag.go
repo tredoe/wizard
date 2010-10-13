@@ -319,6 +319,14 @@ func tagsToCreate() map[string]string {
 		value = ""
 	}
 	tag["project_is_cgo"] = value
+	tag["project_is_lib"] = value
+
+	if *fProjecType == "lib" {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["project_is_lib"] = value
 
 	if *fVCS == "none" {
 		value = "ok"
