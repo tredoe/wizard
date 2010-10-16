@@ -2,9 +2,9 @@
 _*
 
 # Go
-*.o
-*.a
+*.[ao]
 *.[568vq]
 [568vq].out
+*.cgo*
+*.so
 main
-

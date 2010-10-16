@@ -7,7 +7,7 @@
 ## Installation
 
 {{.section project_is_lib}}
-	$ [sudo -E] goinstall << download URL >>
+	$ goinstall << download URL >>
 {{.or}}
 << Instructions to install >>
 {{.end}}
