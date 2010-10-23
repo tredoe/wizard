@@ -1,12 +1,15 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -ev
 
 ## Install dependencies
 goinstall github.com/kless/goconfig/config
 goinstall github.com/kless/go-readin/readin
 
-## Build the command
+## Build
 cd cmd; make install
+
+## Clean
+make clean
 
 ## Install templates and licenses
 make data

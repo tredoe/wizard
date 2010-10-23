@@ -1,11 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -ev
 
 ## Install dependencies
 goinstall [url]
 
-## Build the command
+## Build
 cd cmd; make install
+
+## Clean
+make clean
 
 ## Install succeeded!
 
