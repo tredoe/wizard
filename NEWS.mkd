@@ -13,6 +13,11 @@ listed below.*
 
 * * *
 
+### 2010-11-??  v0.9.9
+
++ Fixed re-writing of larger files.
+
+
 ### 2010-10-11  v0.9.8
 
 + The user configuration file is only added if it doesn't exist.

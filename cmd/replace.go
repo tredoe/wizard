@@ -13,6 +13,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -186,7 +187,11 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 				s := bytes.Split(line, copyright, -1)
 				s = bytes.Fields(s[1]) // All after of "Copyright"
 				year = string(s[0])    // The first one, so the year.
-			}
+			} /*else {
+				skipHeader = true
+				output.Write(line)
+				continue
+			}*/
 
 			// End of header.
 			if bytes.Equal(line, LF) {
@@ -200,7 +205,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 				}
 
 				output.Write([]byte(header))
-				output.WriteByte('\n')
+//				output.WriteByte('\n')
 			}
 		}
 
@@ -417,10 +422,10 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 
 // Gets the remaining of file buffer to add it to the output buffer. Finally
 // it is saved in the original file.
-func rewrite(file *os.File, rw *bufio.ReadWriter, output *bytes.Buffer) os.Error {
+func rewrite(file *os.File, rw *bufio.ReadWriter, output *bytes.Buffer) (err os.Error) {
 	// === Get the remaining of the buffer.
-	end := make([]byte, rw.Reader.Buffered())
-	if _, err := rw.Read(end); err != nil {
+	end, err := ioutil.ReadAll(rw.Reader)
+	if err != nil {
 		return err
 	}
 
@@ -429,19 +434,19 @@ func rewrite(file *os.File, rw *bufio.ReadWriter, output *bytes.Buffer) os.Error
 	// === Write changes to file
 
 	// Set the new size of file.
-	if err := file.Truncate(int64(len(output.Bytes()))); err != nil {
+	if err = file.Truncate(int64(len(output.Bytes()))); err != nil {
 		return err
 	}
 
 	// Offset at the beggining of file.
-	if _, err := file.Seek(0, 0); err != nil {
+	if _, err = file.Seek(0, 0); err != nil {
 		return err
 	}
 
 	// Write buffer to file.
 	rw.Write(output.Bytes())
 
-	if err := rw.Writer.Flush(); err != nil {
+	if err = rw.Writer.Flush(); err != nil {
 		return err
 	}
 
