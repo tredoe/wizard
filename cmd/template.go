@@ -91,7 +91,7 @@ tag map[string]string) {
 // Base to rendering single files.
 func _renderFile(destination, template string, tag map[string]string) {
 	render := parseFile(template, tag)
-	ioutil.WriteFile(destination, []byte(render), PERM_FILE)
+	ioutil.WriteFile(destination, []byte(render), getPerm(destination))
 }
 
 // Renders a single file.

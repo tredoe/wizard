@@ -23,6 +23,7 @@ import (
 const (
 	PERM_DIRECTORY = 0755
 	PERM_FILE      = 0644
+	PERM_EXEC      = 0755
 )
 
 // Characters
@@ -33,9 +34,10 @@ const (
 )
 
 const (
-	DIR_COMMAND = "cmd"       // For when the project is a command application.
-	USER_CONFIG = ".gowizard" // Configuration file per user
-	README      = "README.mkd"
+	DIR_COMMAND  = "cmd"       // For when the project is a command application.
+	USER_CONFIG  = ".gowizard" // Configuration file per user
+	README       = "README.mkd"
+	FILE_INSTALL = "Install.sh"
 )
 
 
@@ -118,8 +120,6 @@ func createProject() {
 		renderNesting(path.Join(dirApp, *fPackageName)+".go",
 			headerCodeFile, tmplCmdMain, tag)
 		renderNesting(dirApp+"/Makefile", headerMakefile, tmplCmdMakefile, tag)
-
-		copyFile(*fProjectName+"/Install.sh", dirData+"/copy/Install.sh", 0755)
 	}
 
 	// === Render common files
@@ -134,6 +134,10 @@ func createProject() {
 	} else {
 		renderFile(*fProjectName, dirTmpl+"/AUTHORS.mkd", tag)
 		renderFile(*fProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
+	}
+
+	if *fProjecType != "lib" {
+		renderFile(*fProjectName, dirTmpl+"/Install.sh", tag)
 	}
 
 	// === Add file related to VCS
@@ -254,8 +258,8 @@ func updateProject() {
 		}
 
 		if *fProjecType == "app" || *fProjecType == "tool" {
-			old := path.Join(DIR_COMMAND, cfg.PackageName)+".go"
-			new := path.Join(DIR_COMMAND, *fPackageName)+".go"
+			old := path.Join(DIR_COMMAND, cfg.PackageName) + ".go"
+			new := path.Join(DIR_COMMAND, *fPackageName) + ".go"
 
 			// It is possible that it has been deleted by the developer.
 			if err := os.Rename(old, new); err == nil {
@@ -264,8 +268,8 @@ func updateProject() {
 				}
 			}
 		} else {
-			old := path.Join(*fPackageName, cfg.PackageName)+".go"
-			new := path.Join(*fPackageName, *fPackageName)+".go"
+			old := path.Join(*fPackageName, cfg.PackageName) + ".go"
+			new := path.Join(*fPackageName, *fPackageName) + ".go"
 
 			if err := os.Rename(old, new); err == nil {
 				if *fVerbose {
@@ -273,8 +277,8 @@ func updateProject() {
 				}
 			}
 
-			old = path.Join(*fPackageName, cfg.PackageName)+"_test.go"
-			new = path.Join(*fPackageName, *fPackageName)+"_test.go"
+			old = path.Join(*fPackageName, cfg.PackageName) + "_test.go"
+			new = path.Join(*fPackageName, *fPackageName) + "_test.go"
 
 			if err := os.Rename(old, new); err == nil {
 				if *fVerbose {
@@ -365,6 +369,20 @@ func updateProject() {
 		}
 
 		cfg.License = *fLicense // Metadata
+	}
+
+	// === Installation file
+	if update["PackageName"] && *fProjecType == "cgo" {
+		if backup(FILE_INSTALL) {
+			if err := replaceInstall(tag["package_name"], cfg); err != nil {
+				fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", FILE_INSTALL, err)
+			} else if *fVerbose {
+				updatedFiles.Push(FILE_INSTALL)
+			}
+
+		} else {
+			errorFiles.Push(FILE_INSTALL)
+		}
 	}
 
 	// === Metadata file

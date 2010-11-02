@@ -5,7 +5,7 @@ set -ev
 goinstall [url]
 
 ## Build
-cd cmd; make install
+cd {{.section dir_is_cmd}}cmd{{.or}}{{package_name}}{{.end}}; make install
 
 ## Clean
 make clean

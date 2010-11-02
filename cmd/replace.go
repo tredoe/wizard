@@ -71,7 +71,7 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 	isFirstLine := true
 
 	for {
-		line, err := rw.ReadSlice('\n')
+		line, err := rw.ReadBytes('\n')
 		if err == os.EOF {
 			break
 		}
@@ -91,7 +91,7 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 					output.WriteByte('\n')
 
 					// === Get the second line to change the header
-					line, err := rw.ReadSlice('\n')
+					line, err := rw.ReadBytes('\n')
 					if err != nil {
 						return err
 					}
@@ -173,7 +173,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 	}
 
 	for {
-		line, err := rw.ReadSlice('\n')
+		line, err := rw.ReadBytes('\n')
 		if err == os.EOF {
 			break
 		}
@@ -324,7 +324,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 	if len(option_2) == 0 {
 		// Read line to line
 		for {
-			line, err := rw.ReadSlice('\n')
+			line, err := rw.ReadBytes('\n')
 			if err == os.EOF {
 				break
 			}
@@ -353,7 +353,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 
 		// In the first, is searched `option_1` else `option_2`.
 		for {
-			line, err := rw.ReadSlice('\n')
+			line, err := rw.ReadBytes('\n')
 			if err == os.EOF {
 				if isRound_1 {
 					isRound_1, isHeader, isLine = false, false, false
@@ -364,7 +364,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 					}
 
 					rw.Reader = bufio.NewReader(file)
-					line, _ = rw.ReadSlice('\n')
+					line, _ = rw.ReadBytes('\n')
 					// Round 2
 				} else {
 					break
@@ -407,6 +407,45 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 				output.Write(line)
 			}
 		}
+	}
+
+	if err := rewrite(file, rw, output); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Replaces the directory named as the project name.
+func replaceInstall(packageName string, cfg *Metadata) os.Error {
+	output := new(bytes.Buffer)
+
+	oldPackage := []byte("cd " + cfg.PackageName)
+	newPackage := []byte("cd " + packageName)
+
+	// === Read file
+	file, err := os.Open(FILE_INSTALL, os.O_RDWR, 0755)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Buffered I/O
+	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
+
+	for {
+		line, err := rw.ReadBytes('\n')
+		if err == os.EOF {
+			break
+		}
+
+		if bytes.HasPrefix(line, oldPackage) {
+			newLine := bytes.Replace(line, oldPackage, newPackage, 1)
+
+			output.Write(newLine)
+			break
+		}
+		output.Write(line)
 	}
 
 	if err := rewrite(file, rw, output); err != nil {

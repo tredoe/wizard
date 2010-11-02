@@ -335,6 +335,13 @@ func tagsToCreate() map[string]string {
 	}
 	tag["vcs_is_none"] = value
 
+	if *fProjecType == "app" || *fProjecType == "tool" {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["dir_is_cmd"] = value
+
 	return tag
 }
 
