@@ -127,9 +127,10 @@ _*
 *.[ao]
 *.[568vq]
 [568vq].out
+main
+# Cgo
 *.cgo*
 *.so
-main
 `
 )
 
