@@ -16,14 +16,7 @@ import (
 
 const ERROR = 2 // Exit status code if there is any error.
 
-
-type error struct {
-	os.ErrorString
-}
-
-var (
-	errNoHeader = &error{"no header with copyright"}
-)
+var errNoHeader = os.NewError("no header with copyright")
 
 
 func reportExit(err os.Error) {
