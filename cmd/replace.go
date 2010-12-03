@@ -162,7 +162,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 	}
 
 	if !bytes.Equal(comment, fileComment) {
-		return errNoHeader
+		return os.NewError("header without copyright")
 	}
 
 	// === Read line to line
