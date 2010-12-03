@@ -10,7 +10,6 @@
 package main
 
 import (
-	"container/vector"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -78,7 +77,7 @@ func getPerm(fname string) (perm uint32) {
 // ===
 type finder struct {
 	ext   string
-	files vector.StringVector
+	files []string
 }
 
 func newFinder(ext string) *finder {
@@ -107,11 +106,9 @@ func (self *finder) VisitDir(path string, f *os.FileInfo) bool {
 func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 	name := f.Name
 
-	if self.ext == ".go" && path.Ext(name) == ".go" {
-		self.files.Push(filePath)
-	} else if self.ext == ".mkd" && path.Ext(name) == ".mkd" {
-
-		self.files.Push(filePath)
+	if self.ext == ".go" && path.Ext(name) == ".go" ||
+	self.ext == ".mkd" && path.Ext(name) == ".mkd" {
+		self.files = append(self.files, filePath)
 	}
 }
 
@@ -127,7 +124,6 @@ func _finder(ext string, pathName string) []string {
 			"no files with extension %q in directory %q\n", ext, pathName)
 		os.Exit(ERROR)
 	}
-
 	return finder.files
 }
 

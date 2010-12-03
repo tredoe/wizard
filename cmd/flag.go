@@ -10,7 +10,6 @@
 package main
 
 import (
-	"container/vector"
 	"flag"
 	"fmt"
 	"os"
@@ -434,49 +433,39 @@ func userConfig() {
 
 	// === Get values
 	var errors bool
-	errKeys := new(vector.StringVector)
+	var errKeys []string
 
 	if *fAuthor == "" {
 		*fAuthor, err = cfg.String("DEFAULT", "author")
 		if err != nil {
 			errors = true
-			errKeys.Push("author")
+			errKeys = append(errKeys, "author")
 		}
 	}
 	if *fAuthorEmail == "" {
 		*fAuthorEmail, err = cfg.String("DEFAULT", "author-email")
 		if err != nil {
 			errors = true
-			errKeys.Push("author-email")
+			errKeys = append(errKeys, "author-email")
 		}
 	}
 	if *fLicense == "" {
 		*fLicense, err = cfg.String("DEFAULT", "license")
 		if err != nil {
 			errors = true
-			errKeys.Push("license")
+			errKeys = append(errKeys, "license")
 		}
 	}
 	if *fVCS == "" {
 		*fVCS, err = cfg.String("DEFAULT", "vcs")
 		if err != nil {
 			errors = true
-			errKeys.Push("vcs")
+			errKeys = append(errKeys, "vcs")
 		}
 	}
 
 	if errors {
-		s := ""
-
-		for i, val := range *errKeys {
-			if i == 0 {
-				s = val
-			} else {
-				s += ", " + val
-			}
-		}
-
-		fmt.Fprintf(os.Stderr, "%s: %s\n", err, s)
+		fmt.Fprintf(os.Stderr, "%s: %s\n", err, strings.Join(errKeys, ","))
 		os.Exit(ERROR)
 	}
 }

@@ -10,7 +10,6 @@
 package main
 
 import (
-	"container/vector"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -189,8 +188,7 @@ func createProject() {
 
 // Updates some values from a project already created.
 func updateProject() {
-	updatedFiles := new(vector.StringVector)
-	errorFiles := new(vector.StringVector)
+	var updatedFiles, errorFiles []string
 
 	// 'cfg' has the old values.
 	cfg, err := ReadMetadata()
@@ -237,7 +235,7 @@ func updateProject() {
 				reportExit(err)
 			}
 			if *fVerbose {
-				updatedFiles.Push(fname)
+				updatedFiles = append(updatedFiles, fname)
 			}
 		}
 	}
@@ -312,10 +310,10 @@ func updateProject() {
 					fname, packageName, cfg, tag, update); err != nil {
 					fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", fname, err)
 				} else if *fVerbose {
-					updatedFiles.Push(fname)
+					updatedFiles = append(updatedFiles, fname)
 				}
 			} else {
-				errorFiles.Push(fname)
+				errorFiles = append(errorFiles, fname)
 			}
 		}
 
@@ -326,10 +324,10 @@ func updateProject() {
 				fmt.Fprintf(os.Stderr,
 					"file %q not updated: %s\n", pathMakefile, err)
 			} else if *fVerbose {
-				updatedFiles.Push(pathMakefile)
+				updatedFiles = append(updatedFiles, pathMakefile)
 			}
 		} else {
-			errorFiles.Push(pathMakefile)
+			errorFiles = append(errorFiles, pathMakefile)
 		}
 	}
 
@@ -345,10 +343,10 @@ func updateProject() {
 					fname, projectName, cfg, tag, update); err != nil {
 					fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", fname, err)
 				} else if *fVerbose {
-					updatedFiles.Push(fname)
+					updatedFiles = append(updatedFiles, fname)
 				}
 			} else {
-				errorFiles.Push(fname)
+				errorFiles = append(errorFiles, fname)
 			}
 		}
 	}
@@ -365,7 +363,7 @@ func updateProject() {
 		addLicense(".", tag)
 
 		if *fVerbose {
-			updatedFiles.Push("LICENSE")
+			updatedFiles = append(updatedFiles, "LICENSE")
 		}
 
 		cfg.License = *fLicense // Metadata
@@ -377,11 +375,11 @@ func updateProject() {
 			if err := replaceInstall(tag["package_name"], cfg); err != nil {
 				fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", FILE_INSTALL, err)
 			} else if *fVerbose {
-				updatedFiles.Push(FILE_INSTALL)
+				updatedFiles = append(updatedFiles, FILE_INSTALL)
 			}
 
 		} else {
-			errorFiles.Push(FILE_INSTALL)
+			errorFiles = append(errorFiles, FILE_INSTALL)
 		}
 	}
 
@@ -402,31 +400,22 @@ func updateProject() {
 			reportExit(err)
 		}
 	} else {
-		errorFiles.Push(_META_FILE)
+		errorFiles = append(errorFiles, _META_FILE)
 	}
 
 	// === Print messages
 	if *fVerbose {
-		updatedFiles.Push(_META_FILE)
+		updatedFiles = append(updatedFiles, _META_FILE)
 		fmt.Println("\n == Files updated")
 
-		for _, file := range *updatedFiles {
+		for _, file := range updatedFiles {
 			fmt.Printf(" + %s\n", file)
 		}
 	}
 
-	if errorFiles.Len() != 0 {
-		files := ""
-
-		for i, file := range *errorFiles {
-			if i == 0 {
-				files = file
-			} else {
-				files += ", " + file
-			}
-		}
-
-		fmt.Fprintf(os.Stderr, "could not be backed up: %s\n", files)
+	if len(errorFiles) != 0 {
+		fmt.Fprintf(os.Stderr, "could not be backed up: %s\n",
+			strings.Join(errorFiles, ","))
 	}
 }
 
