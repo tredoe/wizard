@@ -54,7 +54,7 @@ func parse(str string, data interface{}) string {
 		reportExit(err)
 	}
 
-	t.Execute(data, _templateParser)
+	t.Execute(_templateParser, data)
 
 	return _templateParser.str
 }
@@ -69,7 +69,7 @@ func parseFile(filename string, data interface{}) string {
 		reportExit(err)
 	}
 
-	t.Execute(data, _templateParser)
+	t.Execute(_templateParser, data)
 
 	return _templateParser.str
 }

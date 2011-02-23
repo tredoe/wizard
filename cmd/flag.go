@@ -70,7 +70,7 @@ func loadConfig() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if len(os.Args) == 1 {
+	if len(os.Args) == 1 { // flag.NArg()
 		usage()
 	}
 
