@@ -278,7 +278,7 @@ func setNames() {
 			// The package name is created:
 			// getting the last string after of the dash ('-'), if any,
 			// and removing 'go'. Finally, it's lower cased.
-			pkg := strings.Split(*fProjectName, "-", -1)
+			pkg := strings.Split(*fProjectName, "-")
 			*fPackageName = reGo.ReplaceAllString(
 				strings.ToLower(pkg[len(pkg)-1]), "")
 		} else {

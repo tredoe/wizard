@@ -112,7 +112,7 @@ func renderNewFile(destination, template string, tag map[string]string) {
 // If `year` is nil then gets the actual year.
 func _renderHeader(tag map[string]string, year string, renderCodeFile,
 renderMakefile bool) (headerCodeFile, headerMakefile string) {
-	licenseName := strings.Split(*fLicense, "-", -1)[0]
+	licenseName := strings.Split(*fLicense, "-")[0]
 
 	if year == "" {
 		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
