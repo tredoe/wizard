@@ -135,4 +135,3 @@ main
 )
 
 const hgIgnoreTop = "syntax: glob\n"
-

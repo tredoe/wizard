@@ -107,7 +107,7 @@ func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 	name := f.Name
 
 	if self.ext == ".go" && path.Ext(name) == ".go" ||
-	self.ext == ".mkd" && path.Ext(name) == ".mkd" {
+		self.ext == ".mkd" && path.Ext(name) == ".mkd" {
 		self.files = append(self.files, filePath)
 	}
 }
@@ -136,4 +136,3 @@ func finderGo(pathName string) []string {
 func finderMkd(pathName string) []string {
 	return _finder(".mkd", pathName)
 }
-

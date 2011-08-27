@@ -204,18 +204,14 @@ renderMakefile bool) (headerCodeFile, headerMakefile string) {
 	return headerMakefile, ""
 }
 
-func renderCodeHeader(tag map[string]string, year string) (
-headerCodeFile, headerMakefile string) {
+func renderCodeHeader(tag map[string]string, year string) (headerCodeFile, headerMakefile string) {
 	return _renderHeader(tag, year, true, false)
 }
 
-func renderMakeHeader(tag map[string]string, year string) (
-headerMakefile, headerCodeFile string) {
+func renderMakeHeader(tag map[string]string, year string) (headerMakefile, headerCodeFile string) {
 	return _renderHeader(tag, year, false, true)
 }
 
-func renderAllHeaders(tag map[string]string, year string) (
-headerCodeFile, headerMakefile string) {
+func renderAllHeaders(tag map[string]string, year string) (headerCodeFile, headerMakefile string) {
 	return _renderHeader(tag, year, true, true)
 }
-

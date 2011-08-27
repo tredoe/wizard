@@ -169,7 +169,7 @@ func ReadMetadata() (*Metadata, os.Error) {
 	section = "Optional"
 	// ===
 	//if s, err := cfg.String(section, "platform"); err == nil {
-		//_Metadata.Platform = s
+	//_Metadata.Platform = s
 	//}
 	if s, err := cfg.String(section, "keywords"); err == nil {
 		_Metadata.Keywords = s
@@ -269,4 +269,3 @@ func (self *reflectStruct) name_value(fieldName string) (name, value string) {
 
 	return
 }
-

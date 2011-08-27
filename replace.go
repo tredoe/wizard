@@ -205,7 +205,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 				}
 
 				output.Write([]byte(header))
-//				output.WriteByte('\n')
+				//				output.WriteByte('\n')
 			}
 		}
 
@@ -240,7 +240,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 						if update["ProjectName"] {
 							oldProject := []byte("/" + cfg.ProjectName + "/")
 							newLine = bytes.Replace(newLine, oldProject,
-								[]byte("/" + *fProjectName + "/"), 1)
+								[]byte("/"+*fProjectName+"/"), 1)
 						}
 
 						output.Write(newLine)
@@ -491,4 +491,3 @@ func rewrite(file *os.File, rw *bufio.ReadWriter, output *bytes.Buffer) (err os.
 
 	return nil
 }
-

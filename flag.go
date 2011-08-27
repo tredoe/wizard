@@ -469,4 +469,3 @@ func userConfig() {
 		os.Exit(ERROR)
 	}
 }
-

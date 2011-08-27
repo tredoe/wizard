@@ -21,4 +21,3 @@ func reportExit(err os.Error) {
 	fmt.Fprintf(os.Stderr, err.String())
 	os.Exit(ERROR)
 }
-
