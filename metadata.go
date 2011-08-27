@@ -1,6 +1,6 @@
 // Copyright 2010  The "gowizard" Authors
 //
-// Use of this source code is governed by the Simplified BSD License
+// Use of this source code is governed by the BSD-2 Clause license
 // that can be found in the LICENSE file.
 //
 // This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
@@ -32,13 +32,13 @@ var listProject = map[string]string{
 // Available licenses
 var listLicense = map[string]string{
 	"apache-2": "Apache License, version 2.0",
-	"bsd-2":    "Simplified BSD License",
-	"bsd-3":    "New BSD License",
+	"bsd-2":    "BSD-2 Clause license",
+	"bsd-3":    "BSD-3 Clause license",
 	"cc0-1":    "Creative Commons CC0, version 1.0 Universal",
 	"gpl-3":    "GNU General Public License, version 3 or later",
 	"lgpl-3":   "GNU Lesser General Public License, version 3 or later",
 	"agpl-3":   "GNU Affero General Public License, version 3 or later",
-	"none":     "Proprietary License",
+	"none":     "Proprietary license",
 }
 
 // Version control systems (VCS)

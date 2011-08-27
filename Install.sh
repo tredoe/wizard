@@ -6,7 +6,7 @@ goinstall github.com/kless/goconfig/config
 goinstall github.com/kless/go-readin/readin
 
 ## Build
-cd cmd; make install
+make install
 
 ## Clean
 make clean

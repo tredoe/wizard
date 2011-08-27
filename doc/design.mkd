@@ -71,7 +71,7 @@ To know more about *CC0* read [here][11].
 ### Discarded licenses
 
 The [MIT/X11 License][12] has not been added since it is equivalent to the
-*Simplified BSD License*; *GNU GPLv2* because it is incompatible with the
+*BSD-2 Clause license*; *GNU GPLv2* because it is incompatible with the
 *2nd Apache License*.
 
 
