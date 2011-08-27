@@ -2,8 +2,8 @@
 set -ev
 
 ## Install dependencies
-goinstall github.com/kless/goconfig/config
-goinstall github.com/kless/go-readin/readin
+#goinstall github.com/kless/goconfig/config
+#goinstall github.com/kless/inline
 
 ## Build
 make install

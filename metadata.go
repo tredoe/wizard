@@ -240,16 +240,16 @@ func (self *Metadata) WriteINI(dir string) os.Error {
 
 // To handle the reflection of a struct
 type reflectStruct struct {
-	strType  *reflect.StructType
-	strValue *reflect.StructValue
+	strType  reflect.Type
+	strValue reflect.Value
 }
 
 // Gets structs that represent the type 'Metadata'.
 func (self *Metadata) getStruct() *reflectStruct {
-	ptrValue := reflect.NewValue(self).(*reflect.PtrValue)
+	ptrValue := reflect.ValueOf(self)
 
-	strType := ptrValue.Elem().Type().(*reflect.StructType)
-	strValue := ptrValue.Elem().(*reflect.StructValue)
+	strType := ptrValue.Elem().Type()
+	strValue := ptrValue.Elem()
 
 	return &reflectStruct{strType, strValue}
 }
@@ -259,7 +259,7 @@ func (self *reflectStruct) name_value(fieldName string) (name, value string) {
 	field, _ := self.strType.FieldByName(fieldName)
 	value_ := self.strValue.FieldByName(fieldName)
 
-	value = value_.(*reflect.StringValue).Get()
+	value = value_.String()
 
 	if tag := field.Tag; tag != "" {
 		name = tag

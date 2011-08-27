@@ -57,7 +57,7 @@ func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[st
 	}
 
 	// === Read file
-	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
+	file, err := os.OpenFile(fname, os.O_RDWR, PERM_FILE)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 	newPackageFile := []byte(string(packageName) + ".go")
 
 	// === Read file
-	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
+	file, err := os.OpenFile(fname, os.O_RDWR, PERM_FILE)
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func _replaceSourceFile(fname string, isCodeFile bool, comment, packageName []by
 
 			// Search the year.
 			if bytes.Index(line, copyright) != -1 {
-				s := bytes.Split(line, copyright, -1)
+				s := bytes.Split(line, copyright)
 				s = bytes.Fields(s[1]) // All after of "Copyright"
 				year = string(s[0])    // The first one, so the year.
 			} /*else {
@@ -311,7 +311,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 	}
 
 	// === Read file
-	file, err := os.Open(fname, os.O_RDWR, PERM_FILE)
+	file, err := os.OpenFile(fname, os.O_RDWR, PERM_FILE)
 	if err != nil {
 		return err
 	}
@@ -424,7 +424,7 @@ func replaceInstall(packageName string, cfg *Metadata) os.Error {
 	newPackage := []byte("cd " + packageName)
 
 	// === Read file
-	file, err := os.Open(FILE_INSTALL, os.O_RDWR, 0755)
+	file, err := os.OpenFile(FILE_INSTALL, os.O_RDWR, 0755)
 	if err != nil {
 		return err
 	}

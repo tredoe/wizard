@@ -43,7 +43,7 @@ the appropriate ignore file.
 Example:
 
 	gowizard -Project-name=goFoo -Author="John Foo" -Author-email="e@mail.com" \
--Project-type=lib -License=gpl-3 -vcs=git
+	-Project-type=lib -License=gpl-3 -vcs=git
 
 If the configuration file has been set, then it could be shorter:
 

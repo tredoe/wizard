@@ -17,8 +17,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kless/go-linoise/linoise"
 	"github.com/kless/goconfig/config"
+	inline "github.com/kless/inline"
 )
 
 
@@ -216,7 +216,7 @@ func interactive() {
 	}
 
 	fmt.Println("\n  = Interactive\n")
-	readin.DefaultIndent = "  "
+	inline.DefaultIndent = "  "
 
 	for _, k := range interactiveFlags {
 		f := flag.Lookup(k)
@@ -225,26 +225,26 @@ func interactive() {
 		switch k {
 		case "Package-name":
 			setNames()
-			input, err = readin.Prompt(text, *fPackageName)
+			input, err = inline.Prompt(text, *fPackageName)
 		case "Project-type":
-			input, err = readin.PromptChoice(text, arrayKeys(listProject),
+			input, err = inline.PromptChoice(text, arrayKeys(listProject),
 				f.Value.String())
 		case "Author-email":
 			if *fAuthorIsOrg {
-				input, err = readin.Prompt(text, "")
+				input, err = inline.Prompt(text, "")
 			} else {
-				input, err = readin.RepeatPrompt(text)
+				input, err = inline.RepeatPrompt(text)
 			}
 		case "License":
-			input, err = readin.PromptChoice(text, arrayKeys(listLicense),
+			input, err = inline.PromptChoice(text, arrayKeys(listLicense),
 				f.Value.String())
 		case "org":
-			*fAuthorIsOrg, err = readin.PromptBool(text)
+			*fAuthorIsOrg, err = inline.PromptBool(text)
 		case "vcs":
-			input, err = readin.PromptChoice(text, arrayKeys(listVCS),
+			input, err = inline.PromptChoice(text, arrayKeys(listVCS),
 				f.Value.String())
 		default:
-			input, err = readin.RepeatPrompt(text)
+			input, err = inline.RepeatPrompt(text)
 		}
 
 		if err != nil {
