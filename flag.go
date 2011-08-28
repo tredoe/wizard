@@ -215,9 +215,9 @@ func interactive() {
 		"vcs",
 	}
 
-	fmt.Println("\n  = Interactive\n")
+	fmt.Println("")
 	q := inline.NewQuestion()
-	defer q.RestoreTerm()
+	defer q.Close()
 
 	for _, k := range interactiveFlags {
 		f := flag.Lookup(k)
@@ -229,23 +229,23 @@ func interactive() {
 			input, err = q.ReadStringDefault(text, *fPackageName)
 		case "Project-type":
 			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject),
-				0)//f.Value.String())
+				"lib") // f.Value.String())
 		case "Author-email":
 			if *fAuthorIsOrg {
-				input, err = q.ReadString(text)
+				input, err = q.ReadString(text, inline.EMPTY)
 			} else {
-				input, err = q.Read(text)
+				input, err = q.ReadString(text, inline.NO_EMPTY)
 			}
 		case "License":
 			input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense),
-				0)//f.Value.String())
+				f.Value.String())
 		case "org":
 			*fAuthorIsOrg, err = q.ReadBool(text, false)
 		case "vcs":
 			input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS),
-				0)//f.Value.String())
+				f.Value.String())
 		default:
-			input, err = q.Read(text)
+			input, err = q.ReadString(text, inline.NO_EMPTY)
 		}
 
 		if err != nil {
