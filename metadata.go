@@ -57,28 +57,28 @@ type MetadataFieldError string
 func (self MetadataFieldError) String() string {
 	return "metadata: default section has not field '" + string(self) + "'"
 }
-
+// ===
 
 // Based on Metadata for Python Software Package, version 1.1
 type Metadata struct {
-	MetadataVersion string "metadata-version" // Version of the file format
-	ProjectType     string "project-type"
-	ProjectName     string "project-name"
-	PackageName     string "package-name"
-	Version         string "version"
-	Summary         string "summary"
-	DownloadURL     string "download-url"
-	Author          string "author"
-	AuthorEmail     string "author-email"
-	License         string "license"
-	VCS             string "vcs"
+	MetadataVersion string `tag:"metadata-version"` // Version of the file format
+	ProjectType     string `tag:"project-type"`
+	ProjectName     string `tag:"project-name"`
+	PackageName     string `tag:"package-name"`
+	Version         string `tag:"version"`
+	Summary         string `tag:"summary"`
+	DownloadURL     string `tag:"download-url"`
+	Author          string `tag:"author"`
+	AuthorEmail     string `tag:"author-email"`
+	License         string `tag:"license"`
+	VCS             string `tag:"vcs"`
 
 	// === Optional
-	//Platform string "platform"
-	//Description string "description"
-	Keywords string "keywords"
-	HomePage string "home-page"
-	//Classifier  []string "classifier"
+	//Platform string `tag:"platform"`
+	//Description string `tag:"description"`
+	Keywords string `tag:"keywords"`
+	HomePage string `tag:"home-page"`
+	//Classifier  []string `tag:"classifier"`
 
 	// Configuration file
 	cfg *config.Config
@@ -261,7 +261,7 @@ func (self *reflectStruct) name_value(fieldName string) (name, value string) {
 
 	value = value_.String()
 
-	if tag := field.Tag; tag != "" {
+	if tag := field.Tag.Get("tag"); tag != "" {
 		name = tag
 	} else {
 		name = field.Name

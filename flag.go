@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"github.com/kless/goconfig/config"
-	inline "github.com/kless/inline"
+	"github.com/kless/inline"
 )
 
 
@@ -216,35 +216,36 @@ func interactive() {
 	}
 
 	fmt.Println("\n  = Interactive\n")
-	inline.DefaultIndent = "  "
+	q := inline.NewQuestion()
+	defer q.RestoreTerm()
 
 	for _, k := range interactiveFlags {
 		f := flag.Lookup(k)
-		text := "+ " + strings.TrimRight(f.Usage, ".")
+		text := strings.TrimRight(f.Usage, ".")
 
 		switch k {
 		case "Package-name":
 			setNames()
-			input, err = inline.Prompt(text, *fPackageName)
+			input, err = q.ReadStringDefault(text, *fPackageName)
 		case "Project-type":
-			input, err = inline.PromptChoice(text, arrayKeys(listProject),
-				f.Value.String())
+			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject),
+				0)//f.Value.String())
 		case "Author-email":
 			if *fAuthorIsOrg {
-				input, err = inline.Prompt(text, "")
+				input, err = q.ReadString(text)
 			} else {
-				input, err = inline.RepeatPrompt(text)
+				input, err = q.Read(text)
 			}
 		case "License":
-			input, err = inline.PromptChoice(text, arrayKeys(listLicense),
-				f.Value.String())
+			input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense),
+				0)//f.Value.String())
 		case "org":
-			*fAuthorIsOrg, err = inline.PromptBool(text)
+			*fAuthorIsOrg, err = q.ReadBool(text, false)
 		case "vcs":
-			input, err = inline.PromptChoice(text, arrayKeys(listVCS),
-				f.Value.String())
+			input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS),
+				0)//f.Value.String())
 		default:
-			input, err = inline.RepeatPrompt(text)
+			input, err = q.Read(text)
 		}
 
 		if err != nil {

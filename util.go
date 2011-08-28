@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 
@@ -117,7 +118,7 @@ func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 // Base to find all files with extension `ext` on path `pathName`.
 func _finder(ext string, pathName string) []string {
 	finder := newFinder(ext)
-	path.Walk(pathName, finder, nil)
+	filepath.Walk(pathName, finder, nil)
 
 	if len(finder.files) == 0 {
 		fmt.Fprintf(os.Stderr,
