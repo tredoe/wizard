@@ -414,47 +414,7 @@ func replaceVCS_URL(fname, oldProjectName, newProjectName, vcs string) os.Error 
 	return nil
 }
 
-// Replaces the directory named as the project name.
-func replaceInstall(packageName string, cfg *Metadata) os.Error {
-	output := new(bytes.Buffer)
-
-	oldPackage := []byte("cd " + cfg.PackageName)
-	newPackage := []byte("cd " + packageName)
-
-	// === Read file
-	file, err := os.OpenFile(FILE_INSTALL, os.O_RDWR, 0755)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Buffered I/O
-	rw := bufio.NewReadWriter(bufio.NewReader(file), bufio.NewWriter(file))
-
-	for {
-		line, err := rw.ReadBytes('\n')
-		if err == os.EOF {
-			break
-		}
-
-		if bytes.HasPrefix(line, oldPackage) {
-			newLine := bytes.Replace(line, oldPackage, newPackage, 1)
-
-			output.Write(newLine)
-			break
-		}
-		output.Write(line)
-	}
-
-	if err := rewrite(file, rw, output); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // === Utility
-// ===
 
 // Gets the remaining of file buffer to add it to the output buffer. Finally
 // it is saved in the original file.

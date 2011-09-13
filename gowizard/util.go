@@ -32,7 +32,7 @@ func arrayKeys(m map[string]string) []string {
 
 // Creates a backup of a file.
 func backup(fname string) (ok bool) {
-	if err := copyFile(fname+"~", fname, getPerm(fname)); err != nil {
+	if err := copyFile(fname+"~", fname, PERM_FILE); err != nil {
 		return false
 	}
 	return true
@@ -62,14 +62,6 @@ func createHeader(name string) string {
 	}
 
 	return string(header)
-}
-
-// Gets the permission.
-func getPerm(fname string) (perm uint32) {
-	if path.Base(fname) == FILE_INSTALL {
-		return PERM_EXEC
-	}
-	return PERM_FILE
 }
 
 // === Implementation of interface 'Visitor' for 'path.Walk'

@@ -86,7 +86,7 @@ func renderNesting(destination, tmplHeader, template string,
 // Base to rendering single files.
 func _renderFile(destination, template string, tag map[string]string) {
 	render := parseFile(template, tag)
-	ioutil.WriteFile(destination, []byte(render), getPerm(destination))
+	ioutil.WriteFile(destination, []byte(render), PERM_FILE)
 }
 
 // Renders a single file.

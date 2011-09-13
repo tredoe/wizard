@@ -21,7 +21,6 @@ import (
 const (
 	PERM_DIRECTORY = 0755
 	PERM_FILE      = 0644
-	PERM_EXEC      = 0755
 )
 
 // Characters
@@ -101,7 +100,7 @@ func createProject() {
 	dirApp := path.Join(*fProjectName, *fPackageName)
 	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
-	renderNesting(path.Join(dirApp, *fPackageName)+".go", headerCodeFile
+	renderNesting(path.Join(dirApp, *fPackageName)+".go", headerCodeFile,
 		tmplPkgMain, tag)
 	renderNesting(dirApp+"/Makefile", headerMakefile, tmplPkgMakefile, tag)
 
