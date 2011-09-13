@@ -65,7 +65,7 @@ func createHeader(name string) string {
 }
 
 // === Implementation of interface 'Visitor' for 'path.Walk'
-// ===
+
 type finder struct {
 	ext   string
 	files []string
@@ -102,8 +102,6 @@ func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
 		self.files = append(self.files, filePath)
 	}
 }
-
-// ===
 
 // Base to find all files with extension `ext` on path `pathName`.
 func _finder(ext string, pathName string) []string {

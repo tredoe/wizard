@@ -29,7 +29,7 @@ type code struct {
 
 // === Template parser
 // Based on http://go.hokapoka.com/go/embedding-or-nesting-go-templates/
-// ===
+
 
 type templateParser struct {
 	str string
@@ -72,7 +72,6 @@ func parseFile(filename string, data interface{}) string {
 }
 
 // === Utility
-// ===
 
 // Renders template nesting both tmplHeader and content.
 func renderNesting(destination, tmplHeader, template string,
@@ -100,7 +99,6 @@ func renderNewFile(destination, template string, tag map[string]string) {
 }
 
 // === Render of header
-// ===
 
 // Base to render the headers of source code files according to the license.
 // If `year` is nil then gets the actual year.

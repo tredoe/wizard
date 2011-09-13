@@ -31,9 +31,8 @@ const (
 )
 
 const (
-	DIR_COMMAND  = "cmd"       // For when the project is a command application.
-	USER_CONFIG  = ".gowizard" // Configuration file per user
-	README       = "README.mkd"
+	USER_CONFIG = ".gowizard" // Configuration file per user
+	README      = "README.mkd"
 )
 
 // Get data directory from `$(GOROOT)/lib/$(TARG)`
@@ -44,6 +43,34 @@ var configVCS = map[string]string{
 	"bzr": ".bzr/branch/branch.conf",
 	"git": ".git/config",
 	"hg":  ".hg/hgrc",
+}
+
+// Project types
+var listProject = map[string]string{
+	"cmd": "Command line program",
+	"pac": "Package",
+	"cgo": "Package that calls C code",
+}
+
+// Available licenses
+var listLicense = map[string]string{
+	"apache-2": "Apache License, version 2.0",
+	"bsd-2":    "BSD-2 Clause license",
+	"bsd-3":    "BSD-3 Clause license",
+	"cc0-1":    "Creative Commons CC0, version 1.0 Universal",
+	"gpl-3":    "GNU General Public License, version 3 or later",
+	"lgpl-3":   "GNU Lesser General Public License, version 3 or later",
+	"agpl-3":   "GNU Affero General Public License, version 3 or later",
+	"none":     "Proprietary license",
+}
+
+// Version control systems (VCS)
+var listVCS = map[string]string{
+	"bzr":   "Bazaar",
+	"git":   "Git",
+	"hg":    "Mercurial",
+	"other": "other VCS",
+	"none":  "none",
 }
 
 // Adds license file in directory `dir`.
@@ -106,7 +133,7 @@ func createProject() {
 
 	if *fProjecType != "cmd" {
 		renderNesting(path.Join(dirApp, *fPackageName)+"_test.go",
-		headerCodeFile, tmplTest, tag)
+			headerCodeFile, tmplTest, tag)
 	}
 
 	// === Render common files
@@ -146,15 +173,6 @@ func createProject() {
 	// === License file
 	addLicense(*fProjectName, tag)
 
-	// === Create file Metadata
-	// tag["project_name"] has the original name (no in lower case).
-	cfg := NewMetadata(*fProjecType, tag["project_name"], *fPackageName,
-		*fLicense, *fAuthor, *fAuthorEmail, *fVCS)
-
-	if err := cfg.WriteINI(*fProjectName); err != nil {
-		reportExit(err)
-	}
-
 	// === Print messages
 	if tag["author_is_org"] != "" {
 		fmt.Print(`
@@ -170,221 +188,10 @@ func createProject() {
 	}
 }
 
-// Updates some values from a project already created.
-func updateProject() {
-	var updatedFiles, errorFiles []string
-
-	// 'cfg' has the old values.
-	cfg, err := ReadMetadata()
-	if err != nil {
-		reportExit(err)
-	}
-
-	// 'tag' and the flags have the new values.
-	tag, update := tagsToUpdate(cfg)
-	if *fDebug {
-		debug(tag)
-	}
-
-	// === Rename directories
-	if *fVerbose && (update["ProjectName"] || update["PackageName"]) {
-		fmt.Println(" == Directories renamed")
-	}
-
-	if update["ProjectName"] {
-		if err := os.Chdir(".."); err != nil {
-			reportExit(err)
-		}
-
-		oldProjectName := strings.ToLower(cfg.ProjectName)
-
-		if err := os.Rename(oldProjectName, *fProjectName); err != nil {
-			reportExit(err)
-		}
-		if *fVerbose {
-			fmt.Printf(" + Project: %q -> %q\n", oldProjectName, *fProjectName)
-		}
-
-		// Do 'chdir' in new project directory.
-		if err := os.Chdir(*fProjectName); err != nil {
-			reportExit(err)
-		}
-
-		// === Rename URL in the VCS
-		fname := configVCS[cfg.VCS]
-
-		if cfg.VCS != "other" && cfg.VCS != "none" && backup(fname) {
-			if err := replaceVCS_URL(fname, strings.ToLower(cfg.ProjectName),
-				*fProjectName, cfg.VCS); err != nil {
-				reportExit(err)
-			}
-			if *fVerbose {
-				updatedFiles = append(updatedFiles, fname)
-			}
-		}
-	}
-
-	if update["PackageName"] {
-		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
-			reportExit(err)
-		}
-		if *fVerbose {
-			fmt.Printf(" + Package: %q -> %q\n", cfg.PackageName, *fPackageName)
-		}
-	}
-
-	// === Rename source file named as the package
-	if update["PackageName"] {
-		if *fVerbose {
-			fmt.Println("\n == Files renamed")
-		}
-
-		old := path.Join(*fPackageName, cfg.PackageName) + ".go"
-		new := path.Join(*fPackageName, *fPackageName) + ".go"
-
-		if err := os.Rename(old, new); err == nil {
-			if *fVerbose {
-				fmt.Printf(" + %s -> %s\n", old, new)
-			}
-		}
-
-		if *fProjecType != "cmd" {
-			old := path.Join(*fPackageName, cfg.PackageName) + "_test.go"
-			new := path.Join(*fPackageName, *fPackageName) + "_test.go"
-
-			if err := os.Rename(old, new); err == nil {
-				if *fVerbose {
-					fmt.Printf(" + %s -> %s\n", old, new)
-				}
-			}
-		}
-	}
-
-	// === Update source code files
-	if update["ProjectName"] || update["License"] || update["PackageInCode"] {
-		packageName := []byte(tag["package_name"])
-
-		// === Directory of source files can have a different name.
-		var files []string
-		var pathMakefile string
-
-		files = finderGo(*fPackageName)
-		pathMakefile = path.Join(*fPackageName, "Makefile")
-		// ===
-
-		for _, fname := range files {
-			if backup(fname) {
-
-				if err := replaceGoFile(
-					fname, packageName, cfg, tag, update); err != nil {
-					fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", fname, err)
-				} else if *fVerbose {
-					updatedFiles = append(updatedFiles, fname)
-				}
-			} else {
-				errorFiles = append(errorFiles, fname)
-			}
-		}
-
-		// === Update Makefile
-		if backup(pathMakefile) {
-			if err := replaceMakefile(
-				pathMakefile, packageName, cfg, tag, update); err != nil {
-				fmt.Fprintf(os.Stderr,
-					"file %q not updated: %s\n", pathMakefile, err)
-			} else if *fVerbose {
-				updatedFiles = append(updatedFiles, pathMakefile)
-			}
-		} else {
-			errorFiles = append(errorFiles, pathMakefile)
-		}
-	}
-
-	// === Update text files with extension 'mkd'
-	if update["ProjectName"] || update["License"] {
-		projectName := []byte(tag["project_name"])
-		files := finderMkd(".")
-
-		for _, fname := range files {
-			if backup(fname) {
-
-				if err := replaceTextFile(
-					fname, projectName, cfg, tag, update); err != nil {
-					fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", fname, err)
-				} else if *fVerbose {
-					updatedFiles = append(updatedFiles, fname)
-				}
-			} else {
-				errorFiles = append(errorFiles, fname)
-			}
-		}
-	}
-
-	// === License file
-	if update["License"] {
-		// Remove extra file added with license LGPL.
-		if cfg.License == "lgpl-3" {
-			if err := os.Remove("./LICENSE-GPL"); err != nil {
-				reportExit(err)
-			}
-		}
-
-		addLicense(".", tag)
-
-		if *fVerbose {
-			updatedFiles = append(updatedFiles, "LICENSE")
-		}
-
-		cfg.License = *fLicense // Metadata
-	}
-
-	// === Metadata file
-	if backup(_META_FILE) {
-		if update["ProjectName"] {
-			cfg.DownloadURL = strings.Replace(cfg.DownloadURL, cfg.ProjectName,
-				tag["project_name"], 1)
-			cfg.HomePage = strings.Replace(cfg.HomePage, cfg.ProjectName,
-				tag["project_name"], 1)
-			cfg.ProjectName = tag["project_name"]
-		}
-		if update["PackageName"] {
-			cfg.PackageName = *fPackageName
-		}
-
-		if err := cfg.WriteINI("."); err != nil {
-			reportExit(err)
-		}
-	} else {
-		errorFiles = append(errorFiles, _META_FILE)
-	}
-
-	// === Print messages
-	if *fVerbose {
-		updatedFiles = append(updatedFiles, _META_FILE)
-		fmt.Println("\n == Files updated")
-
-		for _, file := range updatedFiles {
-			fmt.Printf(" + %s\n", file)
-		}
-	}
-
-	if len(errorFiles) != 0 {
-		fmt.Fprintf(os.Stderr, "could not be backed up: %s\n",
-			strings.Join(errorFiles, ","))
-	}
-}
-
 // === Main program execution
-// ===
 
 func main() {
 	loadConfig()
-
-	if !*fUpdate {
-		createProject()
-	} else {
-		updateProject()
-	}
-
+	createProject()
 	os.Exit(0)
 }

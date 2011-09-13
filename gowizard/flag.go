@@ -23,7 +23,6 @@ import (
 
 // Flags for the command line
 var (
-	// === Metadata
 	fProjecType  = flag.String("Project-type", "", "The project type.")
 	fProjectName = flag.String("Project-name", "", "The name of the project.")
 	fPackageName = flag.String("Package-name", "", "The name of the package.")
@@ -35,7 +34,6 @@ var (
 
 	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
 	fDebug       = flag.Bool("d", false, "Debug mode")
-	fUpdate      = flag.Bool("u", false, "Update data on project created")
 	fVerbose     = flag.Bool("v", false, "Show files updated")
 	fVCS         = flag.String("vcs", "", "Version control system")
 )
@@ -44,8 +42,6 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `
 Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 	[-Package-name -org]
-
-       gowizard -u [-Project-name -Package-name -License] [-org]
 
 `)
 	flag.PrintDefaults()
@@ -73,9 +69,7 @@ func loadConfig() {
 	}
 
 	// Get configuration per user
-	if !*fUpdate {
-		userConfig()
-	}
+	userConfig()
 
 	// === Options
 	if *fListProject {
@@ -102,24 +96,17 @@ func loadConfig() {
 		os.Exit(0)
 	}
 
-	if !*fUpdate {
-		if *fInteractive {
-			interactive()
-		} else {
-			setNames()
-		}
+	if *fInteractive {
+		interactive()
+	} else {
+		setNames()
 	}
 
 	// === Checking
-	if !*fUpdate {
-		checkAtCreate()
-	} else {
-		checkAtUpdate()
-	}
+	checkAtCreate()
 }
 
 // === Checking
-// ===
 
 // Common checking.
 func checkCommon(errors bool) {
@@ -133,10 +120,6 @@ func checkCommon(errors bool) {
 	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
 		fmt.Fprintf(os.Stderr,
 			"license 'bsd-3' requires an organization as author\n")
-		if *fUpdate {
-			fmt.Fprintf(os.Stderr,
-				"\tThe author name for the license is got from metadata file\n")
-		}
 		errors = true
 	}
 
@@ -176,23 +159,6 @@ func checkAtCreate() {
 
 	checkCommon(errors)
 }
-
-// Checks at updating project.
-func checkAtUpdate() {
-	var errors bool
-
-	// === Necessary fields
-	if *fProjectName == "" && *fPackageName == "" && *fLicense == "" {
-		fmt.Fprintf(os.Stderr, "missing required fields to update\n")
-		usage()
-	}
-
-	if *fLicense != "" {
-		checkCommon(errors)
-	}
-}
-
-// ===
 
 // Interactive mode.
 func interactive() {
@@ -307,56 +273,6 @@ func tagsToCreate() map[string]string {
 	tag["project_is_cgo"] = value
 
 	return tag
-}
-
-// Creates tags to pass them to templates. Used at updating a project.
-//
-// If the flags are empty then they are set with metadata values.
-// If flags are not empty then is indicated in map 'update' since they are the
-// values to change.
-func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool) {
-	update = map[string]bool{}
-
-	// setNames() Needs to know the 'ProjectType'
-	*fProjecType = cfg.ProjectType
-	setNames()
-
-	tag = map[string]string{
-		"project_name": *fProjectName,
-		"package_name": *fPackageName,
-	}
-
-	if *fProjectName == "" {
-		tag["project_name"] = cfg.ProjectName
-	} else if *fProjectName != cfg.ProjectName {
-		update["ProjectName"] = true
-
-		*fProjectName = strings.ToLower(*fProjectName)
-		tag["_project_header"] = createHeader(*fProjectName)
-	}
-
-	if *fPackageName == "" {
-		tag["package_name"] = cfg.PackageName
-	} else if *fPackageName != cfg.PackageName {
-		update["PackageName"] = true
-
-		if cfg.ProjectType == "pac" || cfg.ProjectType == "cgo" {
-			update["PackageInCode"] = true
-		}
-	}
-
-	if *fLicense == "" {
-		*fLicense = cfg.License
-	} else if *fLicense != cfg.License {
-		update["License"] = true
-
-		if *fLicense == "bsd-3" {
-			tag["author"] = cfg.Author
-		}
-	}
-	tag["license"] = listLicense[*fLicense]
-
-	return tag, update
 }
 
 // Loads configuration per user, if any.
