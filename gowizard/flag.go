@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"github.com/kless/goconfig/config"
-	"github.com/kless/inline"
+	"github.com/kless/Go-Inline/inline"
 )
 
 // Flags for the command line
@@ -212,7 +212,7 @@ func interactive() {
 	}
 
 	fmt.Println("")
-	q := inline.NewQuestion()
+	q := inline.NewQuestionByDefault()
 	defer q.Close()
 
 	for _, k := range interactiveFlags {
@@ -222,26 +222,24 @@ func interactive() {
 		switch k {
 		case "Package-name":
 			setNames()
-			input, err = q.ReadStringDefault(text, *fPackageName)
+			input, err = q.ReadStringDefault(text, *fPackageName, inline.REQUIRED)
 		case "Project-type":
-			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject),
-				"lib") // f.Value.String())
+			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject), "lib", inline.NONE) // f.Value.String())
 		case "Author-email":
 			if *fAuthorIsOrg {
-				input, err = q.ReadString(text, inline.EMPTY)
+				input, err = q.ReadString(text, inline.NONE)
 			} else {
-				input, err = q.ReadString(text, inline.NO_EMPTY)
+				input, err = q.ReadString(text, inline.REQUIRED)
 			}
 		case "License":
-			input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense),
-				f.Value.String())
+			input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), f.Value.String(), inline.NONE)
 		case "org":
-			*fAuthorIsOrg, err = q.ReadBool(text, false)
+			*fAuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
 		case "vcs":
 			input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS),
-				f.Value.String())
+				f.Value.String(), inline.NONE)
 		default:
-			input, err = q.ReadString(text, inline.NO_EMPTY)
+			input, err = q.ReadString(text, inline.REQUIRED)
 		}
 
 		if err != nil {
