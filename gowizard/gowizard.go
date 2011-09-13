@@ -225,7 +225,7 @@ func updateProject() {
 		}
 	}
 
-	if update["PackageName"] && (*fProjecType == "pac" || *fProjecType == "cgo") {
+	if update["PackageName"] {
 		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
 			reportExit(err)
 		}
@@ -240,28 +240,18 @@ func updateProject() {
 			fmt.Println("\n == Files renamed")
 		}
 
-		if *fProjecType == "cmd" {
-			old := path.Join(DIR_COMMAND, cfg.PackageName) + ".go"
-			new := path.Join(DIR_COMMAND, *fPackageName) + ".go"
+		old := path.Join(*fPackageName, cfg.PackageName) + ".go"
+		new := path.Join(*fPackageName, *fPackageName) + ".go"
 
-			// It is possible that it has been deleted by the developer.
-			if err := os.Rename(old, new); err == nil {
-				if *fVerbose {
-					fmt.Printf(" + %s -> %s\n", old, new)
-				}
+		if err := os.Rename(old, new); err == nil {
+			if *fVerbose {
+				fmt.Printf(" + %s -> %s\n", old, new)
 			}
-		} else {
-			old := path.Join(*fPackageName, cfg.PackageName) + ".go"
-			new := path.Join(*fPackageName, *fPackageName) + ".go"
+		}
 
-			if err := os.Rename(old, new); err == nil {
-				if *fVerbose {
-					fmt.Printf(" + %s -> %s\n", old, new)
-				}
-			}
-
-			old = path.Join(*fPackageName, cfg.PackageName) + "_test.go"
-			new = path.Join(*fPackageName, *fPackageName) + "_test.go"
+		if *fProjecType != "cmd" {
+			old := path.Join(*fPackageName, cfg.PackageName) + "_test.go"
+			new := path.Join(*fPackageName, *fPackageName) + "_test.go"
 
 			if err := os.Rename(old, new); err == nil {
 				if *fVerbose {
@@ -279,13 +269,8 @@ func updateProject() {
 		var files []string
 		var pathMakefile string
 
-		if *fProjecType == "cmd" {
-			files = finderGo(DIR_COMMAND)
-			pathMakefile = path.Join(DIR_COMMAND, "Makefile")
-		} else {
-			files = finderGo(*fPackageName)
-			pathMakefile = path.Join(*fPackageName, "Makefile")
-		}
+		files = finderGo(*fPackageName)
+		pathMakefile = path.Join(*fPackageName, "Makefile")
 		// ===
 
 		for _, fname := range files {

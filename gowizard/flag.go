@@ -261,25 +261,17 @@ func setNames() {
 	// The project name is not changed to lower case to add it so to the tag.
 	*fProjectName = strings.TrimSpace(*fProjectName)
 
-	switch *fProjecType {
 	// A program is usually named as the project name.
-	case "cmd":
-		if *fPackageName == "" {
-			*fPackageName = strings.ToLower(*fProjectName)
-		}
-	// For packages
-	default:
-		if *fPackageName == "" {
-			// The package name is created:
-			// getting the last string after of the dash ('-'), if any,
-			// and removing 'go'. Finally, it's lower cased.
-			pkg := strings.Split(*fProjectName, "-")
-			*fPackageName = reGo.ReplaceAllString(
-				strings.ToLower(pkg[len(pkg)-1]), "")
-		} else {
-			*fPackageName = strings.ToLower(
-				strings.TrimSpace(*fPackageName))
-		}
+	if *fPackageName == "" {
+		// The package name is created:
+		// getting the last string after of the dash ('-'), if any,
+		// and removing 'go'. Finally, it's lower cased.
+		pkg := strings.Split(*fProjectName, "-")
+		*fPackageName = reGo.ReplaceAllString(
+			strings.ToLower(pkg[len(pkg)-1]), "")
+	} else {
+		*fPackageName = strings.ToLower(
+			strings.TrimSpace(*fPackageName))
 	}
 }
 
@@ -313,20 +305,6 @@ func tagsToCreate() map[string]string {
 		value = ""
 	}
 	tag["project_is_cgo"] = value
-
-	if *fVCS == "none" {
-		value = "ok"
-	} else {
-		value = ""
-	}
-	tag["vcs_is_none"] = value
-
-	if *fProjecType == "cmd" {
-		value = "ok"
-	} else {
-		value = ""
-	}
-	tag["dir_is_cmd"] = value
 
 	return tag
 }
