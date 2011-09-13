@@ -6,11 +6,7 @@
 
 ## Installation
 
-{{.section project_is_lib}}
-	$ goinstall << download URL >>
-{{.or}}
-<< Instructions to install >>
-{{.end}}
+	goinstall << download URL >>
 
 
 ## Configuration
@@ -30,27 +26,6 @@ See file AUTHORS and CONTRIBUTORS (if any).
 
 Licensed under **{{license}}**.  
 See file LICENSE.
-
-
-## Contact
-
-<< Contact information for the distributor or programmer >>
-
-
-## Known bugs
-
-<< Known bugs and instructions on reporting new ones >>
-
-
-## Credits and acknowledgments
-
-For credits, see file AUTHORS and CONTRIBUTORS (if any).
-
-
-## ChangeLog
-
-For changes between releases, see file NEWS; and for changes between the commits,
-see {{.section vcs_is_none}}file CHANGES{{.or}}the [commit history][]{{.end}}.
 
 
 * * *
