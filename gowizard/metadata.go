@@ -22,9 +22,8 @@ const _VERSION = "1.1"
 
 // Project types
 var listProject = map[string]string{
-	"app":  "Program",
-	"tool": "Development tool",
-	"lib":  "Library",
+	"cmd":  "Command line program",
+	"pac":  "Package",
 	"cgo":  "Package that calls C code",
 }
 

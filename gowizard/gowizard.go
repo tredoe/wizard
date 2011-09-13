@@ -96,25 +96,18 @@ func createProject() {
 	headerCodeFile, headerMakefile := renderAllHeaders(tag, "")
 
 	// === Render project files
-	var dirApp string // To create directories in lower case.
 
-	switch *fProjecType {
-	case "lib", "cgo":
-		dirApp = path.Join(*fProjectName, *fPackageName)
-		os.MkdirAll(dirApp, PERM_DIRECTORY)
+	// To create directories in lower case.
+	dirApp := path.Join(*fProjectName, *fPackageName)
+	os.MkdirAll(dirApp, PERM_DIRECTORY)
 
-		renderNesting(path.Join(dirApp, *fPackageName)+".go",
-			headerCodeFile, tmplPkgMain, tag)
+	renderNesting(path.Join(dirApp, *fPackageName)+".go", headerCodeFile
+		tmplPkgMain, tag)
+	renderNesting(dirApp+"/Makefile", headerMakefile, tmplPkgMakefile, tag)
+
+	if *fProjecType != "cmd" {
 		renderNesting(path.Join(dirApp, *fPackageName)+"_test.go",
-			headerCodeFile, tmplTest, tag)
-		renderNesting(dirApp+"/Makefile", headerMakefile, tmplPkgMakefile, tag)
-	case "app", "tool":
-		dirApp = path.Join(*fProjectName, DIR_COMMAND)
-		os.MkdirAll(dirApp, PERM_DIRECTORY)
-
-		renderNesting(path.Join(dirApp, *fPackageName)+".go",
-			headerCodeFile, tmplCmdMain, tag)
-		renderNesting(dirApp+"/Makefile", headerMakefile, tmplCmdMakefile, tag)
+		headerCodeFile, tmplTest, tag)
 	}
 
 	// === Render common files
@@ -232,7 +225,7 @@ func updateProject() {
 		}
 	}
 
-	if update["PackageName"] && (*fProjecType == "lib" || *fProjecType == "cgo") {
+	if update["PackageName"] && (*fProjecType == "pac" || *fProjecType == "cgo") {
 		if err := os.Rename(cfg.PackageName, *fPackageName); err != nil {
 			reportExit(err)
 		}
@@ -247,7 +240,7 @@ func updateProject() {
 			fmt.Println("\n == Files renamed")
 		}
 
-		if *fProjecType == "app" || *fProjecType == "tool" {
+		if *fProjecType == "cmd" {
 			old := path.Join(DIR_COMMAND, cfg.PackageName) + ".go"
 			new := path.Join(DIR_COMMAND, *fPackageName) + ".go"
 
@@ -286,7 +279,7 @@ func updateProject() {
 		var files []string
 		var pathMakefile string
 
-		if *fProjecType == "app" || *fProjecType == "tool" {
+		if *fProjecType == "cmd" {
 			files = finderGo(DIR_COMMAND)
 			pathMakefile = path.Join(DIR_COMMAND, "Makefile")
 		} else {

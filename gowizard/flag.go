@@ -224,7 +224,7 @@ func interactive() {
 			setNames()
 			input, err = q.ReadStringDefault(text, *fPackageName, inline.REQUIRED)
 		case "Project-type":
-			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject), "lib", inline.NONE) // f.Value.String())
+			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject), "pac", inline.NONE) // f.Value.String())
 		case "Author-email":
 			if *fAuthorIsOrg {
 				input, err = q.ReadString(text, inline.NONE)
@@ -263,11 +263,11 @@ func setNames() {
 
 	switch *fProjecType {
 	// A program is usually named as the project name.
-	case "app", "tool":
+	case "cmd":
 		if *fPackageName == "" {
 			*fPackageName = strings.ToLower(*fProjectName)
 		}
-	// For libraries (packages)
+	// For packages
 	default:
 		if *fPackageName == "" {
 			// The package name is created:
@@ -321,7 +321,7 @@ func tagsToCreate() map[string]string {
 	}
 	tag["vcs_is_none"] = value
 
-	if *fProjecType == "app" || *fProjecType == "tool" {
+	if *fProjecType == "cmd" {
 		value = "ok"
 	} else {
 		value = ""
@@ -362,7 +362,7 @@ func tagsToUpdate(cfg *Metadata) (tag map[string]string, update map[string]bool)
 	} else if *fPackageName != cfg.PackageName {
 		update["PackageName"] = true
 
-		if cfg.ProjectType == "lib" || cfg.ProjectType == "cgo" {
+		if cfg.ProjectType == "pac" || cfg.ProjectType == "cgo" {
 			update["PackageInCode"] = true
 		}
 	}

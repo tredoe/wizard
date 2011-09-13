@@ -33,8 +33,8 @@ The required flags to build a new project are *-Project-type*, *-Project-name*,
 *-License* ,*-Author*, *-Author-email* and *-vcs*; *-Author-email* is not
 necessary when the author is an organization (*-org*).
 
-By default, the package name (*-Package-name*) for a program (app, tool) is
-named as the project name. For other types of project, it is removed "go-" from
+By default, the package name (*-Package-name*) for a program (cmd) is named as
+the project name. For other types of project, it is removed "go-" from the
 project name.
 
 The flag *-vcs* indicates the version control system to use, which allows to add
@@ -42,12 +42,12 @@ the appropriate ignore file.
 
 Example:
 
-	gowizard -Project-name=goFoo -Author="John Foo" -Author-email="e@mail.com" \
-	-Project-type=lib -License=gpl-3 -vcs=git
+	gowizard -Project-name=Go-Foo -Author="John Foo" -Author-email="e@mail.com" \
+	-Project-type=pac -License=gpl-3 -vcs=git
 
 If the configuration file has been set, then it could be shorter:
 
-	gowizard -Project-name=goFoo -Project-type=lib
+	gowizard -Project-name=Go-Foo -Project-type=pac
 
 Useful flags:
 
@@ -72,7 +72,7 @@ Note that files are backed up adding "~" to the file name.
 Example:
 
 	cd gofoo
-	gowizard -u -Project-name=goBar -License=bsd-2 -v
+	gowizard -u -Project-name=Go-Bar -License=bsd-2 -v
 
 ### Suggestions about naming
 

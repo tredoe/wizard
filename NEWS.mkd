@@ -15,7 +15,7 @@ listed below.*
 
 ### 2010-11-??  v0.9.9
 
-+ Added script for easy installation of commands and *cgo* libraries.
++ Added script for easy installation of commands and *cgo* packages.
 
 + Fixed re-writing of larger files.
 
@@ -34,7 +34,7 @@ listed below.*
 
 + The source file is named as the package name. The directory of source files is
 named "cmd" when the project is a command application, and it is named as the
-package name when it is a library.
+package name when it is a package.
 
 + Update fields related to the project name in file Metadata.
 

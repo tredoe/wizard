@@ -1,4 +1,4 @@
-gowizard
+GoWizard
 ========
 
 ## Metadata
@@ -55,7 +55,7 @@ And syntax guides:
 I am agree with Google about [no to license proliferation][4] so the licenses to
 choose which have been approved by *The Open Source Initiative (OSI)* are:
 
-+ [New and Simplified BSD licenses][5]
++ [BSD-3 Clause and BSD-2 Clause licenses][5]
 + [Apache License, version 2.0][6]
 + [GNU General Public License, version 3][7] or later
 + [GNU Lesser General Public License, version 3][8] or later
