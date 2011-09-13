@@ -1,15 +1,6 @@
 GoWizard
 ========
 
-## Metadata
-
-It has been used the metadata for Python Software Packages to build a Metadata
-file with each project.
-
-So, could be easily changed some project data. In addition, it could be used by
-another tools to get the package name.
-
-
 ## Templates
 
 ### Text files syntax

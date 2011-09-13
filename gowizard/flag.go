@@ -224,7 +224,6 @@ func interactive() {
 func setNames() {
 	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
 
-	// The project name is not changed to lower case to add it so to the tag.
 	*fProjectName = strings.TrimSpace(*fProjectName)
 
 	// A program is usually named as the project name.
@@ -254,9 +253,6 @@ func tagsToCreate() map[string]string {
 		"vcs":             *fVCS,
 		"_project_header": createHeader(*fProjectName),
 	}
-
-	// Now, the project name can be changed to lower case.
-	*fProjectName = strings.ToLower(*fProjectName)
 
 	if *fAuthorIsOrg {
 		value = "ok"

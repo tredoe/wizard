@@ -5,7 +5,7 @@ cd gowizard
 
 ## Install dependencies
 #goinstall github.com/kless/goconfig/config
-#goinstall github.com/kless/inline
+#goinstall github.com/kless/Go-Inline/inline
 
 ## Build
 make install
