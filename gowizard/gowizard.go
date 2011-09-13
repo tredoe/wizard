@@ -35,7 +35,6 @@ const (
 	DIR_COMMAND  = "cmd"       // For when the project is a command application.
 	USER_CONFIG  = ".gowizard" // Configuration file per user
 	README       = "README.mkd"
-	FILE_INSTALL = "Install.sh"
 )
 
 // Get data directory from `$(GOROOT)/lib/$(TARG)`
@@ -130,10 +129,6 @@ func createProject() {
 	} else {
 		renderFile(*fProjectName, dirTmpl+"/AUTHORS.mkd", tag)
 		renderFile(*fProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
-	}
-
-	if *fProjecType != "lib" {
-		renderFile(*fProjectName, dirTmpl+"/Install.sh", tag)
 	}
 
 	// === Add file related to VCS
@@ -364,20 +359,6 @@ func updateProject() {
 		}
 
 		cfg.License = *fLicense // Metadata
-	}
-
-	// === Installation file
-	if update["PackageName"] && *fProjecType == "cgo" {
-		if backup(FILE_INSTALL) {
-			if err := replaceInstall(tag["package_name"], cfg); err != nil {
-				fmt.Fprintf(os.Stderr, "file %q not updated: %s\n", FILE_INSTALL, err)
-			} else if *fVerbose {
-				updatedFiles = append(updatedFiles, FILE_INSTALL)
-			}
-
-		} else {
-			errorFiles = append(errorFiles, FILE_INSTALL)
-		}
 	}
 
 	// === Metadata file
