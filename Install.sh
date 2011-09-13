@@ -1,6 +1,8 @@
 #!/bin/sh
 set -ev
 
+cd gowizard
+
 ## Install dependencies
 #goinstall github.com/kless/goconfig/config
 #goinstall github.com/kless/inline

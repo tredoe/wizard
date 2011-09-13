@@ -1,4 +1,4 @@
-// Copyright 2010  The "gowizard" Authors
+// Copyright 2010  The "Go-Wizard" Authors
 //
 // Use of this source code is governed by the BSD-2 Clause license
 // that can be found in the LICENSE file.
@@ -16,7 +16,6 @@ import (
 	"path"
 	"path/filepath"
 )
-
 
 // Gets an array from map keys.
 func arrayKeys(m map[string]string) []string {
@@ -72,7 +71,6 @@ func getPerm(fname string) (perm uint32) {
 	}
 	return PERM_FILE
 }
-
 
 // === Implementation of interface 'Visitor' for 'path.Walk'
 // ===

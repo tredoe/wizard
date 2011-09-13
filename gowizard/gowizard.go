@@ -1,4 +1,4 @@
-// Copyright 2010  The "gowizard" Authors
+// Copyright 2010  The "Go-Wizard" Authors
 //
 // Use of this source code is governed by the BSD-2 Clause license
 // that can be found in the LICENSE file.
@@ -16,7 +16,6 @@ import (
 	"path"
 	"strings"
 )
-
 
 // Permissions
 const (
@@ -39,7 +38,6 @@ const (
 	FILE_INSTALL = "Install.sh"
 )
 
-
 // Get data directory from `$(GOROOT)/lib/$(TARG)`
 var dirData = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
 
@@ -49,7 +47,6 @@ var configVCS = map[string]string{
 	"git": ".git/config",
 	"hg":  ".hg/hgrc",
 }
-
 
 // Adds license file in directory `dir`.
 func addLicense(dir string, tag map[string]string) {

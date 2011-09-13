@@ -1,4 +1,4 @@
-// Copyright 2010  The "gowizard" Authors
+// Copyright 2010  The "Go-Wizard" Authors
 //
 // Use of this source code is governed by the BSD-2 Clause license
 // that can be found in the LICENSE file.
@@ -19,7 +19,6 @@ import (
 	"strings"
 )
 
-
 // Text to search
 var (
 	LF             = []byte{'\n'}
@@ -32,7 +31,6 @@ var (
 
 // Header under the project name.
 var reHeader = regexp.MustCompile(fmt.Sprintf("^%c+\n", CHAR_HEADER))
-
 
 // Replaces the project name on file `fname`.
 func replaceTextFile(fname string, projectName []byte, cfg *Metadata, tag map[string]string, update map[string]bool) os.Error {
@@ -454,7 +452,6 @@ func replaceInstall(packageName string, cfg *Metadata) os.Error {
 
 	return nil
 }
-
 
 // === Utility
 // ===

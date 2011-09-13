@@ -1,4 +1,4 @@
-// Copyright 2010  The "gowizard" Authors
+// Copyright 2010  The "Go-Wizard" Authors
 //
 // Use of this source code is governed by the BSD-2 Clause license
 // that can be found in the LICENSE file.
@@ -21,7 +21,6 @@ import (
 	"github.com/kless/inline"
 )
 
-
 // Flags for the command line
 var (
 	// === Metadata
@@ -40,7 +39,6 @@ var (
 	fVerbose     = flag.Bool("v", false, "Show files updated")
 	fVCS         = flag.String("vcs", "", "Version control system")
 )
-
 
 func usage() {
 	fmt.Fprintf(os.Stderr, `
@@ -120,7 +118,6 @@ func loadConfig() {
 	}
 }
 
-
 // === Checking
 // ===
 
@@ -196,7 +193,6 @@ func checkAtUpdate() {
 }
 
 // ===
-
 
 // Interactive mode.
 func interactive() {

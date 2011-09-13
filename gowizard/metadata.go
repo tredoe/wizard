@@ -1,4 +1,4 @@
-// Copyright 2010  The "gowizard" Authors
+// Copyright 2010  The "Go-Wizard" Authors
 //
 // Use of this source code is governed by the BSD-2 Clause license
 // that can be found in the LICENSE file.
@@ -16,7 +16,6 @@ import (
 
 	"github.com/kless/goconfig/config"
 )
-
 
 const _META_FILE = "Metadata"
 const _VERSION = "1.1"
@@ -49,7 +48,6 @@ var listVCS = map[string]string{
 	"other": "other VCS",
 	"none":  "none",
 }
-
 
 // === Errors
 type MetadataFieldError string
@@ -86,7 +84,7 @@ type Metadata struct {
 
 // Creates a new metadata with the basic fields to build the project.
 func NewMetadata(ProjectType, ProjectName, PackageName, License, Author,
-AuthorEmail, vcs string) *Metadata {
+	AuthorEmail, vcs string) *Metadata {
 	_Metadata := new(Metadata)
 	_Metadata.cfg = config.NewDefault()
 
@@ -233,7 +231,6 @@ func (self *Metadata) WriteINI(dir string) os.Error {
 
 	return nil
 }
-
 
 // === Reflection
 // ===

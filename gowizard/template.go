@@ -1,4 +1,4 @@
-// Copyright 2010  The "gowizard" Authors
+// Copyright 2010  The "Go-Wizard" Authors
 //
 // Use of this source code is governed by the BSD-2 Clause license
 // that can be found in the LICENSE file.
@@ -19,7 +19,6 @@ import (
 	"time"
 )
 
-
 // === Structure of a page for a source code file
 const tmplCode = "{{tmplHeader}}\n{{content}}"
 
@@ -27,7 +26,6 @@ type code struct {
 	tmplHeader string
 	content    string
 }
-
 
 // === Template parser
 // Based on http://go.hokapoka.com/go/embedding-or-nesting-go-templates/
@@ -42,7 +40,6 @@ func (self *templateParser) Write(p []byte) (n int, err os.Error) {
 
 	return len(p), nil
 }
-
 
 func parse(str string, data interface{}) string {
 	_templateParser := new(templateParser)
@@ -74,19 +71,17 @@ func parseFile(filename string, data interface{}) string {
 	return _templateParser.str
 }
 
-
 // === Utility
 // ===
 
 // Renders template nesting both tmplHeader and content.
 func renderNesting(destination, tmplHeader, template string,
-tag map[string]string) {
+	tag map[string]string) {
 	renderContent := parse(template, tag)
 	render := parse(tmplCode, &code{tmplHeader, renderContent})
 
 	ioutil.WriteFile(destination, []byte(render), PERM_FILE)
 }
-
 
 // Base to rendering single files.
 func _renderFile(destination, template string, tag map[string]string) {
@@ -104,14 +99,13 @@ func renderNewFile(destination, template string, tag map[string]string) {
 	_renderFile(destination, template, tag)
 }
 
-
 // === Render of header
 // ===
 
 // Base to render the headers of source code files according to the license.
 // If `year` is nil then gets the actual year.
 func _renderHeader(tag map[string]string, year string, renderCodeFile,
-renderMakefile bool) (headerCodeFile, headerMakefile string) {
+	renderMakefile bool) (headerCodeFile, headerMakefile string) {
 	licenseName := strings.Split(*fLicense, "-")[0]
 
 	if year == "" {
