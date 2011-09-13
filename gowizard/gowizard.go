@@ -152,11 +152,8 @@ func createProject() {
 
 	// === Add file related to VCS
 	switch *fVCS {
-	case "other":
+	case "other", "none":
 		break
-	// File CHANGES is only necessary when is not used a VCS.
-	case "none":
-		renderFile(*fProjectName, dirTmpl+"/CHANGES.mkd", tag)
 	default:
 		ignoreFile := "." + *fVCS + "ignore"
 

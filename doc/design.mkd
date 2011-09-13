@@ -26,10 +26,6 @@ And syntax guides:
 + [How to write a good README][3]
 + [README](http://en.wikipedia.org/wiki/README)
 
-*CHANGES* on:
-
-+ [Changelog](http://en.wikipedia.org/wiki/Changelog)
-
 *AUTHORS* and *CONTRIBUTORS* on:
 
 + [AUTHORS](http://golang.org/AUTHORS)

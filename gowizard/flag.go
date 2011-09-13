@@ -34,7 +34,6 @@ var (
 
 	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
 	fDebug       = flag.Bool("d", false, "Debug mode")
-	fVerbose     = flag.Bool("v", false, "Show files updated")
 	fVCS         = flag.String("vcs", "", "Version control system")
 )
 
@@ -190,7 +189,7 @@ func interactive() {
 			setNames()
 			input, err = q.ReadStringDefault(text, *fPackageName, inline.REQUIRED)
 		case "Project-type":
-			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject), "pac", inline.NONE) // f.Value.String())
+			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject), "pac", inline.NONE)
 		case "Author-email":
 			if *fAuthorIsOrg {
 				input, err = q.ReadString(text, inline.NONE)
