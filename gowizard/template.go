@@ -19,6 +19,11 @@ import (
 	"time"
 )
 
+const (
+	CHAR_CODE_COMMENT = "//" // For comments in source code files
+	CHAR_MAKE_COMMENT = "#"  // For comments in file Makefile
+)
+
 // === Structure of a page for a source code file
 const tmplCode = "{{tmplHeader}}\n{{content}}"
 

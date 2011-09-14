@@ -10,12 +10,13 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 )
+
+const CHAR_HEADER = '=' // Header under the project name
 
 // Gets an array from map keys.
 func arrayKeys(m map[string]string) []string {
@@ -109,9 +110,7 @@ func _finder(ext string, pathName string) []string {
 	filepath.Walk(pathName, finder, nil)
 
 	if len(finder.files) == 0 {
-		fmt.Fprintf(os.Stderr,
-			"no files with extension %q in directory %q\n", ext, pathName)
-		os.Exit(ERROR)
+		fatalf("no files with extension %q in directory %q\n", ext, pathName)
 	}
 	return finder.files
 }

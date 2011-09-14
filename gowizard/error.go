@@ -14,10 +14,14 @@ import (
 	"os"
 )
 
-const ERROR = 2 // Exit status code if there is any error.
-
+const ERROR = 1 // Exit status code if there is any error.
 
 func reportExit(err os.Error) {
-	fmt.Fprintf(os.Stderr, err.String())
+	fmt.Fprintf(os.Stderr, "gowizard: %s\n", err.String())
+	os.Exit(ERROR)
+}
+
+func fatalf(format string, a ...interface{}) {
+	fmt.Fprintf(os.Stderr, "gowizard: "+format, a...)
 	os.Exit(ERROR)
 }

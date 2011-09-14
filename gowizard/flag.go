@@ -341,7 +341,6 @@ func userConfig() {
 	}
 
 	if errors {
-		fmt.Fprintf(os.Stderr, "%s: %s\n", err, strings.Join(errKeys, ","))
-		os.Exit(ERROR)
+		fatalf("%s: %s\n", err, strings.Join(errKeys, ","))
 	}
 }

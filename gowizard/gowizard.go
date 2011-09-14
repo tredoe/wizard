@@ -17,26 +17,42 @@ import (
 	"strings"
 )
 
-// Permissions
 const (
+	// Permissions
 	PERM_DIRECTORY = 0755
 	PERM_FILE      = 0644
-)
 
-// Characters
-const (
-	CHAR_CODE_COMMENT = "//" // For comments in source code files
-	CHAR_MAKE_COMMENT = "#"  // For comments in file Makefile
-	CHAR_HEADER       = '='  // Header under the project name
-)
-
-const (
 	USER_CONFIG = ".gowizard" // Configuration file per user
 	README      = "README.mkd"
+
+	//PATH_GOINSTALLED = "/src/pkg/github.com/kless/GoWizard"
+	PATH_GOINSTALLED = "/lib/gowizard"
 )
 
-// Get data directory from `$(GOROOT)/lib/$(TARG)`
-var dirData = path.Join(os.Getenv("GOROOT"), "lib", "gowizard")
+var dirData string
+
+// Get data directory
+func init() {
+	goEnv := os.Getenv("GOPATH")
+
+	if goEnv != "" {
+		goto _Found
+	}
+	if goEnv = os.Getenv("GOROOT"); goEnv != "" {
+		goto _Found
+	}
+	if goEnv = os.Getenv("GOROOT_FINAL"); goEnv != "" {
+		goto _Found
+	}
+
+_Found:
+	if goEnv == "" {
+		fatalf("Environment variable GOROOT neither" +
+			" GOROOT_FINAL has been set\n")
+	}
+
+	dirData = path.Join(goEnv, PATH_GOINSTALLED)
+}
 
 // VCS configuration files to push to a server.
 var configVCS = map[string]string{
