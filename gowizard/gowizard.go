@@ -23,10 +23,9 @@ const (
 	PERM_FILE      = 0644
 
 	USER_CONFIG = ".gowizard" // Configuration file per user
-	README      = "README.mkd"
 
-	//PATH_GOINSTALLED = "/src/pkg/github.com/kless/GoWizard"
-	PATH_GOINSTALLED = "/lib/gowizard"
+	SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/GoWizard/data"
+	//SUBDIR_GOINSTALLED = "lib/gowizard"
 )
 
 var dirData string
@@ -51,7 +50,7 @@ _Found:
 			" GOROOT_FINAL has been set\n")
 	}
 
-	dirData = path.Join(goEnv, PATH_GOINSTALLED)
+	dirData = path.Join(goEnv, SUBDIR_GOINSTALLED)
 }
 
 // VCS configuration files to push to a server.
