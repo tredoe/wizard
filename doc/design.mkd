@@ -1,5 +1,5 @@
 Go-Wizard
-========
+=========
 
 ## Templates
 

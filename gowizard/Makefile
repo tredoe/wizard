@@ -11,9 +11,9 @@ include $(GOROOT)/src/Make.inc
 
 TARG=gowizard
 GOFILES=\
-	gowizard.go\
+	config.go\
 	error.go\
-	flag.go\
+	gowizard.go\
 	template.go\
 	tmpl-data.go\
 	util.go\

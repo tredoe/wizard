@@ -21,6 +21,9 @@ import (
 	"github.com/kless/Go-Inline/inline"
 )
 
+// Configuration file per user
+const USER_CONFIG = ".gowizard"
+
 // Flags for the command line
 var (
 	fProjecType  = flag.String("Project-type", "", "The project type.")
@@ -67,9 +70,6 @@ func loadConfig() {
 		usage()
 	}
 
-	// Get configuration per user
-	userConfig()
-
 	// === Options
 	if *fListProject {
 		fmt.Println("  = Project types\n")
@@ -89,6 +89,10 @@ func loadConfig() {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
+	// ===
+
+	// Get configuration per user
+	userConfig()
 
 	// Exit if it is not on interactive way
 	if !*fInteractive && (*fListProject || *fListLicense || *fListVCS) {
@@ -103,60 +107,6 @@ func loadConfig() {
 
 	// === Checking
 	checkAtCreate()
-}
-
-// === Checking
-
-// Common checking.
-func checkCommon(errors bool) {
-	// === License
-	*fLicense = strings.ToLower(*fLicense)
-	if _, present := listLicense[*fLicense]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable license: %q\n", *fLicense)
-		errors = true
-	}
-
-	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
-		fmt.Fprintf(os.Stderr,
-			"license 'bsd-3' requires an organization as author\n")
-		errors = true
-	}
-
-	if errors {
-		os.Exit(ERROR)
-	}
-}
-
-// Checks at creating project.
-func checkAtCreate() {
-	var errors bool
-
-	// === Necessary fields
-	if *fProjecType == "" || *fProjectName == "" || *fLicense == "" ||
-		*fAuthor == "" || *fVCS == "" {
-		fmt.Fprintf(os.Stderr, "missing required fields to create project\n")
-		usage()
-	}
-	if *fAuthorEmail == "" && !*fAuthorIsOrg {
-		fmt.Fprintf(os.Stderr, "the email address is required for people\n")
-		errors = true
-	}
-
-	// === Project type
-	*fProjecType = strings.ToLower(*fProjecType)
-	if _, present := listProject[*fProjecType]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", *fProjecType)
-		errors = true
-	}
-
-	// === VCS
-	*fVCS = strings.ToLower(*fVCS)
-	if _, present := listVCS[*fVCS]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", *fVCS)
-		errors = true
-	}
-
-	checkCommon(errors)
 }
 
 // Interactive mode.
@@ -185,26 +135,45 @@ func interactive() {
 		text := strings.TrimRight(f.Usage, ".")
 
 		switch k {
+		case "org":
+			*fAuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
+		case "Project-type":
+			input, err = q.ReadChoice(text, arrayKeys(listProject),
+				inline.NONE)
+		case "Project-name":
+			input, err = q.ReadString(text, inline.REQUIRED)
 		case "Package-name":
 			setNames()
 			input, err = q.ReadStringDefault(text, *fPackageName, inline.REQUIRED)
-		case "Project-type":
-			input, err = q.ReadChoiceDefault(text, arrayKeys(listProject), "pac", inline.NONE)
+		case "Author":
+			if *fAuthor != "" {
+				input, err = q.ReadStringDefault(text,f.Value.String(), inline.REQUIRED)
+				break
+			}
+			input, err = q.ReadString(text, inline.REQUIRED)
 		case "Author-email":
 			if *fAuthorIsOrg {
 				input, err = q.ReadString(text, inline.NONE)
-			} else {
-				input, err = q.ReadString(text, inline.REQUIRED)
+				break
 			}
-		case "License":
-			input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), f.Value.String(), inline.NONE)
-		case "org":
-			*fAuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
-		case "vcs":
-			input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS),
-				f.Value.String(), inline.NONE)
-		default:
+
+			if *fAuthorEmail != "" {
+				input, err = q.ReadStringDefault(text,f.Value.String(), inline.REQUIRED)
+				break
+			}
 			input, err = q.ReadString(text, inline.REQUIRED)
+		case "License":
+			if *fLicense != "" {
+				input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), f.Value.String(), inline.NONE)
+				break
+			}
+			input, err = q.ReadChoice(text, arrayKeys(listLicense), inline.NONE)
+		case "vcs":
+			if *fVCS != "" {
+				input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS), f.Value.String(), inline.NONE)
+				break
+			}
+			input, err = q.ReadChoice(text, arrayKeys(listVCS), inline.NONE)
 		}
 
 		if err != nil {
@@ -217,57 +186,6 @@ func interactive() {
 	}
 
 	fmt.Println()
-}
-
-// Sets names for both project and package.
-func setNames() {
-	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
-
-	*fProjectName = strings.TrimSpace(*fProjectName)
-
-	// A program is usually named as the project name.
-	if *fPackageName == "" {
-		// The package name is created:
-		// getting the last string after of the dash ('-'), if any,
-		// and removing 'go'. Finally, it's lower cased.
-		pkg := strings.Split(*fProjectName, "-")
-		*fPackageName = reGo.ReplaceAllString(
-			strings.ToLower(pkg[len(pkg)-1]), "")
-	} else {
-		*fPackageName = strings.ToLower(
-			strings.TrimSpace(*fPackageName))
-	}
-}
-
-// Creates tags to pass them to templates. Used at creating a new project.
-func tagsToCreate() map[string]string {
-	var value string
-
-	tag := map[string]string{
-		"project_name":    *fProjectName,
-		"package_name":    *fPackageName,
-		"author":          *fAuthor,
-		"author_email":    *fAuthorEmail,
-		"license":         listLicense[*fLicense],
-		"vcs":             *fVCS,
-		"_project_header": createHeader(*fProjectName),
-	}
-
-	if *fAuthorIsOrg {
-		value = "ok"
-	} else {
-		value = ""
-	}
-	tag["author_is_org"] = value
-
-	if *fProjecType == "cgo" {
-		value = "ok"
-	} else {
-		value = ""
-	}
-	tag["project_is_cgo"] = value
-
-	return tag
 }
 
 // Loads configuration per user, if any.
@@ -343,4 +261,111 @@ func userConfig() {
 	if errors {
 		fatalf("%s: %s\n", err, strings.Join(errKeys, ","))
 	}
+}
+
+// === Checking
+
+// Common checking.
+func checkCommon(errors bool) {
+	// === License
+	*fLicense = strings.ToLower(*fLicense)
+	if _, present := listLicense[*fLicense]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable license: %q\n", *fLicense)
+		errors = true
+	}
+
+	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
+		fmt.Fprintf(os.Stderr,
+			"license 'bsd-3' requires an organization as author\n")
+		errors = true
+	}
+
+	if errors {
+		os.Exit(ERROR)
+	}
+}
+
+// Checks at creating project.
+func checkAtCreate() {
+	var errors bool
+
+	// === Necessary fields
+	if *fProjecType == "" || *fProjectName == "" || *fLicense == "" ||
+		*fAuthor == "" || *fVCS == "" {
+		fmt.Fprintf(os.Stderr, "missing required fields to create project\n")
+		usage()
+	}
+	if *fAuthorEmail == "" && !*fAuthorIsOrg {
+		fmt.Fprintf(os.Stderr, "the email address is required for people\n")
+		errors = true
+	}
+
+	// === Project type
+	*fProjecType = strings.ToLower(*fProjecType)
+	if _, present := listProject[*fProjecType]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", *fProjecType)
+		errors = true
+	}
+
+	// === VCS
+	*fVCS = strings.ToLower(*fVCS)
+	if _, present := listVCS[*fVCS]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", *fVCS)
+		errors = true
+	}
+
+	checkCommon(errors)
+}
+
+// === Utility
+
+// Sets names for both project and package.
+func setNames() {
+	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
+
+	*fProjectName = strings.TrimSpace(*fProjectName)
+
+	// A program is usually named as the project name.
+	if *fPackageName == "" {
+		// The package name is created:
+		// getting the last string after of the dash ('-'), if any,
+		// and removing 'go'. Finally, it's lower cased.
+		pkg := strings.Split(*fProjectName, "-")
+		*fPackageName = reGo.ReplaceAllString(
+			strings.ToLower(pkg[len(pkg)-1]), "")
+	} else {
+		*fPackageName = strings.ToLower(
+			strings.TrimSpace(*fPackageName))
+	}
+}
+
+// Creates tags to pass them to templates. Used at creating a new project.
+func tagsToCreate() map[string]string {
+	var value string
+
+	tag := map[string]string{
+		"project_name":    *fProjectName,
+		"package_name":    *fPackageName,
+		"author":          *fAuthor,
+		"author_email":    *fAuthorEmail,
+		"license":         listLicense[*fLicense],
+		"vcs":             *fVCS,
+		"_project_header": createHeader(*fProjectName),
+	}
+
+	if *fAuthorIsOrg {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["author_is_org"] = value
+
+	if *fProjecType == "cgo" {
+		value = "ok"
+	} else {
+		value = ""
+	}
+	tag["project_is_cgo"] = value
+
+	return tag
 }

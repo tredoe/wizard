@@ -10,6 +10,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -29,14 +30,6 @@ func arrayKeys(m map[string]string) []string {
 	}
 
 	return a
-}
-
-// Creates a backup of a file.
-func backup(fname string) (ok bool) {
-	if err := copyFile(fname+"~", fname, PERM_FILE); err != nil {
-		return false
-	}
-	return true
 }
 
 // Copies a file from source to destination.
@@ -63,6 +56,20 @@ func createHeader(name string) string {
 	}
 
 	return string(header)
+}
+
+// Shows data on 'tag'.
+func debug(tag map[string]string) {
+	fmt.Println("  = Debug\n")
+
+	for k, v := range tag {
+		// Tags starting with '_' are not showed.
+		if k[0] == '_' {
+			continue
+		}
+		fmt.Printf("  %s: %s\n", k, v)
+	}
+	os.Exit(0)
 }
 
 // === Implementation of interface 'Visitor' for 'path.Walk'

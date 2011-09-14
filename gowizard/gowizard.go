@@ -17,41 +17,17 @@ import (
 	"strings"
 )
 
+// === Variables
+// ===
+
 const (
 	// Permissions
 	PERM_DIRECTORY = 0755
 	PERM_FILE      = 0644
 
-	USER_CONFIG = ".gowizard" // Configuration file per user
-
 	SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/Go-Wizard/data"
 	//SUBDIR_GOINSTALLED = "lib/gowizard"
 )
-
-var dirData string
-
-// Get data directory
-func init() {
-	goEnv := os.Getenv("GOPATH")
-
-	if goEnv != "" {
-		goto _Found
-	}
-	if goEnv = os.Getenv("GOROOT"); goEnv != "" {
-		goto _Found
-	}
-	if goEnv = os.Getenv("GOROOT_FINAL"); goEnv != "" {
-		goto _Found
-	}
-
-_Found:
-	if goEnv == "" {
-		fatalf("Environment variable GOROOT neither" +
-			" GOROOT_FINAL has been set\n")
-	}
-
-	dirData = path.Join(goEnv, SUBDIR_GOINSTALLED)
-}
 
 // VCS configuration files to push to a server.
 var configVCS = map[string]string{
@@ -88,6 +64,43 @@ var listVCS = map[string]string{
 	"none":  "none",
 }
 
+// === Get data directory
+
+var dirData string
+
+func init() {
+	goEnv := os.Getenv("GOPATH")
+
+	if goEnv != "" {
+		goto _Found
+	}
+	if goEnv = os.Getenv("GOROOT"); goEnv != "" {
+		goto _Found
+	}
+	if goEnv = os.Getenv("GOROOT_FINAL"); goEnv != "" {
+		goto _Found
+	}
+
+_Found:
+	if goEnv == "" {
+		fatalf("Environment variable GOROOT neither" +
+			" GOROOT_FINAL has been set\n")
+	}
+
+	dirData = path.Join(goEnv, SUBDIR_GOINSTALLED)
+}
+
+// === Main program execution
+// ===
+
+func main() {
+	loadConfig()
+	createProject()
+	os.Exit(0)
+}
+
+// ===
+
 // Adds license file in directory `dir`.
 func addLicense(dir string, tag map[string]string) {
 	dirTmpl := dirData + "/license"
@@ -111,20 +124,6 @@ func addLicense(dir string, tag map[string]string) {
 			}
 		}
 	}
-}
-
-// Shows data on 'tag'.
-func debug(tag map[string]string) {
-	fmt.Println("  = Debug\n")
-
-	for k, v := range tag {
-		// Tags starting with '_' are not showed.
-		if k[0] == '_' {
-			continue
-		}
-		fmt.Printf("  %s: %s\n", k, v)
-	}
-	os.Exit(0)
 }
 
 // Creates a new project.
@@ -198,12 +197,4 @@ func createProject() {
 		}
 		fmt.Print(" file to add people.\n")
 	}
-}
-
-// === Main program execution
-
-func main() {
-	loadConfig()
-	createProject()
-	os.Exit(0)
 }
