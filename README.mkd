@@ -5,8 +5,13 @@ Tired of adding the same files every time you create a new Go project?
 Don't know how to structure it?  
 Don't know how to apply the license?
 
-**GoWizard** creates the base for new Go projects and it adds the license header
-to source code files.
+**GoWizard** creates the base for new Go projects, adds the license header
+to source code files, and creates an ignore file for the VCS given.
+
+The ignore file has been configured to ignore files finished in "~" (used like
+backups, in Unix), the ones started with "." (hidden files, in Unix), and the
+ones started with "_" to have files that don't be committed. It also ignores
+files got from compiling and linking.
 
 
 ## Installation

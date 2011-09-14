@@ -119,7 +119,8 @@ include $(GOROOT)/src/Make.pkg
 
 // === File ignore for VCS
 var (
-	tmplIgnore = `*~
+	tmplIgnore = `# Generic
+*~
 [._]*
 
 # Go
@@ -127,6 +128,7 @@ var (
 *.[568vq]
 [568vq].out
 main
+
 # Cgo
 *.cgo*
 *.so
