@@ -1,4 +1,4 @@
-// Copyright 2010  The "GoWizard" Authors
+// Copyright 2010  The "Go-Wizard" Authors
 //
 // Use of this source code is governed by the BSD-2 Clause license
 // that can be found in the LICENSE file.
@@ -24,7 +24,7 @@ const (
 
 	USER_CONFIG = ".gowizard" // Configuration file per user
 
-	SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/GoWizard/data"
+	SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/Go-Wizard/data"
 	//SUBDIR_GOINSTALLED = "lib/gowizard"
 )
 

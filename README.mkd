@@ -1,11 +1,11 @@
-GoWizard
+Go-Wizard
 =========
 
 Tired of adding the same files every time you create a new Go project?  
 Don't know how to structure it?  
 Don't know how to apply the license?
 
-**GoWizard** creates the base for new Go projects, adds the license header
+**Go-Wizard** creates the base for new Go projects, adds the license header
 to source code files, and creates an ignore file for the VCS given.  
 The ignore file has been configured to ignore files finished in "~" (used like
 backups, in Unix), the ones started with "." (hidden files, in Unix), and the
@@ -15,7 +15,7 @@ files got from compiling and linking.
 
 ## Installation
 
-	goinstall github.com/kless/GoWizard/gowizard
+	goinstall github.com/kless/Go-Wizard/gowizard
 
 
 ## Configuration
@@ -23,7 +23,7 @@ files got from compiling and linking.
 If you want not repeat the same input every time you create a project, then you
 could use an user configuration file in your home directory:
 
-	[ -f ${HOME}/.gowizard ] || cp ${GOROOT}/src/pkg/github.com/kless/GoWizard/data/user.cfg ${HOME}/.gowizard
+	[ -f ${HOME}/.gowizard ] || cp ${GOROOT}/src/pkg/github.com/kless/Go-Wizard/data/user.cfg ${HOME}/.gowizard
 
 It allows set the flags *-Author*, *-Author-email*, *-License*, and *-vcs*,
 with a value by default.
@@ -76,7 +76,7 @@ years.
 
 ## Copyright and licensing
 
-***Copyright 2010  The "GoWizard" Authors***  
+***Copyright 2010  The "Go-Wizard" Authors***  
 See file AUTHORS and CONTRIBUTORS (if any).
 
 Licensed under **BSD-2 Clause license**.  

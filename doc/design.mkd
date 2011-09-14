@@ -1,4 +1,4 @@
-GoWizard
+Go-Wizard
 ========
 
 ## Templates
