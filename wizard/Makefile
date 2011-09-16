@@ -9,13 +9,13 @@
 
 include $(GOROOT)/src/Make.inc
 
-TARG=gowizard
+TARG=wizard
 GOFILES=\
 	config.go\
 	error.go\
-	gowizard.go\
 	template.go\
 	util.go\
+	wizard.go\
 
 include $(GOROOT)/src/Make.cmd
 

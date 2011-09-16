@@ -7,21 +7,11 @@
 // OR CONDITIONS OF ANY KIND, either express or implied. See the License
 // for more details.
 
-package wizard
+package main
 
 import (
-	"fmt"
-	"os"
+
+	"github.com/kless/Go-Wizard/wizard"
 )
 
-const ERROR = 1 // Exit status code if there is any error.
 
-func reportExit(err os.Error) {
-	fmt.Fprintf(os.Stderr, "gowizard: %s\n", err.String())
-	os.Exit(ERROR)
-}
-
-func fatalf(format string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, "gowizard: "+format, a...)
-	os.Exit(ERROR)
-}
