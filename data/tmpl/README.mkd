@@ -1,5 +1,5 @@
-{{project_name}}
-{{_project_header}}
+{{.project_name}}
+{{._project_header}}
 
 << Describe project >>
 
@@ -21,10 +21,10 @@
 
 ## Copyright and licensing
 
-***{{copyright}}***  
+***{{.copyright}}***  
 See file AUTHORS and CONTRIBUTORS (if any).
 
-Licensed under **{{license}}**.  
+Licensed under **{{.license}}**.  
 See file LICENSE.
 
 

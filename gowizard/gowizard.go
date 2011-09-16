@@ -12,8 +12,9 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -87,7 +88,7 @@ _Found:
 			" GOROOT_FINAL has been set\n")
 	}
 
-	dirData = path.Join(goEnv, SUBDIR_GOINSTALLED)
+	dirData = filepath.Join(goEnv, SUBDIR_GOINSTALLED)
 }
 
 // === Main program execution
@@ -95,6 +96,7 @@ _Found:
 
 func main() {
 	loadConfig()
+
 	createProject()
 	os.Exit(0)
 }
@@ -102,24 +104,25 @@ func main() {
 // ===
 
 // Adds license file in directory `dir`.
-func addLicense(dir string, tag map[string]string) {
-	dirTmpl := dirData + "/license"
+func addLicense(dir string, tag map[string]interface{}) {
+	dirTmpl := filepath.Join(dirData, "license")
 
 	switch *fLicense {
 	case "none":
 		break
 	case "bsd-3":
-		renderNewFile(dir+"/LICENSE", dirTmpl+"/bsd-3.txt", tag)
+		renderFile(filepath.Join(dir, "LICENSE"),
+			filepath.Join(dirTmpl, "bsd-3.txt"), tag)
 	default:
-		if err := copyFile(dir+"/LICENSE",
-			path.Join(dirTmpl, *fLicense+".txt"), PERM_FILE); err != nil {
+		if err := copyFile(filepath.Join(dir, "LICENSE"),
+			filepath.Join(dirTmpl, *fLicense+".txt"), PERM_FILE); err != nil {
 			reportExit(err)
 		}
 
 		// License LGPL must also add the GPL license text.
 		if *fLicense == "lgpl-3" {
-			if err := copyFile(dir+"/LICENSE-GPL",
-				path.Join(dirTmpl, "gpl-3.txt"), PERM_FILE); err != nil {
+			if err := copyFile(filepath.Join(dir, "LICENSE-GPL"),
+				filepath.Join(dirTmpl, "gpl-3.txt"), PERM_FILE); err != nil {
 				reportExit(err)
 			}
 		}
@@ -133,35 +136,39 @@ func createProject() {
 		debug(tag)
 	}
 
-	headerCodeFile, headerMakefile := renderAllHeaders(tag, "")
-
 	// === Render project files
-
 	// To create directories in lower case.
-	dirApp := path.Join(*fProjectName, *fPackageName)
-	os.MkdirAll(dirApp, PERM_DIRECTORY)
+	dirApp := filepath.Join(*fProjectName, *fPackageName)
+	if err := os.MkdirAll(dirApp, PERM_DIRECTORY); err != nil {
+		log.Fatal("directory error:", err)
+	}
 
-	renderNesting(path.Join(dirApp, *fPackageName)+".go", headerCodeFile,
-		tmplPkgMain, tag)
-	renderNesting(dirApp+"/Makefile", headerMakefile, tmplPkgMakefile, tag)
+	setTmpl := parseTemplates(tag, CHAR_CODE_COMMENT, 0)
 
 	if *fProjecType != "cmd" {
-		renderNesting(path.Join(dirApp, *fPackageName)+"_test.go",
-			headerCodeFile, tmplTest, tag)
+		renderSet(filepath.Join(dirApp, *fPackageName)+".go",
+			setTmpl, "Pac", tag)
+		renderSet(filepath.Join(dirApp, *fPackageName)+"_test.go",
+			setTmpl, "Test", tag)
+	} else {
+		renderSet(filepath.Join(dirApp, *fPackageName)+".go",
+			setTmpl, "Cmd", tag)
 	}
 
 	// === Render common files
-	dirTmpl := dirData + "/tmpl" // Templates base directory
+	dirTmpl := filepath.Join(dirData, "tmpl") // Base directory of templates
 
-	renderFile(*fProjectName, dirTmpl+"/NEWS.mkd", tag)
-	renderFile(*fProjectName, dirTmpl+"/README.mkd", tag)
+	renderFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
+		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"), tag)
+	renderFile(filepath.Join(*fProjectName, "NEWS.mkd"),
+		filepath.Join(dirTmpl, "NEWS.mkd"), tag)
+	renderFile(filepath.Join(*fProjectName, "README.mkd"),
+		filepath.Join(dirTmpl, "README.mkd"), tag)
 
-	if strings.HasPrefix(*fLicense, "cc0") {
-		renderNewFile(*fProjectName+"/AUTHORS.mkd",
-			dirTmpl+"/AUTHORS-cc0.mkd", tag)
-	} else {
-		renderFile(*fProjectName, dirTmpl+"/AUTHORS.mkd", tag)
-		renderFile(*fProjectName, dirTmpl+"/CONTRIBUTORS.mkd", tag)
+	// The file AUTHORS is for copyright holders.
+	if !strings.HasPrefix(*fLicense, "cc0") {
+		renderFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
+			filepath.Join(dirTmpl, "AUTHORS.mkd"), tag)
 	}
 
 	// === Add file related to VCS
@@ -175,7 +182,7 @@ func createProject() {
 			tmplIgnore = hgIgnoreTop + tmplIgnore
 		}
 
-		if err := ioutil.WriteFile(path.Join(*fProjectName, ignoreFile),
+		if err := ioutil.WriteFile(filepath.Join(*fProjectName, ignoreFile),
 			[]byte(tmplIgnore), PERM_FILE); err != nil {
 			reportExit(err)
 		}
@@ -185,12 +192,12 @@ func createProject() {
 	addLicense(*fProjectName, tag)
 
 	// === Print messages
-	if tag["author_is_org"] != "" {
+	if tag["author_is_org"].(bool) {
 		fmt.Print(`
   * The organization has been added as author.
     Update `)
 
-		if tag["license_is_cc0"] != "" {
+		if tag["license_is_cc0"].(bool) {
 			fmt.Print("AUTHORS")
 		} else {
 			fmt.Print("CONTRIBUTORS")

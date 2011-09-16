@@ -10,205 +10,224 @@
 package main
 
 import (
-	"io/ioutil"
+	"log"
 	"os"
-	"path"
 	"strconv"
 	"strings"
-	"old/template"
+	"template"
 	"time"
 )
 
+// For comments in source code files
+const CHAR_CODE_COMMENT = "//"
+
+// Copyright and licenses
 const (
-	CHAR_CODE_COMMENT = "//" // For comments in source code files
-	CHAR_MAKE_COMMENT = "#"  // For comments in file Makefile
+	tmplCopyright = `{{define "Copyright"}}{{with .comment}}{{.}} {{end}}Copyright {{.year}}  The "{{.project_name}}" Authors{{end}}`
+
+	tmplBSD = `{{define "BSD"}}{{template "Copyright" .}}
+{{.comment}}
+{{.comment}} Use of this source code is governed by the {{.license}}
+{{.comment}} that can be found in the LICENSE file.
+{{.comment}}
+{{.comment}} This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+{{.comment}} OR CONDITIONS OF ANY KIND, either express or implied. See the License
+{{.comment}} for more details.
+{{end}}`
+
+	tmplApache = `{{define "Apache"}}{{template "Copyright" .}}
+{{.comment}}
+{{.comment}} Licensed under the Apache License, Version 2.0 (the "License");
+{{.comment}} you may not use this file except in compliance with the License.
+{{.comment}} You may obtain a copy of the License at
+{{.comment}}
+{{.comment}}     http://www.apache.org/licenses/LICENSE-2.0
+{{.comment}}
+{{.comment}} Unless required by applicable law or agreed to in writing, software
+{{.comment}} distributed under the License is distributed on an "AS IS" BASIS,
+{{.comment}} WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+{{.comment}} See the License for the specific language governing permissions and
+{{.comment}} limitations under the License.
+{{end}}`
+
+	tmplGNU = `{{define "GNU"}}{{template "Copyright" .}}
+{{.comment}}
+{{.comment}} This program is free software: you can redistribute it and/or modify
+{{.comment}} it under the terms of the GNU {{with Affero}}{{.}} {{end}}{{with Lesser}}{{.}} {{end}}General Public License as published by
+{{.comment}} the Free Software Foundation, either version 3 of the License, or
+{{.comment}} (at your option) any later version.
+{{.comment}}
+{{.comment}} This program is distributed in the hope that it will be useful,
+{{.comment}} but WITHOUT ANY WARRANTY; without even the implied warranty of
+{{.comment}} MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+{{.comment}} GNU {{with Affero}}{{.}} {{end}}{{with Lesser}}{{.}} {{end}}General Public License for more details.
+{{.comment}}
+{{.comment}} You should have received a copy of the GNU {{with Affero}}{{.}} {{end}}{{with Lesser}}{{.}} {{end}}General Public License
+{{.comment}} along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{{end}}`
+
+	tmplNone = `{{define "None"}}{{template "Copyright" .}}
+{{end}}`
+
+	tmplCC0 = `{{define "CC0"}}{{.comment}} To the extent possible under law, Authors have waived all copyright and
+{{.comment}} related or neighboring rights to "{{.project_name}}".
+{{end}}`
 )
 
-// === Structure of a page for a source code file
-const tmplCode = "{{tmplHeader}}\n{{content}}"
+// For source code files
+const (
+	tmplCmd = `{{define "Cmd"}}{{.Header}}
+package main
 
-type code struct {
-	tmplHeader string
-	content    string
+import (
+
+)
+
+
+{{end}}`
+
+	tmplPac = `{{define "Pac"}}{{.Header}}
+package {{.package_name}}
+{{if .project_is_cgo}}
+import "C"{{end}}
+import (
+
+)
+
+
+{{end}}`
+
+	tmplTest = `{{define "Test"}}{{.Header}}
+package {{.package_name}}
+
+import (
+	"testing"
+)
+
+func Test(t *testing.T) {
+
 }
 
-// === Template parser
-// Based on http://go.hokapoka.com/go/embedding-or-nesting-go-templates/
+{{end}}`
+)
+
+// === File ignore for VCS
+const hgIgnoreTop = "syntax: glob\n"
+
+var tmplIgnore = `# Generic
+*~
+[._]*
+
+# Go
+*.[ao]
+*.[568vq]
+[568vq].out
+main
+
+# Cgo
+*.cgo*
+*.so
+`
 
 
-type templateParser struct {
-	str string
-}
-
-func (self *templateParser) Write(p []byte) (n int, err os.Error) {
-	self.str += string(p)
-
-	return len(p), nil
-}
-
-func parse(str string, data interface{}) string {
-	_templateParser := new(templateParser)
-
-	t := template.New(nil)
-	t.SetDelims("{{", "}}")
-
-	if err := t.Parse(str); err != nil {
-		reportExit(err)
+// Renders the template "src", creating a file in "dst".
+func renderFile(dst, src string, data interface{}) {
+	// === Create file.
+	file, err := os.Create(dst)
+	if err != nil {
+		log.Fatal("file error:", err)
+	}
+	if err = file.Chmod(PERM_FILE); err != nil {
+		log.Fatal("file error:", err)
 	}
 
-	t.Execute(_templateParser, data)
-
-	return _templateParser.str
-}
-
-func parseFile(filename string, data interface{}) string {
-	_templateParser := new(templateParser)
-
-	t := template.New(nil)
-	t.SetDelims("{{", "}}")
-
-	if err := t.ParseFile(filename); err != nil {
+	tmpl, err := template.ParseFile(src)
+	if err != nil {
 		reportExit(err)
 	}
-
-	t.Execute(_templateParser, data)
-
-	return _templateParser.str
+	if err = tmpl.Execute(file, data); err != nil {
+		reportExit(err)
+	}
 }
 
-// === Utility
+// Renders the template "tmplName" in "set" to the file "dst".
+func renderSet(dst string, set *template.Set, tmplName string, data interface{}) {
+	// === Create file.
+	file, err := os.Create(dst)
+	if err != nil {
+		log.Fatal("file error:", err)
+	}
+	if err = file.Chmod(PERM_FILE); err != nil {
+		log.Fatal("file error:", err)
+	}
 
-// Renders template nesting both tmplHeader and content.
-func renderNesting(destination, tmplHeader, template string,
-	tag map[string]string) {
-	renderContent := parse(template, tag)
-	render := parse(tmplCode, &code{tmplHeader, renderContent})
-
-	ioutil.WriteFile(destination, []byte(render), PERM_FILE)
+	err = set.Execute(file, tmplName, data)
+	if err != nil {
+		log.Fatalf("execution failed: %s", err)
+	}
 }
 
-// Base to rendering single files.
-func _renderFile(destination, template string, tag map[string]string) {
-	render := parseFile(template, tag)
-	ioutil.WriteFile(destination, []byte(render), PERM_FILE)
-}
 
-// Renders a single file.
-func renderFile(destination, template string, tag map[string]string) {
-	_renderFile(path.Join(destination, path.Base(template)), template, tag)
-}
-
-// Renders a single file, but uses a new name.
-func renderNewFile(destination, template string, tag map[string]string) {
-	_renderFile(destination, template, tag)
-}
-
-// === Render of header
-
-// Base to render the headers of source code files according to the license.
-// If `year` is nil then gets the actual year.
-func _renderHeader(tag map[string]string, year string, renderCodeFile,
-	renderMakefile bool) (headerCodeFile, headerMakefile string) {
+// Parses the templates.
+// "charComment" is the character used to comment in code files.
+// If "year" is nil then gets the actual year.
+func parseTemplates(data map[string]interface{}, charComment string, year int) *template.Set {
+	var tmplHeader string
 	licenseName := strings.Split(*fLicense, "-")[0]
 
-	if year == "" {
-		tag["year"] = strconv.Itoa64(time.LocalTime().Year)
+	data["comment"] = charComment
+
+	if year == 0 {
+		data["year"] = strconv.Itoa64(time.LocalTime().Year)
+	} else {
+		data["year"] = year
 	}
 
 	switch licenseName {
 	case "apache":
-		tmplHeader := tmplCopyright + tmplApache
-
-		if renderCodeFile {
-			tag["comment"] = CHAR_CODE_COMMENT
-			headerCodeFile = parse(tmplHeader, tag)
-		}
-		if renderMakefile {
-			tag["comment"] = CHAR_MAKE_COMMENT
-			headerMakefile = parse(tmplHeader, tag)
-		}
+		tmplHeader = tmplApache
 	case "bsd":
-		tmplHeader := tmplCopyright + tmplBSD
-
-		if renderCodeFile {
-			tag["comment"] = CHAR_CODE_COMMENT
-			headerCodeFile = parse(tmplHeader, tag)
-		}
-		if renderMakefile {
-			tag["comment"] = CHAR_MAKE_COMMENT
-			headerMakefile = parse(tmplHeader, tag)
-		}
+		tmplHeader = tmplBSD
 	case "cc0":
-		if renderCodeFile {
-			tag["comment"] = CHAR_CODE_COMMENT
-			headerCodeFile = parse(tmplCC0, tag)
-		}
-		if renderMakefile {
-			tag["comment"] = CHAR_MAKE_COMMENT
-			headerMakefile = parse(tmplCC0, tag)
-		}
+		tmplHeader = tmplCC0
 	case "gpl", "lgpl", "agpl":
-		tmplHeader := tmplCopyright + tmplGNU
-
-		tag["Affero"] = ""
-		tag["Lesser"] = ""
+		data["Affero"] = ""
+		data["Lesser"] = ""
 
 		if licenseName == "agpl" {
-			tag["Affero"] = "Affero"
+			data["Affero"] = "Affero"
 		} else if licenseName == "lgpl" {
-			tag["Lesser"] = "Lesser"
+			data["Lesser"] = "Lesser"
 		}
 
-		if renderCodeFile {
-			tag["comment"] = CHAR_CODE_COMMENT
-			headerCodeFile = parse(tmplHeader, tag)
-		}
-		if renderMakefile {
-			tag["comment"] = CHAR_MAKE_COMMENT
-			headerMakefile = parse(tmplHeader, tag)
-		}
+		tmplHeader = tmplGNU
 	case "none":
-		tmplHeader := tmplCopyright + "\n"
+		tmplHeader = tmplNone
+	}
 
-		if renderCodeFile {
-			tag["comment"] = CHAR_CODE_COMMENT
-			headerCodeFile = parse(tmplHeader, tag)
-		}
-		if renderMakefile {
-			tag["comment"] = CHAR_MAKE_COMMENT
-			headerMakefile = parse(tmplHeader, tag)
+	set := new(template.Set)
+	var fullSet *template.Set
+	var err os.Error
+
+//	for _, t := range []string{tmplApache, tmplBSD, tmplCC0, tmplGNU, tmplNone,
+	for _, t := range []string{tmplCopyright, tmplHeader, tmplCmd, tmplPac,
+			tmplTest} {
+		fullSet, err = set.Parse(t)
+		if err != nil {
+			log.Fatal("parse error in %q: %s", t, err)
 		}
 	}
+
 
 	// Tag to render the copyright in README.
-	tag["comment"] = ""
-	tag["copyright"] = parse(tmplCopyright, tag)
+//	data["comment"] = ""
+//	data["copyright"] = parse(tmplCopyright, data)
 
 	// These tags are not used anymore.
-	for _, t := range []string{"Affero", "comment", "year"} {
-		tag[t] = "", false
-	}
+//	for _, t := range []string{"Affero", "comment", "year"} {
+//		data[t] = "", false
+//	}
 
-	if renderCodeFile && renderMakefile {
-		return headerCodeFile, headerMakefile
-	}
-
-	if renderCodeFile {
-		return headerCodeFile, ""
-	}
-
-	// if renderMakefile
-	return headerMakefile, ""
+	return fullSet
 }
 
-func renderCodeHeader(tag map[string]string, year string) (headerCodeFile, headerMakefile string) {
-	return _renderHeader(tag, year, true, false)
-}
-
-func renderMakeHeader(tag map[string]string, year string) (headerMakefile, headerCodeFile string) {
-	return _renderHeader(tag, year, false, true)
-}
-
-func renderAllHeaders(tag map[string]string, year string) (headerCodeFile, headerMakefile string) {
-	return _renderHeader(tag, year, true, true)
-}

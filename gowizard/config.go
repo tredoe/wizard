@@ -13,7 +13,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -126,9 +126,10 @@ func interactive() {
 		"vcs",
 	}
 
-	fmt.Println("")
 	q := inline.NewQuestionByDefault()
 	defer q.Close()
+
+	fmt.Println("\n  = Go Wizard\n")
 
 	for _, k := range interactiveFlags {
 		f := flag.Lookup(k)
@@ -198,7 +199,7 @@ func userConfig() {
 		return
 	}
 
-	pathUserConfig := path.Join(home, USER_CONFIG)
+	pathUserConfig := filepath.Join(home, USER_CONFIG)
 
 	// To know if the file exist.
 	info, err := os.Stat(pathUserConfig)
@@ -340,10 +341,10 @@ func setNames() {
 }
 
 // Creates tags to pass them to templates. Used at creating a new project.
-func tagsToCreate() map[string]string {
-	var value string
+func tagsToCreate() map[string]interface{} {
+	var value bool
 
-	tag := map[string]string{
+	tag := map[string]interface{} {
 		"project_name":    *fProjectName,
 		"package_name":    *fPackageName,
 		"author":          *fAuthor,
@@ -354,16 +355,13 @@ func tagsToCreate() map[string]string {
 	}
 
 	if *fAuthorIsOrg {
-		value = "ok"
-	} else {
-		value = ""
+		value = true
 	}
 	tag["author_is_org"] = value
+	value = false
 
 	if *fProjecType == "cgo" {
-		value = "ok"
-	} else {
-		value = ""
+		value = true
 	}
 	tag["project_is_cgo"] = value
 

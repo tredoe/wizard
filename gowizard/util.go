@@ -13,8 +13,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
-	"path/filepath"
 )
 
 const CHAR_HEADER = '=' // Header under the project name
@@ -58,76 +56,17 @@ func createHeader(name string) string {
 	return string(header)
 }
 
-// Shows data on 'tag'.
-func debug(tag map[string]string) {
+// Shows data on 'tag', execpt started with "_".
+func debug(tag map[string]interface{}) {
 	fmt.Println("  = Debug\n")
 
 	for k, v := range tag {
-		// Tags starting with '_' are not showed.
+		// Skip "_"
 		if k[0] == '_' {
 			continue
 		}
-		fmt.Printf("  %s: %s\n", k, v)
+		fmt.Printf("  %s: %v\n", k, v)
 	}
 	os.Exit(0)
 }
 
-// === Implementation of interface 'Visitor' for 'path.Walk'
-
-type finder struct {
-	ext   string
-	files []string
-}
-
-func newFinder(ext string) *finder {
-	_finder := new(finder)
-
-	if ext != ".go" && ext != ".mkd" {
-		panic("File extension not supported")
-	}
-	_finder.ext = ext
-
-	return _finder
-}
-
-// Skips directories created on compilation.
-func (self *finder) VisitDir(path string, f *os.FileInfo) bool {
-	dirName := f.Name
-
-	if dirName == "_test" || dirName == "_obj" {
-		return false
-	}
-
-	return true
-}
-
-// Adds all files to the list, according to the extension.
-func (self *finder) VisitFile(filePath string, f *os.FileInfo) {
-	name := f.Name
-
-	if self.ext == ".go" && path.Ext(name) == ".go" ||
-		self.ext == ".mkd" && path.Ext(name) == ".mkd" {
-		self.files = append(self.files, filePath)
-	}
-}
-
-// Base to find all files with extension `ext` on path `pathName`.
-func _finder(ext string, pathName string) []string {
-	finder := newFinder(ext)
-	filepath.Walk(pathName, finder, nil)
-
-	if len(finder.files) == 0 {
-		fatalf("no files with extension %q in directory %q\n", ext, pathName)
-	}
-	return finder.files
-}
-
-// Finds all Go source files.
-func finderGo(pathName string) []string {
-	return _finder(".go", pathName)
-}
-
-// Finds all markup text files, except README.
-func finderMkd(pathName string) []string {
-	return _finder(".mkd", pathName)
-}

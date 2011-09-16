@@ -15,7 +15,6 @@ GOFILES=\
 	error.go\
 	gowizard.go\
 	template.go\
-	tmpl-data.go\
 	util.go\
 
 include $(GOROOT)/src/Make.cmd

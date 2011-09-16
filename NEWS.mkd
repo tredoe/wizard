@@ -13,11 +13,20 @@ listed below.*
 
 * * *
 
-### 2010-11-??  v0.9.9
+### 2011-09-??  v0.9.9
 
-+ Added script for easy installation of commands and *cgo* packages.
++ Removed all stuff related to the file Metadata.
 
-+ Fixed re-writing of larger files.
++ Removed the installation script.
+
++ The mode interactive takes values by default from the user configuration, if
+any.
+
++ The paths use "path/filepath" to be compatible with Windows paths.
+
++ It is not created a "Makefile" since "goinstall" can handle installations.
+
++ Updated Go API for templates.
 
 
 ### 2010-10-11  v0.9.8
