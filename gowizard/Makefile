@@ -9,12 +9,9 @@
 
 include $(GOROOT)/src/Make.inc
 
-TARG=github.com/kless/Go-Wizard/wizard
+TARG=gowizard
 GOFILES=\
-	config.go\
-	template.go\
-	util.go\
-	wizard.go\
+	gowizard.go\
 
-include $(GOROOT)/src/Make.pkg
+include $(GOROOT)/src/Make.cmd
 

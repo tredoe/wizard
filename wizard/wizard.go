@@ -39,7 +39,7 @@ var configVCS = map[string]string{
 // Project types
 var listProject = map[string]string{
 	"cmd": "Command line program",
-	"pac": "Package",
+	"pkg": "Package",
 	"cgo": "Package that calls C code",
 }
 
@@ -68,36 +68,36 @@ var listVCS = map[string]string{
 // ===
 
 // Represents all information to create a project
-type info struct {
+type project struct {
 	dirData    string // directory with templates
 	dirProject string // directory of project created
 
 	data map[string]interface{} // variables to pass to templates
 }
 
-func NewInfo(isFirstRun bool) *info {
-	i := new(info)
+func NewProject(isFirstRun bool) *project {
+	p := new(project)
 
 	if isFirstRun {
-		i.dirData = dirData()
+		p.dirData = dirData()
 	}
-	i.dirProject = dirProject()
-	i.data = templateData()
+	p.dirProject = dirProject()
+	p.data = templateData()
 
-	return i
+	return p
 }
 
 // ===
 
 // Adds license file in directory `dir`.
-func (i *info) addLicense(dir string) {
-	dirTmpl := filepath.Join(i.dirData, "license")
+func (p *project) addLicense(dir string) {
+	dirTmpl := filepath.Join(p.dirData, "license")
 
 	switch *fLicense {
 	case "none":
 		break
 	case "bsd-3":
-		i.renderFile(filepath.Join(dir, "LICENSE"),
+		p.renderFile(filepath.Join(dir, "LICENSE"),
 			filepath.Join(dirTmpl, "bsd-3.txt"))
 	default:
 		copyFile(filepath.Join(dir, "LICENSE"),
@@ -112,37 +112,37 @@ func (i *info) addLicense(dir string) {
 }
 
 // Creates a new project.
-func (i *info) CreateProject() {
-	if err := os.MkdirAll(i.dirProject, PERM_DIRECTORY); err != nil {
+func (p *project) Create() {
+	if err := os.MkdirAll(p.dirProject, PERM_DIRECTORY); err != nil {
 		log.Fatal("directory error:", err)
 	}
 
-	setTmpl := i.parseTemplates(_CHAR_CODE_COMMENT, 0)
+	setTmpl := p.parseTemplates(_CHAR_CODE_COMMENT, 0)
 
 	// === Render project files
 	if *fProjecType != "cmd" {
-		i.renderSet(filepath.Join(i.dirProject, *fPackageName)+".go",
-			setTmpl, "Pac")
-		i.renderSet(filepath.Join(i.dirProject, *fPackageName)+"_test.go",
+		p.renderSet(filepath.Join(p.dirProject, *fPackageName)+".go",
+			setTmpl, "Pkg")
+		p.renderSet(filepath.Join(p.dirProject, *fPackageName)+"_test.go",
 			setTmpl, "Test")
 	} else {
-		i.renderSet(filepath.Join(i.dirProject, *fPackageName)+".go",
+		p.renderSet(filepath.Join(p.dirProject, *fPackageName)+".go",
 			setTmpl, "Cmd")
 	}
 
 	// === Render common files
-	dirTmpl := filepath.Join(i.dirData, "tmpl") // Base directory of templates
+	dirTmpl := filepath.Join(p.dirData, "tmpl") // Base directory of templates
 
-	i.renderFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
+	p.renderFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
 		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"))
-	i.renderFile(filepath.Join(*fProjectName, "NEWS.mkd"),
+	p.renderFile(filepath.Join(*fProjectName, "NEWS.mkd"),
 		filepath.Join(dirTmpl, "NEWS.mkd"))
-	i.renderFile(filepath.Join(*fProjectName, "README.mkd"),
+	p.renderFile(filepath.Join(*fProjectName, "README.mkd"),
 		filepath.Join(dirTmpl, "README.mkd"))
 
 	// The file AUTHORS is for copyright holders.
 	if !strings.HasPrefix(*fLicense, "cc0") {
-		i.renderFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
+		p.renderFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
 			filepath.Join(dirTmpl, "AUTHORS.mkd"))
 	}
 
@@ -164,20 +164,14 @@ func (i *info) CreateProject() {
 	}
 
 	// === License file
-	i.addLicense(*fProjectName)
+	p.addLicense(*fProjectName)
 
 	// === Print messages
-	if i.data["author_is_org"].(bool) {
+	if p.data["author_is_org"].(bool) {
 		fmt.Print(`
   * The organization has been added as author.
-    Update `)
-
-		if i.data["license_is_cc0"].(bool) {
-			fmt.Print("AUTHORS")
-		} else {
-			fmt.Print("CONTRIBUTORS")
-		}
-		fmt.Print(" file to add people.\n")
+    Update the CONTRIBUTORS file to add people.
+`)
 	}
 }
 

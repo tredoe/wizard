@@ -17,6 +17,10 @@ files got from compiling and linking.
 
 	goinstall github.com/kless/Go-Wizard/gowizard
 
+To only install the library, which could be used by a Go IDE:
+
+	goinstall github.com/kless/Go-Wizard/wizard
+
 
 ## Configuration
 
@@ -24,7 +28,7 @@ If you want not repeat the same input every time you create a project, then you
 could use an user configuration file in your home directory:
 
 	[ -f ${HOME}/.gowizard ] ||
-cp ${GOROOT}/src/pkg/github.com/kless/Go-Wizard/data/user.cfg ${HOME}/.gowizard
+	cp ${GOROOT}/src/pkg/github.com/kless/Go-Wizard/data/user.cfg ${HOME}/.gowizard
 
 It allows set the flags *-Author*, *-Author-email*, *-License*, and *-vcs*,
 with a value by default.

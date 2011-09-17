@@ -10,6 +10,7 @@
 package main
 
 import (
+	"os"
 
 	"github.com/kless/Go-Wizard/wizard"
 )
@@ -17,8 +18,8 @@ import (
 func main() {
 	wizard.LoadFlags()
 
-	i := wizard.NewInfo(true)
-	i.CreateProject()
+	p := wizard.NewProject(true)
+	p.Create()
 
 	os.Exit(0)
 }

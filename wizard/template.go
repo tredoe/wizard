@@ -86,7 +86,7 @@ import (
 
 {{end}}`
 
-	tmplPac = `{{define "Pac"}}{{.Header}}
+	tmplPac = `{{define "Pkg"}}{{.Header}}
 package {{.package_name}}
 {{if .project_is_cgo}}
 import "C"{{end}}
@@ -130,7 +130,7 @@ main
 `
 
 // Renders the template "src", creating a file in "dst".
-func (i *info) renderFile(dst, src string) {
+func (p *project) renderFile(dst, src string) {
 	// === Create file.
 	file, err := os.Create(dst)
 	if err != nil {
@@ -144,13 +144,13 @@ func (i *info) renderFile(dst, src string) {
 	if err != nil {
 		log.Fatal("parsing error:", err)
 	}
-	if err = tmpl.Execute(file, i.data); err != nil {
+	if err = tmpl.Execute(file, p.data); err != nil {
 		log.Fatal("execution failed:", err)
 	}
 }
 
 // Renders the template "tmplName" in "set" to the file "dst".
-func (i *info) renderSet(dst string, set *template.Set, tmplName string) {
+func (p *project) renderSet(dst string, set *template.Set, tmplName string) {
 	// === Create file.
 	file, err := os.Create(dst)
 	if err != nil {
@@ -160,7 +160,7 @@ func (i *info) renderSet(dst string, set *template.Set, tmplName string) {
 		log.Fatal("file error:", err)
 	}
 
-	err = set.Execute(file, tmplName, i.data)
+	err = set.Execute(file, tmplName, p.data)
 	if err != nil {
 		log.Fatalf("execution failed: %s", err)
 	}
@@ -169,7 +169,7 @@ func (i *info) renderSet(dst string, set *template.Set, tmplName string) {
 // Parses the templates.
 // "charComment" is the character used to comment in code files.
 // If "year" is nil then gets the actual year.
-func (i *info) parseTemplates(charComment string, year int) *template.Set {
+func (p *project) parseTemplates(charComment string, year int) *template.Set {
 	var err os.Error
 	var fullSet *template.Set
 	var tmplHeader string
@@ -177,12 +177,12 @@ func (i *info) parseTemplates(charComment string, year int) *template.Set {
 	licenseName := strings.Split(*fLicense, "-")[0]
 	set := new(template.Set)
 
-	i.data["comment"] = charComment
+	p.data["comment"] = charComment
 
 	if year == 0 {
-		i.data["year"] = strconv.Itoa64(time.LocalTime().Year)
+		p.data["year"] = strconv.Itoa64(time.LocalTime().Year)
 	} else {
-		i.data["year"] = year
+		p.data["year"] = year
 	}
 
 	switch licenseName {
@@ -193,13 +193,13 @@ func (i *info) parseTemplates(charComment string, year int) *template.Set {
 	case "cc0":
 		tmplHeader = tmplCC0
 	case "gpl", "lgpl", "agpl":
-		i.data["Affero"] = ""
-		i.data["Lesser"] = ""
+		p.data["Affero"] = ""
+		p.data["Lesser"] = ""
 
 		if licenseName == "agpl" {
-			i.data["Affero"] = "Affero"
+			p.data["Affero"] = "Affero"
 		} else if licenseName == "lgpl" {
-			i.data["Lesser"] = "Lesser"
+			p.data["Lesser"] = "Lesser"
 		}
 
 		tmplHeader = tmplGNU
@@ -216,12 +216,12 @@ func (i *info) parseTemplates(charComment string, year int) *template.Set {
 	}
 
 	// Tag to render the copyright in README.
-	//	i.data["comment"] = ""
-	//	i.data["copyright"] = parse(tmplCopyright, data)
+	//	p.data["comment"] = ""
+	//	p.data["copyright"] = parse(tmplCopyright, data)
 
 	// These tags are not used anymore.
 	//	for _, t := range []string{"Affero", "comment", "year"} {
-	//		i.data[t] = "", false
+	//		p.data[t] = "", false
 	//	}
 
 	return fullSet
