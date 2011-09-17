@@ -134,6 +134,7 @@ func (p *project) Create() {
 		p.toGoFile(filepath.Join(p.dirProject, *fPackageName)+".go",
 			"Cmd")
 	}
+	p.toGoFile(filepath.Join(p.dirProject, "Makefile"), "Makefile")
 
 	// === Render common files
 	dirTmpl := filepath.Join(p.dirData, "tmpl") // Base directory of templates
@@ -228,6 +229,10 @@ func templateData() map[string]interface{} {
 	}
 	if *fProjecType == "cgo" {
 		data["is_cgo_project"] = true
+	}
+	// For the Makefile
+	if *fProjecType == "cmd" {
+		data["is_cmd_project"] = true
 	}
 
 	return data

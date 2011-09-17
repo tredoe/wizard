@@ -24,8 +24,6 @@ any.
 
 + The paths use "path/filepath" to be compatible with Windows paths.
 
-+ It is not created a "Makefile" since "goinstall" can handle installations.
-
 + Updated Go API for templates.
 
 + Splitted in library and command, so the library could be used by a Go IDE.

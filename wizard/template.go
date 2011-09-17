@@ -117,6 +117,16 @@ func Test(t *testing.T) {
 }
 
 `
+
+	tmplMakefile = `include $(GOROOT)/src/Make.inc
+
+TARG={{if .is_cmd_project}}{{else}}<< IMPORT PATH >>/{{end}}{{.package_name}}
+GOFILES=\
+	{{.package_name}}.go\
+
+include $(GOROOT)/src/Make.{{if .is_cmd_project}}cmd{{else}}pkg{{end}}
+
+`
 )
 
 // === File ignore for VCS
@@ -232,8 +242,9 @@ func (p *project) parseTemplates(charComment string, year int) {
 	tPkg := template.Must(template.New("Pkg").Parse(tmplPkg))
 	tTest := template.Must(template.New("Test").Parse(tmplTest))
 	tCmd := template.Must(template.New("Cmd").Parse(tmplCmd))
+	tMakefile := template.Must(template.New("Makefile").Parse(tmplMakefile))
 
-	p.set.Add(tHeader, tPkg, tTest, tCmd)
+	p.set.Add(tHeader, tPkg, tTest, tCmd, tMakefile)
 
 	// Tag to render the copyright in README.
 	//	p.data["comment"] = ""
