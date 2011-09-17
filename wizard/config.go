@@ -22,14 +22,6 @@ import (
 	"github.com/kless/Go-Inline/inline"
 )
 
-const (
-	// Configuration file per user
-	USER_CONFIG = ".gowizard"
-
-	// Subdirectory where is installed through "goinstall"
-	SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/Go-Wizard/data"
-)
-
 // Flags for the command line
 var (
 	fProjecType  = flag.String("Project-type", "", "The project type.")
@@ -43,12 +35,13 @@ var (
 
 	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
 	fVCS         = flag.String("vcs", "", "Version control system")
+	fAddConfig   = flag.Bool("config", false, "Add the user configuration file")
 )
 
 func usage() {
 	fmt.Fprintf(os.Stderr, `
 Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
-	[-Package-name -org]
+	[-Package-name -org -config]
 
 `)
 	flag.PrintDefaults()
@@ -180,7 +173,7 @@ func userConfig() {
 		return
 	}
 
-	pathUserConfig := filepath.Join(home, USER_CONFIG)
+	pathUserConfig := filepath.Join(home, _USER_CONFIG)
 
 	// To know if the file exist.
 	info, err := os.Stat(pathUserConfig)
@@ -190,7 +183,7 @@ func userConfig() {
 	}
 
 	if !info.IsRegular() {
-		log.Fatal("not a file:", USER_CONFIG)
+		log.Fatal("not a file:", _USER_CONFIG)
 		return
 	}
 

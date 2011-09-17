@@ -26,8 +26,17 @@ const (
 	ERROR = 1 // Exit status code if there is any error.
 
 	// Permissions
-	PERM_DIRECTORY = 0755
-	PERM_FILE      = 0644
+	_PERM_DIRECTORY = 0755
+	_PERM_FILE      = 0644
+
+	_CHAR_CODE_COMMENT = "//" // For comments in source code files
+	_CHAR_HEADER       = '='  // Header under the project name
+
+	// Configuration file per user
+	_USER_CONFIG = ".gowizard"
+
+	// Subdirectory where is installed through "goinstall"
+	_SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/Go-Wizard/data"
 )
 
 // VCS configuration files to push to a server.
@@ -102,23 +111,23 @@ func (p *project) addLicense(dir string) {
 	case "none":
 		break
 	case "bsd-3":
-		p.toTextFile(filepath.Join(dir, "LICENSE"),
+		p.parseFromFile(filepath.Join(dir, "LICENSE"),
 			filepath.Join(dirTmpl, "bsd-3.txt"), false)
 	default:
 		copyFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, *fLicense+".txt"), PERM_FILE)
+			filepath.Join(dirTmpl, *fLicense+".txt"), _PERM_FILE)
 
 		// License LGPL must also add the GPL license text.
 		if *fLicense == "lgpl-3" {
 			copyFile(filepath.Join(dir, "LICENSE-GPL"),
-				filepath.Join(dirTmpl, "gpl-3.txt"), PERM_FILE)
+				filepath.Join(dirTmpl, "gpl-3.txt"), _PERM_FILE)
 		}
 	}
 }
 
 // Creates a new project.
 func (p *project) Create() {
-	if err := os.MkdirAll(p.dirProject, PERM_DIRECTORY); err != nil {
+	if err := os.MkdirAll(p.dirProject, _PERM_DIRECTORY); err != nil {
 		log.Fatal("directory error:", err)
 	}
 
@@ -126,29 +135,29 @@ func (p *project) Create() {
 
 	// === Render project files
 	if *fProjecType != "cmd" {
-		p.toGoFile(filepath.Join(p.dirProject, *fPackageName)+".go",
+		p.parseFromVar(filepath.Join(p.dirProject, *fPackageName)+".go",
 			"Pkg")
-		p.toGoFile(filepath.Join(p.dirProject, *fPackageName)+"_test.go",
+		p.parseFromVar(filepath.Join(p.dirProject, *fPackageName)+"_test.go",
 			"Test")
 	} else {
-		p.toGoFile(filepath.Join(p.dirProject, *fPackageName)+".go",
+		p.parseFromVar(filepath.Join(p.dirProject, *fPackageName)+".go",
 			"Cmd")
 	}
-	p.toGoFile(filepath.Join(p.dirProject, "Makefile"), "Makefile")
+	p.parseFromVar(filepath.Join(p.dirProject, "Makefile"), "Makefile")
 
 	// === Render common files
 	dirTmpl := filepath.Join(p.dirData, "tmpl") // Base directory of templates
 
-	p.toTextFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
+	p.parseFromFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
 		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"), false)
-	p.toTextFile(filepath.Join(*fProjectName, "NEWS.mkd"),
+	p.parseFromFile(filepath.Join(*fProjectName, "NEWS.mkd"),
 		filepath.Join(dirTmpl, "NEWS.mkd"), false)
-	p.toTextFile(filepath.Join(*fProjectName, "README.mkd"),
+	p.parseFromFile(filepath.Join(*fProjectName, "README.mkd"),
 		filepath.Join(dirTmpl, "README.mkd"), true)
 
 	// The file AUTHORS is for copyright holders.
 	if !strings.HasPrefix(*fLicense, "cc0") {
-		p.toTextFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
+		p.parseFromFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
 			filepath.Join(dirTmpl, "AUTHORS.mkd"), false)
 	}
 
@@ -164,13 +173,24 @@ func (p *project) Create() {
 		}
 
 		if err := ioutil.WriteFile(filepath.Join(*fProjectName, ignoreFile),
-			[]byte(tmplIgnore), PERM_FILE); err != nil {
+			[]byte(tmplIgnore), _PERM_FILE); err != nil {
 			log.Fatal("write error:", err)
 		}
 	}
 
 	// === License file
 	p.addLicense(*fProjectName)
+
+	// === User configuration file
+	if *fAddConfig {
+		envHome := os.Getenv("HOME")
+
+		if envHome != "" {
+			p.parseFromVar(filepath.Join(envHome, _USER_CONFIG), "Config")
+		} else {
+			log.Print("could not add user configuration file because $HOME is not set")
+		}
+	}
 
 	// === Print messages
 	if p.data["org"].(bool) {
@@ -204,7 +224,7 @@ _Found:
 			" GOROOT_FINAL has been set")
 	}
 
-	return filepath.Join(goEnv, SUBDIR_GOINSTALLED)
+	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED)
 }
 
 // Gets the project directory.
@@ -220,12 +240,13 @@ func templateData() map[string]interface{} {
 		"org":             *fAuthorIsOrg,
 		"author":          *fAuthor,
 		"author_email":    *fAuthorEmail,
+		"license":         *fLicense,
 		"vcs":             *fVCS,
 		"_project_header": createHeader(*fProjectName),
 	}
 
 	if *fLicense != "none" {
-		data["license"] = listLicense[*fLicense]
+		data["full_license"] = listLicense[*fLicense]
 	}
 	if *fProjecType == "cgo" {
 		data["is_cgo_project"] = true

@@ -11,7 +11,6 @@ package wizard
 
 import (
 	"log"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -19,17 +18,14 @@ import (
 	"time"
 )
 
-// For comments in source code files
-const _CHAR_CODE_COMMENT = "//"
-
 // Copyright and licenses
 const (
 	tmplCopyright = `Copyright {{.year}}  The "{{.project_name}}" Authors`
-	tmplCopyleft = `Written in {{.year}} by the "{{.project_name}}" Authors`
+	tmplCopyleft  = `Written in {{.year}} by the "{{.project_name}}" Authors`
 
 	tmplBSD = `{{.comment}} {{template "Copyright" .}}
 {{.comment}}
-{{.comment}} Use of this source code is governed by the {{.license}}
+{{.comment}} Use of this source code is governed by the {{.full_license}}
 {{.comment}} that can be found in the LICENSE file.
 {{.comment}}
 {{.comment}} This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
@@ -84,7 +80,7 @@ const (
 
 // For source code files
 const (
-	tmplCmd = `{{template "Header" .}}
+	tmplCmd      = `{{template "Header" .}}
 package main
 
 import (
@@ -93,8 +89,7 @@ import (
 
 
 `
-
-	tmplPkg = `{{template "Header" .}}
+	tmplPkg      = `{{template "Header" .}}
 package {{.package_name}}
 {{if .is_cgo_project}}
 import "C"{{end}}
@@ -104,8 +99,7 @@ import (
 
 
 `
-
-	tmplTest = `{{template "Header" .}}
+	tmplTest     = `{{template "Header" .}}
 package {{.package_name}}
 
 import (
@@ -117,7 +111,6 @@ func Test(t *testing.T) {
 }
 
 `
-
 	tmplMakefile = `include $(GOROOT)/src/Make.inc
 
 TARG={{if .is_cmd_project}}{{else}}<< IMPORT PATH >>/{{end}}{{.package_name}}
@@ -128,6 +121,14 @@ include $(GOROOT)/src/Make.{{if .is_cmd_project}}cmd{{else}}pkg{{end}}
 
 `
 )
+
+// User configuration
+const tmplUserConfig = `[DEFAULT]
+author: {{.author}}
+author-email: {{.author_email}}
+license: {{.license}}
+vcs: {{.vcs}}
+`
 
 // === File ignore for VCS
 const hgIgnoreTop = "syntax: glob\n"
@@ -148,15 +149,8 @@ main
 `
 
 // Renders the template "src", creating a file in "dst".
-func (p *project) toTextFile(dst, src string, useNest bool) {
-	// === Create file.
-	file, err := os.Create(dst)
-	if err != nil {
-		log.Fatal("file error:", err)
-	}
-	if err = file.Chmod(PERM_FILE); err != nil {
-		log.Fatal("file error:", err)
-	}
+func (p *project) parseFromFile(dst, src string, useNest bool) {
+	file := createFile(dst)
 
 	tmpl, err := template.ParseFile(src)
 	if err != nil {
@@ -177,17 +171,10 @@ func (p *project) toTextFile(dst, src string, useNest bool) {
 }
 
 // Renders the template "tmplName" in "set" to the file "dst".
-func (p *project) toGoFile(dst string, tmplName string) {
-	// === Create file.
-	file, err := os.Create(dst)
-	if err != nil {
-		log.Fatal("file error:", err)
-	}
-	if err = file.Chmod(PERM_FILE); err != nil {
-		log.Fatal("file error:", err)
-	}
+func (p *project) parseFromVar(dst string, tmplName string) {
+	file := createFile(dst)
 
-	if err = p.set.Execute(file, tmplName, p.data); err != nil {
+	if err := p.set.Execute(file, tmplName, p.data); err != nil {
 		log.Fatal("execution failed:", err)
 	}
 }
@@ -231,27 +218,31 @@ func (p *project) parseTemplates(charComment string, year int) {
 
 	// === Add all templates
 	if licenseName != "cc0" {
-		tCopyright := template.Must(template.New("Copyright").Parse(tmplCopyright))
-		p.set.Add(tCopyright)
+		p.set.Add(template.Must(template.New("Copyright").
+			Parse(tmplCopyright)))
 	} else {
-		tCopyright := template.Must(template.New("Copyright").Parse(tmplCopyleft))
-		p.set.Add(tCopyright)
+		p.set.Add(template.Must(template.New("Copyright").
+			Parse(tmplCopyleft)))
+	}
+
+	if *fProjecType == "cmd" {
+		p.set.Add(template.Must(template.New("Cmd").Parse(tmplCmd)))
+	} else {
+		tPkg := template.Must(template.New("Pkg").Parse(tmplPkg))
+		tTest := template.Must(template.New("Test").Parse(tmplTest))
+		p.set.Add(tPkg, tTest)
+	}
+
+	if *fAddConfig {
+		p.set.Add(template.Must(template.New("Config").Parse(tmplUserConfig)))
 	}
 
 	tHeader := template.Must(template.New("Header").Parse(tmplHeader))
-	tPkg := template.Must(template.New("Pkg").Parse(tmplPkg))
-	tTest := template.Must(template.New("Test").Parse(tmplTest))
-	tCmd := template.Must(template.New("Cmd").Parse(tmplCmd))
 	tMakefile := template.Must(template.New("Makefile").Parse(tmplMakefile))
-
-	p.set.Add(tHeader, tPkg, tTest, tCmd, tMakefile)
-
-	// Tag to render the copyright in README.
-	//	p.data["comment"] = ""
-	//	p.data["copyright"] = parse(tmplCopyright, data)
+	p.set.Add(tHeader, tMakefile)
 
 	// These tags are not used anymore.
-	//	for _, t := range []string{"Affero", "comment", "year"} {
-	//		p.data[t] = "", false
-	//	}
+	//for _, t := range []string{"Affero", "comment", "year"} {
+	//	p.data[t] = "", false
+	//}
 }

@@ -25,13 +25,12 @@ To only install the library, which could be used by a Go IDE:
 ## Configuration
 
 If you want not repeat the same input every time you create a project, then you
-could use an user configuration file in your home directory:
-
-	[ -f ${HOME}/.gowizard ] ||
-	cp ${GOROOT}/src/pkg/github.com/kless/Go-Wizard/data/user.cfg ${HOME}/.gowizard
-
+could use an user configuration file in your home directory.  
 It allows set the flags *-Author*, *-Author-email*, *-License*, and *-vcs*,
 with a value by default.
+
+To create it, you have to use the flag *-config*, besides of the required flags
+at creating a project.
 
 
 ## Operating instructions
@@ -52,11 +51,15 @@ the appropriate ignore file.
 Example:
 
 	gowizard -Project-name=Go-Foo -Author="John Foo" -Author-email="e@mail.com" \
-	-Project-type=pac -License=bsd-2 -vcs=git
+	-Project-type=pac -License=bsd-2 -vcs=git -config
 
-If the configuration file has been set, then it could be shorter:
+If the configuration file has been set, then it could be shorter now:
 
-	gowizard -Project-name=Go-Foo -Project-type=pac
+	gowizard -Project-name=Go-Bar
+
+Or use another flags than values by default:
+
+	gowizard -Project-name=Go-Bar -License=apache-2
 
 Useful flags:
 

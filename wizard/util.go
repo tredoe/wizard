@@ -16,8 +16,6 @@ import (
 	"os"
 )
 
-const CHAR_HEADER = '=' // Header under the project name
-
 // Gets an array from map keys.
 func arrayKeys(m map[string]string) []string {
 	a := make([]string, len(m))
@@ -44,12 +42,25 @@ func copyFile(destination, source string, perm uint32) {
 	}
 }
 
+// Creates a file.
+func createFile(dst string) *os.File {
+	file, err := os.Create(dst)
+	if err != nil {
+		log.Fatal("file error:", err)
+	}
+	if err = file.Chmod(_PERM_FILE); err != nil {
+		log.Fatal("file error:", err)
+	}
+
+	return file
+}
+
 // Creates a string of characters with length of `name` to use it under that name.
 func createHeader(name string) string {
 	header := make([]byte, len(name))
 
 	for i, _ := range header {
-		header[i] = CHAR_HEADER
+		header[i] = _CHAR_HEADER
 	}
 
 	return string(header)
