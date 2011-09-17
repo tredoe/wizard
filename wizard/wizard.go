@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"template"
 )
 
 // === Variables
@@ -72,9 +73,12 @@ type project struct {
 	dirData    string // directory with templates
 	dirProject string // directory of project created
 
+	set  *template.Set          // set of templates
 	data map[string]interface{} // variables to pass to templates
 }
 
+// Creates information for the project.
+// "isFirstRun" indicates if it is the first time in be called.
 func NewProject(isFirstRun bool) *project {
 	p := new(project)
 
@@ -83,6 +87,7 @@ func NewProject(isFirstRun bool) *project {
 	}
 	p.dirProject = dirProject()
 	p.data = templateData()
+	p.set = new(template.Set)
 
 	return p
 }
@@ -97,8 +102,8 @@ func (p *project) addLicense(dir string) {
 	case "none":
 		break
 	case "bsd-3":
-		p.renderFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, "bsd-3.txt"))
+		p.toTextFile(filepath.Join(dir, "LICENSE"),
+			filepath.Join(dirTmpl, "bsd-3.txt"), false)
 	default:
 		copyFile(filepath.Join(dir, "LICENSE"),
 			filepath.Join(dirTmpl, *fLicense+".txt"), PERM_FILE)
@@ -117,33 +122,33 @@ func (p *project) Create() {
 		log.Fatal("directory error:", err)
 	}
 
-	setTmpl := p.parseTemplates(_CHAR_CODE_COMMENT, 0)
+	p.parseTemplates(_CHAR_CODE_COMMENT, 0)
 
 	// === Render project files
 	if *fProjecType != "cmd" {
-		p.renderSet(filepath.Join(p.dirProject, *fPackageName)+".go",
-			setTmpl, "Pkg")
-		p.renderSet(filepath.Join(p.dirProject, *fPackageName)+"_test.go",
-			setTmpl, "Test")
+		p.toGoFile(filepath.Join(p.dirProject, *fPackageName)+".go",
+			"Pkg")
+		p.toGoFile(filepath.Join(p.dirProject, *fPackageName)+"_test.go",
+			"Test")
 	} else {
-		p.renderSet(filepath.Join(p.dirProject, *fPackageName)+".go",
-			setTmpl, "Cmd")
+		p.toGoFile(filepath.Join(p.dirProject, *fPackageName)+".go",
+			"Cmd")
 	}
 
 	// === Render common files
 	dirTmpl := filepath.Join(p.dirData, "tmpl") // Base directory of templates
 
-	p.renderFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
-		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"))
-	p.renderFile(filepath.Join(*fProjectName, "NEWS.mkd"),
-		filepath.Join(dirTmpl, "NEWS.mkd"))
-	p.renderFile(filepath.Join(*fProjectName, "README.mkd"),
-		filepath.Join(dirTmpl, "README.mkd"))
+	p.toTextFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
+		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"), false)
+	p.toTextFile(filepath.Join(*fProjectName, "NEWS.mkd"),
+		filepath.Join(dirTmpl, "NEWS.mkd"), false)
+	p.toTextFile(filepath.Join(*fProjectName, "README.mkd"),
+		filepath.Join(dirTmpl, "README.mkd"), true)
 
 	// The file AUTHORS is for copyright holders.
 	if !strings.HasPrefix(*fLicense, "cc0") {
-		p.renderFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
-			filepath.Join(dirTmpl, "AUTHORS.mkd"))
+		p.toTextFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
+			filepath.Join(dirTmpl, "AUTHORS.mkd"), false)
 	}
 
 	// === Add file related to VCS
@@ -167,7 +172,7 @@ func (p *project) Create() {
 	p.addLicense(*fProjectName)
 
 	// === Print messages
-	if p.data["author_is_org"].(bool) {
+	if p.data["org"].(bool) {
 		fmt.Print(`
   * The organization has been added as author.
     Update the CONTRIBUTORS file to add people.
@@ -208,28 +213,22 @@ func dirProject() string {
 
 // Creates data to pass them to templates. Used at creating a new project.
 func templateData() map[string]interface{} {
-	var value bool
-
 	data := map[string]interface{}{
 		"project_name":    *fProjectName,
 		"package_name":    *fPackageName,
+		"org":             *fAuthorIsOrg,
 		"author":          *fAuthor,
 		"author_email":    *fAuthorEmail,
-		"license":         listLicense[*fLicense],
 		"vcs":             *fVCS,
 		"_project_header": createHeader(*fProjectName),
 	}
 
-	if *fAuthorIsOrg {
-		value = true
+	if *fLicense != "none" {
+		data["license"] = listLicense[*fLicense]
 	}
-	data["author_is_org"] = value
-	value = false
-
 	if *fProjecType == "cgo" {
-		value = true
+		data["is_cgo_project"] = true
 	}
-	data["project_is_cgo"] = value
 
 	return data
 }
