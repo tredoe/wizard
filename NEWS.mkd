@@ -13,7 +13,7 @@ listed below.*
 
 * * *
 
-### 2011-09-??  v0.9.9
+### 2011-09-18  v0.9.9
 
 + Removed all stuff related to the file Metadata.
 
@@ -27,6 +27,8 @@ any.
 + Updated Go API for templates.
 
 + Splitted in library and command, so the library could be used by a Go IDE.
+
++ Added flag "-config" to create an user configuration file.
 
 
 ### 2010-10-11  v0.9.8
