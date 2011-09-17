@@ -12,6 +12,7 @@ package wizard
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
@@ -31,18 +32,16 @@ func arrayKeys(m map[string]string) []string {
 }
 
 // Copies a file from source to destination.
-func copyFile(destination, source string, perm uint32) os.Error {
+func copyFile(destination, source string, perm uint32) {
 	src, err := ioutil.ReadFile(source)
 	if err != nil {
-		return err
+		log.Fatal("copy error reading:", err)
 	}
 
 	err = ioutil.WriteFile(destination, src, perm)
 	if err != nil {
-		return err
+		log.Fatal("copy error writing:", err)
 	}
-
-	return nil
 }
 
 // Creates a string of characters with length of `name` to use it under that name.
@@ -69,4 +68,3 @@ func debug(tag map[string]interface{}) {
 	}
 	os.Exit(0)
 }
-

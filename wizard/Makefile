@@ -12,31 +12,9 @@ include $(GOROOT)/src/Make.inc
 TARG=wizard
 GOFILES=\
 	config.go\
-	error.go\
 	template.go\
 	util.go\
 	wizard.go\
 
-include $(GOROOT)/src/Make.cmd
-
-# Copy both templates and licenses to the system.
-data:
-	@ [ -d $(GOROOT)/lib/$(TARG) ] || mkdir $(GOROOT)/lib/$(TARG)
-	cp -R ../data/* $(GOROOT)/lib/$(TARG)/
-
-# Add a configuration file to the current user.
-config:
-ifdef HOME
-	[ -f $(HOME)/.gowizard ] || cp $(GOROOT)/lib/$(TARG)/copy/user.cfg $(HOME)/.gowizard
-else
-	@ echo "Environment variable 'HOME' is not set"
-endif
-
-# Installation
-install:
-ifndef GOBIN
-	mv $(TARG) $(GOROOT)/bin/$(TARG)
-else
-	mv $(TARG) $(GOBIN)/$(TARG)
-endif
+include $(GOROOT)/src/Make.pkg
 

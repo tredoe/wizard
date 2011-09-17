@@ -22,12 +22,11 @@ import (
 // ===
 
 const (
+	ERROR = 1 // Exit status code if there is any error.
+
 	// Permissions
 	PERM_DIRECTORY = 0755
 	PERM_FILE      = 0644
-
-	SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/Go-Wizard/data"
-	//SUBDIR_GOINSTALLED = "lib/gowizard"
 )
 
 // VCS configuration files to push to a server.
@@ -65,110 +64,86 @@ var listVCS = map[string]string{
 	"none":  "none",
 }
 
-// === Get data directory
-
-var dirData string
-
-func init() {
-	goEnv := os.Getenv("GOPATH")
-
-	if goEnv != "" {
-		goto _Found
-	}
-	if goEnv = os.Getenv("GOROOT"); goEnv != "" {
-		goto _Found
-	}
-	if goEnv = os.Getenv("GOROOT_FINAL"); goEnv != "" {
-		goto _Found
-	}
-
-_Found:
-	if goEnv == "" {
-		fatalf("Environment variable GOROOT neither" +
-			" GOROOT_FINAL has been set\n")
-	}
-
-	dirData = filepath.Join(goEnv, SUBDIR_GOINSTALLED)
-}
-
-// === Main program execution
+// === Type
 // ===
 
-func main() {
-	loadConfig()
+// Represents all information to create a project
+type info struct {
+	dirData    string // directory with templates
+	dirProject string // directory of project created
 
-	createProject()
-	os.Exit(0)
+	data map[string]interface{} // variables to pass to templates
+}
+
+func NewInfo(isFirstRun bool) *info {
+	i := new(info)
+
+	if isFirstRun {
+		i.dirData = dirData()
+	}
+	i.dirProject = dirProject()
+	i.data = templateData()
+
+	return i
 }
 
 // ===
 
 // Adds license file in directory `dir`.
-func addLicense(dir string, tag map[string]interface{}) {
-	dirTmpl := filepath.Join(dirData, "license")
+func (i *info) addLicense(dir string) {
+	dirTmpl := filepath.Join(i.dirData, "license")
 
 	switch *fLicense {
 	case "none":
 		break
 	case "bsd-3":
-		renderFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, "bsd-3.txt"), tag)
+		i.renderFile(filepath.Join(dir, "LICENSE"),
+			filepath.Join(dirTmpl, "bsd-3.txt"))
 	default:
-		if err := copyFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, *fLicense+".txt"), PERM_FILE); err != nil {
-			reportExit(err)
-		}
+		copyFile(filepath.Join(dir, "LICENSE"),
+			filepath.Join(dirTmpl, *fLicense+".txt"), PERM_FILE)
 
 		// License LGPL must also add the GPL license text.
 		if *fLicense == "lgpl-3" {
-			if err := copyFile(filepath.Join(dir, "LICENSE-GPL"),
-				filepath.Join(dirTmpl, "gpl-3.txt"), PERM_FILE); err != nil {
-				reportExit(err)
-			}
+			copyFile(filepath.Join(dir, "LICENSE-GPL"),
+				filepath.Join(dirTmpl, "gpl-3.txt"), PERM_FILE)
 		}
 	}
 }
 
 // Creates a new project.
-func createProject() {
-	tag := tagsToCreate()
-	if *fDebug {
-		debug(tag)
-	}
-
-	// === Render project files
-	// To create directories in lower case.
-	dirApp := filepath.Join(*fProjectName, *fPackageName)
-	if err := os.MkdirAll(dirApp, PERM_DIRECTORY); err != nil {
+func (i *info) CreateProject() {
+	if err := os.MkdirAll(i.dirProject, PERM_DIRECTORY); err != nil {
 		log.Fatal("directory error:", err)
 	}
 
-	setTmpl := parseTemplates(tag, CHAR_CODE_COMMENT, 0)
+	setTmpl := i.parseTemplates(_CHAR_CODE_COMMENT, 0)
 
+	// === Render project files
 	if *fProjecType != "cmd" {
-		renderSet(filepath.Join(dirApp, *fPackageName)+".go",
-			setTmpl, "Pac", tag)
-		renderSet(filepath.Join(dirApp, *fPackageName)+"_test.go",
-			setTmpl, "Test", tag)
+		i.renderSet(filepath.Join(i.dirProject, *fPackageName)+".go",
+			setTmpl, "Pac")
+		i.renderSet(filepath.Join(i.dirProject, *fPackageName)+"_test.go",
+			setTmpl, "Test")
 	} else {
-		renderSet(filepath.Join(dirApp, *fPackageName)+".go",
-			setTmpl, "Cmd", tag)
+		i.renderSet(filepath.Join(i.dirProject, *fPackageName)+".go",
+			setTmpl, "Cmd")
 	}
 
 	// === Render common files
-	dirTmpl := filepath.Join(dirData, "tmpl") // Base directory of templates
+	dirTmpl := filepath.Join(i.dirData, "tmpl") // Base directory of templates
 
-	renderFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
-		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"), tag)
-	renderFile(filepath.Join(*fProjectName, "NEWS.mkd"),
-		filepath.Join(dirTmpl, "NEWS.mkd"), tag)
-	renderFile(filepath.Join(*fProjectName, "README.mkd"),
-		filepath.Join(dirTmpl, "README.mkd"), tag)
+	i.renderFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
+		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"))
+	i.renderFile(filepath.Join(*fProjectName, "NEWS.mkd"),
+		filepath.Join(dirTmpl, "NEWS.mkd"))
+	i.renderFile(filepath.Join(*fProjectName, "README.mkd"),
+		filepath.Join(dirTmpl, "README.mkd"))
 
 	// The file AUTHORS is for copyright holders.
 	if !strings.HasPrefix(*fLicense, "cc0") {
-		renderFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
-			filepath.Join(dirTmpl, "AUTHORS.mkd"), tag)
+		i.renderFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
+			filepath.Join(dirTmpl, "AUTHORS.mkd"))
 	}
 
 	// === Add file related to VCS
@@ -184,24 +159,83 @@ func createProject() {
 
 		if err := ioutil.WriteFile(filepath.Join(*fProjectName, ignoreFile),
 			[]byte(tmplIgnore), PERM_FILE); err != nil {
-			reportExit(err)
+			log.Fatal("write error:", err)
 		}
 	}
 
 	// === License file
-	addLicense(*fProjectName, tag)
+	i.addLicense(*fProjectName)
 
 	// === Print messages
-	if tag["author_is_org"].(bool) {
+	if i.data["author_is_org"].(bool) {
 		fmt.Print(`
   * The organization has been added as author.
     Update `)
 
-		if tag["license_is_cc0"].(bool) {
+		if i.data["license_is_cc0"].(bool) {
 			fmt.Print("AUTHORS")
 		} else {
 			fmt.Print("CONTRIBUTORS")
 		}
 		fmt.Print(" file to add people.\n")
 	}
+}
+
+// === Utility
+// ===
+
+// Gets the path of the templates directory.
+func dirData() string {
+	goEnv := os.Getenv("GOPATH")
+
+	if goEnv != "" {
+		goto _Found
+	}
+	if goEnv = os.Getenv("GOROOT"); goEnv != "" {
+		goto _Found
+	}
+	if goEnv = os.Getenv("GOROOT_FINAL"); goEnv != "" {
+		goto _Found
+	}
+
+_Found:
+	if goEnv == "" {
+		log.Fatal("Environment variable GOROOT neither" +
+			" GOROOT_FINAL has been set")
+	}
+
+	return filepath.Join(goEnv, SUBDIR_GOINSTALLED)
+}
+
+// Gets the project directory.
+func dirProject() string {
+	return filepath.Join(*fProjectName, *fPackageName)
+}
+
+// Creates data to pass them to templates. Used at creating a new project.
+func templateData() map[string]interface{} {
+	var value bool
+
+	data := map[string]interface{}{
+		"project_name":    *fProjectName,
+		"package_name":    *fPackageName,
+		"author":          *fAuthor,
+		"author_email":    *fAuthorEmail,
+		"license":         listLicense[*fLicense],
+		"vcs":             *fVCS,
+		"_project_header": createHeader(*fProjectName),
+	}
+
+	if *fAuthorIsOrg {
+		value = true
+	}
+	data["author_is_org"] = value
+	value = false
+
+	if *fProjecType == "cgo" {
+		value = true
+	}
+	data["project_is_cgo"] = value
+
+	return data
 }

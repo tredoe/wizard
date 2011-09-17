@@ -12,6 +12,7 @@ package wizard
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -21,8 +22,13 @@ import (
 	"github.com/kless/Go-Inline/inline"
 )
 
-// Configuration file per user
-const USER_CONFIG = ".gowizard"
+const (
+	// Configuration file per user
+	USER_CONFIG = ".gowizard"
+
+	// Subdirectory where is installed through "goinstall"
+	SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/Go-Wizard/data"
+)
 
 // Flags for the command line
 var (
@@ -36,7 +42,6 @@ var (
 		"A string containing the author's e-mail address.")
 
 	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
-	fDebug       = flag.Bool("d", false, "Debug mode")
 	fVCS         = flag.String("vcs", "", "Version control system")
 )
 
@@ -50,8 +55,8 @@ Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 	os.Exit(ERROR)
 }
 
-// Loads configuration from flags and it returns tags for templates.
-func loadConfig() {
+// Loads configuration from flags and it returns data for templates.
+func LoadFlags() {
 	// === Generic flags
 	fInteractive := flag.Bool("i", false, "Interactive mode")
 
@@ -91,13 +96,13 @@ func loadConfig() {
 	}
 	// ===
 
-	// Get configuration per user
-	userConfig()
-
 	// Exit if it is not on interactive way
 	if !*fInteractive && (*fListProject || *fListLicense || *fListVCS) {
 		os.Exit(0)
 	}
+
+	// Get configuration per user
+	userConfig()
 
 	if *fInteractive {
 		interactive()
@@ -109,162 +114,8 @@ func loadConfig() {
 	checkAtCreate()
 }
 
-// Interactive mode.
-func interactive() {
-	var input string
-	var err os.Error
-
-	// Sorted flags
-	interactiveFlags := []string{
-		"org",
-		"Project-type",
-		"Project-name",
-		"Package-name",
-		"Author",
-		"Author-email",
-		"License",
-		"vcs",
-	}
-
-	q := inline.NewQuestionByDefault()
-	defer q.Close()
-
-	fmt.Println("\n  = Go Wizard\n")
-
-	for _, k := range interactiveFlags {
-		f := flag.Lookup(k)
-		text := strings.TrimRight(f.Usage, ".")
-
-		switch k {
-		case "org":
-			*fAuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
-		case "Project-type":
-			input, err = q.ReadChoice(text, arrayKeys(listProject),
-				inline.NONE)
-		case "Project-name":
-			input, err = q.ReadString(text, inline.REQUIRED)
-		case "Package-name":
-			setNames()
-			input, err = q.ReadStringDefault(text, *fPackageName, inline.REQUIRED)
-		case "Author":
-			if *fAuthor != "" {
-				input, err = q.ReadStringDefault(text,f.Value.String(), inline.REQUIRED)
-				break
-			}
-			input, err = q.ReadString(text, inline.REQUIRED)
-		case "Author-email":
-			if *fAuthorIsOrg {
-				input, err = q.ReadString(text, inline.NONE)
-				break
-			}
-
-			if *fAuthorEmail != "" {
-				input, err = q.ReadStringDefault(text,f.Value.String(), inline.REQUIRED)
-				break
-			}
-			input, err = q.ReadString(text, inline.REQUIRED)
-		case "License":
-			if *fLicense != "" {
-				input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), f.Value.String(), inline.NONE)
-				break
-			}
-			input, err = q.ReadChoice(text, arrayKeys(listLicense), inline.NONE)
-		case "vcs":
-			if *fVCS != "" {
-				input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS), f.Value.String(), inline.NONE)
-				break
-			}
-			input, err = q.ReadChoice(text, arrayKeys(listVCS), inline.NONE)
-		}
-
-		if err != nil {
-			reportExit(err)
-		}
-
-		if k != "org" {
-			flag.Set(k, input)
-		}
-	}
-
-	fmt.Println()
-}
-
-// Loads configuration per user, if any.
-func userConfig() {
-	home, err := os.Getenverror("HOME")
-	if err != nil {
-		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\nuserConfig(): %s: HOME\n\n", err)
-		}
-		return
-	}
-
-	pathUserConfig := filepath.Join(home, USER_CONFIG)
-
-	// To know if the file exist.
-	info, err := os.Stat(pathUserConfig)
-	if err != nil {
-		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\nuserConfig(): %s\n\n", err)
-		}
-		return
-	}
-
-	if !info.IsRegular() {
-		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\nuserConfig(): %s is not a file\n\n",
-				pathUserConfig)
-		}
-		return
-	}
-
-	cfg, err := config.ReadDefault(pathUserConfig)
-	if err != nil {
-		if *fDebug {
-			fmt.Fprintf(os.Stderr, "\nuserConfig(): %s\n\n", err)
-		}
-		return
-	}
-
-	// === Get values
-	var errors bool
-	var errKeys []string
-
-	if *fAuthor == "" {
-		*fAuthor, err = cfg.String("DEFAULT", "author")
-		if err != nil {
-			errors = true
-			errKeys = append(errKeys, "author")
-		}
-	}
-	if *fAuthorEmail == "" {
-		*fAuthorEmail, err = cfg.String("DEFAULT", "author-email")
-		if err != nil {
-			errors = true
-			errKeys = append(errKeys, "author-email")
-		}
-	}
-	if *fLicense == "" {
-		*fLicense, err = cfg.String("DEFAULT", "license")
-		if err != nil {
-			errors = true
-			errKeys = append(errKeys, "license")
-		}
-	}
-	if *fVCS == "" {
-		*fVCS, err = cfg.String("DEFAULT", "vcs")
-		if err != nil {
-			errors = true
-			errKeys = append(errKeys, "vcs")
-		}
-	}
-
-	if errors {
-		fatalf("%s: %s\n", err, strings.Join(errKeys, ","))
-	}
-}
-
 // === Checking
+// ===
 
 // Common checking.
 func checkCommon(errors bool) {
@@ -319,6 +170,153 @@ func checkAtCreate() {
 }
 
 // === Utility
+// ===
+
+// Loads configuration per user, if any.
+func userConfig() {
+	home, err := os.Getenverror("HOME")
+	if err != nil {
+		log.Print("no variable HOME:", err)
+		return
+	}
+
+	pathUserConfig := filepath.Join(home, USER_CONFIG)
+
+	// To know if the file exist.
+	info, err := os.Stat(pathUserConfig)
+	if err != nil {
+		log.Print("user configuration does not exist:", err)
+		return
+	}
+
+	if !info.IsRegular() {
+		log.Fatal("not a file:", USER_CONFIG)
+		return
+	}
+
+	cfg, err := config.ReadDefault(pathUserConfig)
+	if err != nil {
+		log.Fatal("error parsing configuration:", err)
+		return
+	}
+
+	// === Get values
+	var errors bool
+	var errKeys []string
+
+	if *fAuthor == "" {
+		*fAuthor, err = cfg.String("DEFAULT", "author")
+		if err != nil {
+			errors = true
+			errKeys = append(errKeys, "author")
+		}
+	}
+	if *fAuthorEmail == "" {
+		*fAuthorEmail, err = cfg.String("DEFAULT", "author-email")
+		if err != nil {
+			errors = true
+			errKeys = append(errKeys, "author-email")
+		}
+	}
+	if *fLicense == "" {
+		*fLicense, err = cfg.String("DEFAULT", "license")
+		if err != nil {
+			errors = true
+			errKeys = append(errKeys, "license")
+		}
+	}
+	if *fVCS == "" {
+		*fVCS, err = cfg.String("DEFAULT", "vcs")
+		if err != nil {
+			errors = true
+			errKeys = append(errKeys, "vcs")
+		}
+	}
+
+	if errors {
+		log.Fatalf("%s: %s\n", err, strings.Join(errKeys, ","))
+	}
+}
+
+// Interactive mode.
+func interactive() {
+	var input string
+	var err os.Error
+
+	// Sorted flags
+	interactiveFlags := []string{
+		"org",
+		"Project-type",
+		"Project-name",
+		"Package-name",
+		"Author",
+		"Author-email",
+		"License",
+		"vcs",
+	}
+
+	q := inline.NewQuestionByDefault()
+	defer q.Close()
+
+	fmt.Println("\n  = Go Wizard\n")
+
+	for _, k := range interactiveFlags {
+		f := flag.Lookup(k)
+		text := strings.TrimRight(f.Usage, ".")
+
+		switch k {
+		case "org":
+			*fAuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
+		case "Project-type":
+			input, err = q.ReadChoice(text, arrayKeys(listProject),
+				inline.NONE)
+		case "Project-name":
+			input, err = q.ReadString(text, inline.REQUIRED)
+		case "Package-name":
+			setNames()
+			input, err = q.ReadStringDefault(text, *fPackageName, inline.REQUIRED)
+		case "Author":
+			if *fAuthor != "" {
+				input, err = q.ReadStringDefault(text, f.Value.String(), inline.REQUIRED)
+				break
+			}
+			input, err = q.ReadString(text, inline.REQUIRED)
+		case "Author-email":
+			if *fAuthorIsOrg {
+				input, err = q.ReadString(text, inline.NONE)
+				break
+			}
+
+			if *fAuthorEmail != "" {
+				input, err = q.ReadStringDefault(text, f.Value.String(), inline.REQUIRED)
+				break
+			}
+			input, err = q.ReadString(text, inline.REQUIRED)
+		case "License":
+			if *fLicense != "" {
+				input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), f.Value.String(), inline.NONE)
+				break
+			}
+			input, err = q.ReadChoice(text, arrayKeys(listLicense), inline.NONE)
+		case "vcs":
+			if *fVCS != "" {
+				input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS), f.Value.String(), inline.NONE)
+				break
+			}
+			input, err = q.ReadChoice(text, arrayKeys(listVCS), inline.NONE)
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if k != "org" {
+			flag.Set(k, input)
+		}
+	}
+
+	fmt.Println()
+}
 
 // Sets names for both project and package.
 func setNames() {
@@ -338,32 +336,4 @@ func setNames() {
 		*fPackageName = strings.ToLower(
 			strings.TrimSpace(*fPackageName))
 	}
-}
-
-// Creates tags to pass them to templates. Used at creating a new project.
-func tagsToCreate() map[string]interface{} {
-	var value bool
-
-	tag := map[string]interface{} {
-		"project_name":    *fProjectName,
-		"package_name":    *fPackageName,
-		"author":          *fAuthor,
-		"author_email":    *fAuthorEmail,
-		"license":         listLicense[*fLicense],
-		"vcs":             *fVCS,
-		"_project_header": createHeader(*fProjectName),
-	}
-
-	if *fAuthorIsOrg {
-		value = true
-	}
-	tag["author_is_org"] = value
-	value = false
-
-	if *fProjecType == "cgo" {
-		value = true
-	}
-	tag["project_is_cgo"] = value
-
-	return tag
 }

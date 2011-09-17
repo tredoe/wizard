@@ -19,13 +19,13 @@ import (
 )
 
 // For comments in source code files
-const CHAR_CODE_COMMENT = "//"
+const _CHAR_CODE_COMMENT = "//"
 
 // Copyright and licenses
 const (
 	tmplCopyright = `{{define "Copyright"}}{{with .comment}}{{.}} {{end}}Copyright {{.year}}  The "{{.project_name}}" Authors{{end}}`
 
-	tmplBSD = `{{define "BSD"}}{{template "Copyright" .}}
+	tmplBSD = `{{define "Header"}}{{template "Copyright" .}}
 {{.comment}}
 {{.comment}} Use of this source code is governed by the {{.license}}
 {{.comment}} that can be found in the LICENSE file.
@@ -35,7 +35,7 @@ const (
 {{.comment}} for more details.
 {{end}}`
 
-	tmplApache = `{{define "Apache"}}{{template "Copyright" .}}
+	tmplApache = `{{define "Header"}}{{template "Copyright" .}}
 {{.comment}}
 {{.comment}} Licensed under the Apache License, Version 2.0 (the "License");
 {{.comment}} you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ const (
 {{.comment}} limitations under the License.
 {{end}}`
 
-	tmplGNU = `{{define "GNU"}}{{template "Copyright" .}}
+	tmplGNU = `{{define "Header"}}{{template "Copyright" .}}
 {{.comment}}
 {{.comment}} This program is free software: you can redistribute it and/or modify
 {{.comment}} it under the terms of the GNU {{with Affero}}{{.}} {{end}}{{with Lesser}}{{.}} {{end}}General Public License as published by
@@ -66,10 +66,10 @@ const (
 {{.comment}} along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {{end}}`
 
-	tmplNone = `{{define "None"}}{{template "Copyright" .}}
+	tmplNone = `{{define "Header"}}{{template "Copyright" .}}
 {{end}}`
 
-	tmplCC0 = `{{define "CC0"}}{{.comment}} To the extent possible under law, Authors have waived all copyright and
+	tmplCC0 = `{{define "Header"}}{{.comment}} To the extent possible under law, Authors have waived all copyright and
 {{.comment}} related or neighboring rights to "{{.project_name}}".
 {{end}}`
 )
@@ -129,9 +129,8 @@ main
 *.so
 `
 
-
 // Renders the template "src", creating a file in "dst".
-func renderFile(dst, src string, data interface{}) {
+func (i *info) renderFile(dst, src string) {
 	// === Create file.
 	file, err := os.Create(dst)
 	if err != nil {
@@ -143,15 +142,15 @@ func renderFile(dst, src string, data interface{}) {
 
 	tmpl, err := template.ParseFile(src)
 	if err != nil {
-		reportExit(err)
+		log.Fatal("parsing error:", err)
 	}
-	if err = tmpl.Execute(file, data); err != nil {
-		reportExit(err)
+	if err = tmpl.Execute(file, i.data); err != nil {
+		log.Fatal("execution failed:", err)
 	}
 }
 
 // Renders the template "tmplName" in "set" to the file "dst".
-func renderSet(dst string, set *template.Set, tmplName string, data interface{}) {
+func (i *info) renderSet(dst string, set *template.Set, tmplName string) {
 	// === Create file.
 	file, err := os.Create(dst)
 	if err != nil {
@@ -161,26 +160,29 @@ func renderSet(dst string, set *template.Set, tmplName string, data interface{})
 		log.Fatal("file error:", err)
 	}
 
-	err = set.Execute(file, tmplName, data)
+	err = set.Execute(file, tmplName, i.data)
 	if err != nil {
 		log.Fatalf("execution failed: %s", err)
 	}
 }
 
-
 // Parses the templates.
 // "charComment" is the character used to comment in code files.
 // If "year" is nil then gets the actual year.
-func parseTemplates(data map[string]interface{}, charComment string, year int) *template.Set {
+func (i *info) parseTemplates(charComment string, year int) *template.Set {
+	var err os.Error
+	var fullSet *template.Set
 	var tmplHeader string
-	licenseName := strings.Split(*fLicense, "-")[0]
 
-	data["comment"] = charComment
+	licenseName := strings.Split(*fLicense, "-")[0]
+	set := new(template.Set)
+
+	i.data["comment"] = charComment
 
 	if year == 0 {
-		data["year"] = strconv.Itoa64(time.LocalTime().Year)
+		i.data["year"] = strconv.Itoa64(time.LocalTime().Year)
 	} else {
-		data["year"] = year
+		i.data["year"] = year
 	}
 
 	switch licenseName {
@@ -191,13 +193,13 @@ func parseTemplates(data map[string]interface{}, charComment string, year int) *
 	case "cc0":
 		tmplHeader = tmplCC0
 	case "gpl", "lgpl", "agpl":
-		data["Affero"] = ""
-		data["Lesser"] = ""
+		i.data["Affero"] = ""
+		i.data["Lesser"] = ""
 
 		if licenseName == "agpl" {
-			data["Affero"] = "Affero"
+			i.data["Affero"] = "Affero"
 		} else if licenseName == "lgpl" {
-			data["Lesser"] = "Lesser"
+			i.data["Lesser"] = "Lesser"
 		}
 
 		tmplHeader = tmplGNU
@@ -205,29 +207,22 @@ func parseTemplates(data map[string]interface{}, charComment string, year int) *
 		tmplHeader = tmplNone
 	}
 
-	set := new(template.Set)
-	var fullSet *template.Set
-	var err os.Error
-
-//	for _, t := range []string{tmplApache, tmplBSD, tmplCC0, tmplGNU, tmplNone,
 	for _, t := range []string{tmplCopyright, tmplHeader, tmplCmd, tmplPac,
-			tmplTest} {
+		tmplTest} {
 		fullSet, err = set.Parse(t)
 		if err != nil {
 			log.Fatal("parse error in %q: %s", t, err)
 		}
 	}
 
-
 	// Tag to render the copyright in README.
-//	data["comment"] = ""
-//	data["copyright"] = parse(tmplCopyright, data)
+	//	i.data["comment"] = ""
+	//	i.data["copyright"] = parse(tmplCopyright, data)
 
 	// These tags are not used anymore.
-//	for _, t := range []string{"Affero", "comment", "year"} {
-//		data[t] = "", false
-//	}
+	//	for _, t := range []string{"Affero", "comment", "year"} {
+	//		i.data[t] = "", false
+	//	}
 
 	return fullSet
 }
-

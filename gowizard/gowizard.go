@@ -14,4 +14,12 @@ import (
 	"github.com/kless/Go-Wizard/wizard"
 )
 
+func main() {
+	wizard.LoadFlags()
+
+	i := wizard.NewInfo(true)
+	i.CreateProject()
+
+	os.Exit(0)
+}
 
