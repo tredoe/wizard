@@ -51,15 +51,15 @@ the appropriate ignore file.
 Example:
 
 	gowizard -Project-name=Go-Foo -Author="John Foo" -Author-email="e@mail.com" \
-	-Project-type=pac -License=bsd-2 -vcs=git -config
+	-Project-type=pkg -License=bsd-2 -vcs=git -config
 
 If the configuration file has been set, then it could be shorter now:
 
-	gowizard -Project-name=Go-Bar
+	gowizard -Project-name=Go-Bar -Project-type=pkg
 
 or use another flags than values by default:
 
-	gowizard -Project-name=Go-Bar -License=apache-2
+	gowizard -Project-name=Go-Bar -Project-type=pkg -License=apache-2
 
 Useful flags:
 
