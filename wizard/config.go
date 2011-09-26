@@ -87,7 +87,7 @@ func LoadFlags() {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
-	// ===
+	// * * *
 
 	// Exit if it is not on interactive way
 	if !*fInteractive && (*fListProject || *fListLicense || *fListVCS) {
@@ -107,8 +107,8 @@ func LoadFlags() {
 	checkAtCreate()
 }
 
+//
 // === Checking
-// ===
 
 // Common checking.
 func checkCommon(errors bool) {
@@ -162,8 +162,8 @@ func checkAtCreate() {
 	checkCommon(errors)
 }
 
+//
 // === Utility
-// ===
 
 // Loads configuration per user, if any.
 func userConfig() {
@@ -249,6 +249,7 @@ func interactive() {
 	}
 
 	q := inline.NewQuestionByDefault()
+	q.ExitAtCtrlC(0) // Exit with Ctrl-C
 	defer q.Close()
 
 	fmt.Println("\n  = Go Wizard\n")
