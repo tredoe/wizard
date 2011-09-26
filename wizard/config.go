@@ -313,20 +313,27 @@ func interactive() {
 
 // Sets names for both project and package.
 func setNames() {
-	reGo := regexp.MustCompile(`^go`) // To remove it from the project name
+	// === To remove them from the project name, if any.
+	reStart1 := regexp.MustCompile(`^go-`)
+	reStart2 := regexp.MustCompile(`^go`)
+	reEnd := regexp.MustCompile(`-go$`)
 
 	*fProjectName = strings.TrimSpace(*fProjectName)
 
 	// A program is usually named as the project name.
+	// It is created removing prefix or suffix related to "go".
 	if *fPackageName == "" {
-		// The package name is created:
-		// getting the last string after of the dash ('-'), if any,
-		// and removing 'go'. Finally, it's lower cased.
-		pkg := strings.Split(*fProjectName, "-")
-		*fPackageName = reGo.ReplaceAllString(
-			strings.ToLower(pkg[len(pkg)-1]), "")
+		*fPackageName = strings.ToLower(*fProjectName)
+
+		if reStart1.MatchString(*fPackageName) {
+			*fPackageName = reStart1.ReplaceAllString(*fPackageName, "")
+		} else if reStart2.MatchString(*fPackageName) {
+			*fPackageName = reStart2.ReplaceAllString(*fPackageName, "")
+		} else if reEnd.MatchString(*fPackageName) {
+			*fPackageName = reEnd.ReplaceAllString(*fPackageName, "")
+		}
+
 	} else {
-		*fPackageName = strings.ToLower(
-			strings.TrimSpace(*fPackageName))
+		*fPackageName = strings.ToLower(strings.TrimSpace(*fPackageName))
 	}
 }

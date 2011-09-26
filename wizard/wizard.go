@@ -101,7 +101,7 @@ func NewProject(isFirstRun bool) *project {
 	return p
 }
 
-// ===
+// * * *
 
 // Adds license file in directory `dir`.
 func (p *project) addLicense(dir string) {
