@@ -185,7 +185,7 @@ func (p *project) parseFromVar(dst string, tmplName string) {
 func (p *project) parseTemplates(charComment string, year int) {
 	var tmplHeader string
 
-	licenseName := strings.Split(*fLicense, "-")[0]
+	licenseName := strings.Split(p.cfg.license, "-")[0]
 	p.data["comment"] = charComment
 
 	if year == 0 {
@@ -225,7 +225,7 @@ func (p *project) parseTemplates(charComment string, year int) {
 			Parse(tmplCopyleft)))
 	}
 
-	if *fProjecType == "cmd" {
+	if p.cfg.projecType == "cmd" {
 		p.set.Add(template.Must(template.New("Cmd").Parse(tmplCmd)))
 	} else {
 		tPkg := template.Must(template.New("Pkg").Parse(tmplPkg))
@@ -233,7 +233,7 @@ func (p *project) parseTemplates(charComment string, year int) {
 		p.set.Add(tPkg, tTest)
 	}
 
-	if *fAddConfig {
+	if p.cfg.addUserConf {
 		p.set.Add(template.Must(template.New("Config").Parse(tmplUserConfig)))
 	}
 

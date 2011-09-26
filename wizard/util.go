@@ -10,7 +10,6 @@
 package wizard
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -64,18 +63,4 @@ func createHeader(name string) string {
 	}
 
 	return string(header)
-}
-
-// Shows data on 'tag', execpt started with "_".
-func debug(tag map[string]interface{}) {
-	fmt.Println("  = Debug\n")
-
-	for k, v := range tag {
-		// Skip "_"
-		if k[0] == '_' {
-			continue
-		}
-		fmt.Printf("  %s: %v\n", k, v)
-	}
-	os.Exit(0)
 }

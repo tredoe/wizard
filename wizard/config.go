@@ -22,21 +22,21 @@ import (
 	"github.com/kless/Go-Inline/inline"
 )
 
-// Flags for the command line
-var (
-	fProjecType  = flag.String("Project-type", "", "The project type.")
-	fProjectName = flag.String("Project-name", "", "The name of the project.")
-	fPackageName = flag.String("Package-name", "", "The name of the package.")
-	fLicense     = flag.String("License", "", "The license covering the package.")
-	fAuthor      = flag.String("Author", "",
-		"A string containing the author's name at a minimum.")
-	fAuthorEmail = flag.String("Author-email", "",
-		"A string containing the author's e-mail address.")
+// Represents the configuration of the project.
+type conf struct {
+	projecType  string
+	projectName string
+	packageName string
+	license     string
+	author      string
+	authorEmail string
+	authorIsOrg bool
+	vcs         string
 
-	fAuthorIsOrg = flag.Bool("org", false, "Does the author is an organization?")
-	fVCS         = flag.String("vcs", "", "Version control system")
-	fAddConfig   = flag.Bool("config", false, "Add the user configuration file")
-)
+	addUserConf bool
+}
+
+// * * *
 
 func usage() {
 	fmt.Fprintf(os.Stderr, `
@@ -48,9 +48,22 @@ Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 	os.Exit(ERROR)
 }
 
-// Loads configuration from flags and it returns data for templates.
-func LoadFlags() {
+// Loads configuration from flags and user configuration.
+func initConfig() *conf {
+	fProjecType := flag.String("Project-type", "", "The project type.")
+	fProjectName := flag.String("Project-name", "", "The name of the project.")
+	fPackageName := flag.String("Package-name", "", "The name of the package.")
+	fLicense := flag.String("License", "", "The license covering the package.")
+	fAuthor := flag.String("Author", "",
+		"A string containing the author's name at a minimum.")
+	fAuthorEmail := flag.String("Author-email", "",
+		"A string containing the author's e-mail address.")
+
+	fAuthorIsOrg := flag.Bool("org", false, "Does the author is an organization?")
+	fVCS := flag.String("vcs", "", "Version control system")
+
 	// === Generic flags
+	fAddUserConf := flag.Bool("config", false, "Add the user configuration file")
 	fInteractive := flag.Bool("i", false, "Interactive mode")
 
 	fListLicense := flag.Bool("ll", false,
@@ -94,32 +107,46 @@ func LoadFlags() {
 		os.Exit(0)
 	}
 
+	cfg := &conf{
+		projecType:  *fProjecType,
+		projectName: *fProjectName,
+		packageName: *fPackageName,
+		license:     *fLicense,
+		author:      *fAuthor,
+		authorEmail: *fAuthorEmail,
+		authorIsOrg: *fAuthorIsOrg,
+		vcs:         *fVCS,
+		addUserConf: *fAddUserConf,
+	}
+
 	// Get configuration per user
-	userConfig()
+	cfg.userConfig()
 
 	if *fInteractive {
-		interactive()
+		cfg.interactive()
 	} else {
-		setNames()
+		cfg.setNames()
 	}
 
 	// === Checking
-	checkAtCreate()
+	cfg.checkAtCreate()
+
+	return cfg
 }
 
 //
 // === Checking
 
 // Common checking.
-func checkCommon(errors bool) {
+func (c *conf) checkCommon(errors bool) {
 	// === License
-	*fLicense = strings.ToLower(*fLicense)
-	if _, present := listLicense[*fLicense]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable license: %q\n", *fLicense)
+	c.license = strings.ToLower(c.license)
+	if _, present := listLicense[c.license]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable license: %q\n", c.license)
 		errors = true
 	}
 
-	if *fLicense == "bsd-3" && !*fAuthorIsOrg {
+	if c.license == "bsd-3" && !c.authorIsOrg {
 		fmt.Fprintf(os.Stderr,
 			"license 'bsd-3' requires an organization as author\n")
 		errors = true
@@ -131,42 +158,42 @@ func checkCommon(errors bool) {
 }
 
 // Checks at creating project.
-func checkAtCreate() {
+func (c *conf) checkAtCreate() {
 	var errors bool
 
 	// === Necessary fields
-	if *fProjecType == "" || *fProjectName == "" || *fLicense == "" ||
-		*fAuthor == "" || *fVCS == "" {
+	if c.projecType == "" || c.projectName == "" || c.license == "" ||
+		c.author == "" || c.vcs == "" {
 		fmt.Fprintf(os.Stderr, "missing required fields to create project\n")
 		usage()
 	}
-	if *fAuthorEmail == "" && !*fAuthorIsOrg {
+	if c.authorEmail == "" && !c.authorIsOrg {
 		fmt.Fprintf(os.Stderr, "the email address is required for people\n")
 		errors = true
 	}
 
 	// === Project type
-	*fProjecType = strings.ToLower(*fProjecType)
-	if _, present := listProject[*fProjecType]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", *fProjecType)
+	c.projecType = strings.ToLower(c.projecType)
+	if _, present := listProject[c.projecType]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", c.projecType)
 		errors = true
 	}
 
 	// === VCS
-	*fVCS = strings.ToLower(*fVCS)
-	if _, present := listVCS[*fVCS]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", *fVCS)
+	c.vcs = strings.ToLower(c.vcs)
+	if _, present := listVCS[c.vcs]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", c.vcs)
 		errors = true
 	}
 
-	checkCommon(errors)
+	c.checkCommon(errors)
 }
 
 //
 // === Utility
 
 // Loads configuration per user, if any.
-func userConfig() {
+func (c *conf) userConfig() {
 	home, err := os.Getenverror("HOME")
 	if err != nil {
 		log.Print("no variable HOME:", err)
@@ -197,29 +224,29 @@ func userConfig() {
 	var errors bool
 	var errKeys []string
 
-	if *fAuthor == "" {
-		*fAuthor, err = cfg.String("DEFAULT", "author")
+	if c.author == "" {
+		c.author, err = cfg.String("DEFAULT", "author")
 		if err != nil {
 			errors = true
 			errKeys = append(errKeys, "author")
 		}
 	}
-	if *fAuthorEmail == "" {
-		*fAuthorEmail, err = cfg.String("DEFAULT", "author-email")
+	if c.authorEmail == "" {
+		c.authorEmail, err = cfg.String("DEFAULT", "author-email")
 		if err != nil {
 			errors = true
 			errKeys = append(errKeys, "author-email")
 		}
 	}
-	if *fLicense == "" {
-		*fLicense, err = cfg.String("DEFAULT", "license")
+	if c.license == "" {
+		c.license, err = cfg.String("DEFAULT", "license")
 		if err != nil {
 			errors = true
 			errKeys = append(errKeys, "license")
 		}
 	}
-	if *fVCS == "" {
-		*fVCS, err = cfg.String("DEFAULT", "vcs")
+	if c.vcs == "" {
+		c.vcs, err = cfg.String("DEFAULT", "vcs")
 		if err != nil {
 			errors = true
 			errKeys = append(errKeys, "vcs")
@@ -232,7 +259,7 @@ func userConfig() {
 }
 
 // Interactive mode.
-func interactive() {
+func (c *conf) interactive() {
 	var input string
 	var err os.Error
 
@@ -260,40 +287,40 @@ func interactive() {
 
 		switch k {
 		case "org":
-			*fAuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
+			c.authorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
 		case "Project-type":
 			input, err = q.ReadChoice(text, arrayKeys(listProject),
 				inline.NONE)
 		case "Project-name":
 			input, err = q.ReadString(text, inline.REQUIRED)
 		case "Package-name":
-			setNames()
-			input, err = q.ReadStringDefault(text, *fPackageName, inline.REQUIRED)
+			c.setNames()
+			input, err = q.ReadStringDefault(text, c.packageName, inline.REQUIRED)
 		case "Author":
-			if *fAuthor != "" {
+			if c.author != "" {
 				input, err = q.ReadStringDefault(text, f.Value.String(), inline.REQUIRED)
 				break
 			}
 			input, err = q.ReadString(text, inline.REQUIRED)
 		case "Author-email":
-			if *fAuthorIsOrg {
+			if c.authorIsOrg {
 				input, err = q.ReadString(text, inline.NONE)
 				break
 			}
 
-			if *fAuthorEmail != "" {
+			if c.authorEmail != "" {
 				input, err = q.ReadStringDefault(text, f.Value.String(), inline.REQUIRED)
 				break
 			}
 			input, err = q.ReadString(text, inline.REQUIRED)
 		case "License":
-			if *fLicense != "" {
+			if c.license != "" {
 				input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), f.Value.String(), inline.NONE)
 				break
 			}
 			input, err = q.ReadChoice(text, arrayKeys(listLicense), inline.NONE)
 		case "vcs":
-			if *fVCS != "" {
+			if c.vcs != "" {
 				input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS), f.Value.String(), inline.NONE)
 				break
 			}
@@ -313,28 +340,28 @@ func interactive() {
 }
 
 // Sets names for both project and package.
-func setNames() {
+func (c *conf) setNames() {
 	// === To remove them from the project name, if any.
 	reStart1 := regexp.MustCompile(`^go-`)
 	reStart2 := regexp.MustCompile(`^go`)
 	reEnd := regexp.MustCompile(`-go$`)
 
-	*fProjectName = strings.TrimSpace(*fProjectName)
+	c.projectName = strings.TrimSpace(c.projectName)
 
 	// A program is usually named as the project name.
 	// It is created removing prefix or suffix related to "go".
-	if *fPackageName == "" {
-		*fPackageName = strings.ToLower(*fProjectName)
+	if c.packageName == "" {
+		c.packageName = strings.ToLower(c.projectName)
 
-		if reStart1.MatchString(*fPackageName) {
-			*fPackageName = reStart1.ReplaceAllString(*fPackageName, "")
-		} else if reStart2.MatchString(*fPackageName) {
-			*fPackageName = reStart2.ReplaceAllString(*fPackageName, "")
-		} else if reEnd.MatchString(*fPackageName) {
-			*fPackageName = reEnd.ReplaceAllString(*fPackageName, "")
+		if reStart1.MatchString(c.packageName) {
+			c.packageName = reStart1.ReplaceAllString(c.packageName, "")
+		} else if reStart2.MatchString(c.packageName) {
+			c.packageName = reStart2.ReplaceAllString(c.packageName, "")
+		} else if reEnd.MatchString(c.packageName) {
+			c.packageName = reEnd.ReplaceAllString(c.packageName, "")
 		}
 
 	} else {
-		*fPackageName = strings.ToLower(strings.TrimSpace(*fPackageName))
+		c.packageName = strings.ToLower(strings.TrimSpace(c.packageName))
 	}
 }

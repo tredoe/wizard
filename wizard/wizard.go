@@ -19,8 +19,8 @@ import (
 	"template"
 )
 
+//
 // === Variables
-// ===
 
 const (
 	ERROR = 1 // Exit status code if there is any error.
@@ -74,14 +74,15 @@ var listVCS = map[string]string{
 	"none":  "none",
 }
 
+//
 // === Type
-// ===
 
 // Represents all information to create a project
 type project struct {
 	dirData    string // directory with templates
 	dirProject string // directory of project created
 
+	cfg  *conf
 	set  *template.Set          // set of templates
 	data map[string]interface{} // variables to pass to templates
 }
@@ -89,14 +90,16 @@ type project struct {
 // Creates information for the project.
 // "isFirstRun" indicates if it is the first time in be called.
 func NewProject(isFirstRun bool) *project {
+	cfg := initConfig()
 	p := new(project)
 
 	if isFirstRun {
 		p.dirData = dirData()
 	}
-	p.dirProject = dirProject()
-	p.data = templateData()
+	p.dirProject = filepath.Join(p.cfg.projectName, p.cfg.packageName)
+	p.data = templateData(cfg)
 	p.set = new(template.Set)
+	p.cfg = cfg
 
 	return p
 }
@@ -107,7 +110,7 @@ func NewProject(isFirstRun bool) *project {
 func (p *project) addLicense(dir string) {
 	dirTmpl := filepath.Join(p.dirData, "license")
 
-	switch *fLicense {
+	switch p.cfg.license {
 	case "none":
 		break
 	case "bsd-3":
@@ -115,10 +118,10 @@ func (p *project) addLicense(dir string) {
 			filepath.Join(dirTmpl, "bsd-3.txt"), false)
 	default:
 		copyFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, *fLicense+".txt"), _PERM_FILE)
+			filepath.Join(dirTmpl, p.cfg.license+".txt"), _PERM_FILE)
 
 		// License LGPL must also add the GPL license text.
-		if *fLicense == "lgpl-3" {
+		if p.cfg.license == "lgpl-3" {
 			copyFile(filepath.Join(dir, "LICENSE-GPL"),
 				filepath.Join(dirTmpl, "gpl-3.txt"), _PERM_FILE)
 		}
@@ -134,13 +137,13 @@ func (p *project) Create() {
 	p.parseTemplates(_CHAR_CODE_COMMENT, 0)
 
 	// === Render project files
-	if *fProjecType != "cmd" {
-		p.parseFromVar(filepath.Join(p.dirProject, *fPackageName)+".go",
+	if p.cfg.projecType != "cmd" {
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.packageName)+".go",
 			"Pkg")
-		p.parseFromVar(filepath.Join(p.dirProject, *fPackageName)+"_test.go",
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.packageName)+"_test.go",
 			"Test")
 	} else {
-		p.parseFromVar(filepath.Join(p.dirProject, *fPackageName)+".go",
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.packageName)+".go",
 			"Cmd")
 	}
 	p.parseFromVar(filepath.Join(p.dirProject, "Makefile"), "Makefile")
@@ -148,41 +151,41 @@ func (p *project) Create() {
 	// === Render common files
 	dirTmpl := filepath.Join(p.dirData, "tmpl") // Base directory of templates
 
-	p.parseFromFile(filepath.Join(*fProjectName, "CONTRIBUTORS.mkd"),
+	p.parseFromFile(filepath.Join(p.cfg.projectName, "CONTRIBUTORS.mkd"),
 		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"), false)
-	p.parseFromFile(filepath.Join(*fProjectName, "NEWS.mkd"),
+	p.parseFromFile(filepath.Join(p.cfg.projectName, "NEWS.mkd"),
 		filepath.Join(dirTmpl, "NEWS.mkd"), false)
-	p.parseFromFile(filepath.Join(*fProjectName, "README.mkd"),
+	p.parseFromFile(filepath.Join(p.cfg.projectName, "README.mkd"),
 		filepath.Join(dirTmpl, "README.mkd"), true)
 
 	// The file AUTHORS is for copyright holders.
-	if !strings.HasPrefix(*fLicense, "cc0") {
-		p.parseFromFile(filepath.Join(*fProjectName, "AUTHORS.mkd"),
+	if !strings.HasPrefix(p.cfg.license, "cc0") {
+		p.parseFromFile(filepath.Join(p.cfg.projectName, "AUTHORS.mkd"),
 			filepath.Join(dirTmpl, "AUTHORS.mkd"), false)
 	}
 
 	// === Add file related to VCS
-	switch *fVCS {
+	switch p.cfg.vcs {
 	case "other", "none":
 		break
 	default:
-		ignoreFile := "." + *fVCS + "ignore"
+		ignoreFile := "." + p.cfg.vcs + "ignore"
 
-		if *fVCS == "hg" {
+		if p.cfg.vcs == "hg" {
 			tmplIgnore = hgIgnoreTop + tmplIgnore
 		}
 
-		if err := ioutil.WriteFile(filepath.Join(*fProjectName, ignoreFile),
+		if err := ioutil.WriteFile(filepath.Join(p.cfg.projectName, ignoreFile),
 			[]byte(tmplIgnore), _PERM_FILE); err != nil {
 			log.Fatal("write error:", err)
 		}
 	}
 
 	// === License file
-	p.addLicense(*fProjectName)
+	p.addLicense(p.cfg.projectName)
 
 	// === User configuration file
-	if *fAddConfig {
+	if p.cfg.addUserConf {
 		envHome := os.Getenv("HOME")
 
 		if envHome != "" {
@@ -201,8 +204,8 @@ func (p *project) Create() {
 	}
 }
 
+//
 // === Utility
-// ===
 
 // Gets the path of the templates directory.
 func dirData() string {
@@ -227,32 +230,27 @@ _Found:
 	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED)
 }
 
-// Gets the project directory.
-func dirProject() string {
-	return filepath.Join(*fProjectName, *fPackageName)
-}
-
 // Creates data to pass them to templates. Used at creating a new project.
-func templateData() map[string]interface{} {
+func templateData(cfg *conf) map[string]interface{} {
 	data := map[string]interface{}{
-		"project_name":    *fProjectName,
-		"package_name":    *fPackageName,
-		"org":             *fAuthorIsOrg,
-		"author":          *fAuthor,
-		"author_email":    *fAuthorEmail,
-		"license":         *fLicense,
-		"vcs":             *fVCS,
-		"_project_header": createHeader(*fProjectName),
+		"project_name":    cfg.projectName,
+		"package_name":    cfg.packageName,
+		"org":             cfg.authorIsOrg,
+		"author":          cfg.author,
+		"author_email":    cfg.authorEmail,
+		"license":         cfg.license,
+		"vcs":             cfg.vcs,
+		"_project_header": createHeader(cfg.projectName),
 	}
 
-	if *fLicense != "none" {
-		data["full_license"] = listLicense[*fLicense]
+	if cfg.license != "none" {
+		data["full_license"] = listLicense[cfg.license]
 	}
-	if *fProjecType == "cgo" {
+	if cfg.projecType == "cgo" {
 		data["is_cgo_project"] = true
 	}
 	// For the Makefile
-	if *fProjecType == "cmd" {
+	if cfg.projecType == "cmd" {
 		data["is_cmd_project"] = true
 	}
 

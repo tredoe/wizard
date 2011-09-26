@@ -16,8 +16,6 @@ import (
 )
 
 func main() {
-	wizard.LoadFlags()
-
 	p := wizard.NewProject(true)
 	p.Create()
 
