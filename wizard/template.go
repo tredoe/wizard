@@ -50,16 +50,16 @@ const (
 	tmplGNU = `{{.Comment}} {{template "Copyright" .}}
 {{.Comment}}
 {{.Comment}} This program is free software: you can redistribute it and/or modify
-{{.Comment}} it under the terms of the GNU {{with .Affero}}{{.}} {{end}}{{with .Lesser}}{{.}} {{end}}General Public License as published by
+{{.Comment}} it under the terms of the GNU {{with .GNUextra}}{{.}} {{end}}General Public License as published by
 {{.Comment}} the Free Software Foundation, either version 3 of the License, or
 {{.Comment}} (at your option) any later version.
 {{.Comment}}
 {{.Comment}} This program is distributed in the hope that it will be useful,
 {{.Comment}} but WITHOUT ANY WARRANTY; without even the implied warranty of
 {{.Comment}} MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-{{.Comment}} GNU {{with .Affero}}{{.}} {{end}}{{with .Lesser}}{{.}} {{end}}General Public License for more details.
+{{.Comment}} GNU {{with .GNUextra}}{{.}} {{end}}General Public License for more details.
 {{.Comment}}
-{{.Comment}} You should have received a copy of the GNU {{with .Affero}}{{.}} {{end}}{{with .Lesser}}{{.}} {{end}}General Public License
+{{.Comment}} You should have received a copy of the GNU {{with .GNUextra}}{{.}} {{end}}General Public License
 {{.Comment}} along with this program.  If not, see <http://www.gnu.org/licenses/>.
 `
 
@@ -201,13 +201,10 @@ func (p *project) parseTemplates(charComment string, year int) {
 	case "cc0":
 		tmplHeader = tmplCC0
 	case "gpl", "lgpl", "agpl":
-		p.cfg.Affero = ""
-		p.cfg.Lesser = ""
-
 		if licenseName == "agpl" {
-			p.cfg.Affero = "Affero"
+			p.cfg.GNUextra = "Affero"
 		} else if licenseName == "lgpl" {
-			p.cfg.Lesser = "Lesser"
+			p.cfg.GNUextra = "Lesser"
 		}
 
 		tmplHeader = tmplGNU

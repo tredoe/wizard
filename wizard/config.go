@@ -36,14 +36,13 @@ type conf struct {
 	addUserConf bool
 
 	// To pass to templates
+	Comment       string
+	FullLicense   string
+	GNUextra      string
 	ProjectHeader string
-	FullLicense string
-	IsCmdProject bool
-	IsCgoProject bool
-	Comment string
-	Year int
-	Affero string
-	Lesser string
+	IsCmdProject  bool
+	IsCgoProject  bool
+	Year          int
 }
 
 // * * *

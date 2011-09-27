@@ -82,8 +82,8 @@ type project struct {
 	dirData    string // directory with templates
 	dirProject string // directory of project created
 
-	cfg  *conf
-	set  *template.Set          // set of templates
+	cfg *conf
+	set *template.Set // set of templates
 }
 
 // Creates information for the project.
@@ -227,4 +227,3 @@ _Found:
 
 	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED)
 }
-
