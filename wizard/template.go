@@ -124,7 +124,7 @@ include $(GOROOT)/src/Make.{{if .IsCmdProject}}cmd{{else}}pkg{{end}}
 // User configuration
 const tmplUserConfig = `[DEFAULT]
 author: {{.Author}}
-author-email: {{.AuthorEmail}}
+email: {{.Email}}
 license: {{.license}}
 vcs: {{.vcs}}
 `

@@ -16,5 +16,5 @@ explanation.*
 
 * * *
 
-{{.Author}}{{with .AuthorEmail}} <{{.}}>{{end}}
+{{.Author}}{{with .Email}} <{{.}}>{{end}}
 

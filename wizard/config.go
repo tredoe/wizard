@@ -29,7 +29,7 @@ type conf struct {
 	PackageName string
 	license     string
 	Author      string
-	AuthorEmail string
+	Email       string
 	AuthorIsOrg bool
 	vcs         string
 
@@ -49,8 +49,8 @@ type conf struct {
 
 func usage() {
 	fmt.Fprintf(os.Stderr, `
-Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
-	[-Package-name -org -config]
+Usage: gowizard -project-type -project-name -license -author -email -vcs
+	[-package-name -org -config]
 
 `)
 	flag.PrintDefaults()
@@ -59,13 +59,13 @@ Usage: gowizard -Project-type -Project-name -License -Author -Author-email -vcs
 
 // Loads configuration from flags and user configuration.
 func initConfig() *conf {
-	fProjecType := flag.String("Project-type", "", "The project type.")
-	fProjectName := flag.String("Project-name", "", "The name of the project.")
-	fPackageName := flag.String("Package-name", "", "The name of the package.")
-	fLicense := flag.String("License", "", "The license covering the package.")
-	fAuthor := flag.String("Author", "",
+	fProjecType := flag.String("project-type", "", "The project type.")
+	fProjectName := flag.String("project-name", "", "The name of the project.")
+	fPackageName := flag.String("package-name", "", "The name of the package.")
+	fLicense := flag.String("license", "", "The license covering the package.")
+	fAuthor := flag.String("author", "",
 		"A string containing the author's name at a minimum.")
-	fAuthorEmail := flag.String("Author-email", "",
+	fEmail := flag.String("email", "",
 		"A string containing the author's e-mail address.")
 
 	fAuthorIsOrg := flag.Bool("org", false, "Does the author is an organization?")
@@ -76,9 +76,9 @@ func initConfig() *conf {
 	fInteractive := flag.Bool("i", false, "Interactive mode")
 
 	fListLicense := flag.Bool("ll", false,
-		"Show the list of licenses for the flag 'License'")
+		"Show the list of licenses for the flag 'license'")
 	fListProject := flag.Bool("lp", false,
-		"Show the list of project types for the flag 'Project-type'")
+		"Show the list of project types for the flag 'project-type'")
 	fListVCS := flag.Bool("lv", false,
 		"Show the list of version control systems")
 
@@ -122,7 +122,7 @@ func initConfig() *conf {
 		PackageName: *fPackageName,
 		license:     *fLicense,
 		Author:      *fAuthor,
-		AuthorEmail: *fAuthorEmail,
+		Email:       *fEmail,
 		AuthorIsOrg: *fAuthorIsOrg,
 		vcs:         *fVCS,
 		addUserConf: *fAddUserConf,
@@ -190,7 +190,7 @@ func checkAtCreate(c *conf) {
 		fmt.Fprintf(os.Stderr, "missing required fields to create project\n")
 		usage()
 	}
-	if c.AuthorEmail == "" && !c.AuthorIsOrg {
+	if c.Email == "" && !c.AuthorIsOrg {
 		fmt.Fprintf(os.Stderr, "the email address is required for people\n")
 		errors = true
 	}
@@ -254,11 +254,11 @@ func userConfig(c *conf) {
 			errKeys = append(errKeys, "author")
 		}
 	}
-	if c.AuthorEmail == "" {
-		c.AuthorEmail, err = cfg.String("DEFAULT", "author-email")
+	if c.Email == "" {
+		c.Email, err = cfg.String("DEFAULT", "email")
 		if err != nil {
 			errors = true
-			errKeys = append(errKeys, "author-email")
+			errKeys = append(errKeys, "email")
 		}
 	}
 	if c.license == "" {
@@ -288,12 +288,12 @@ func interactive(c *conf) {
 	// Sorted flags
 	interactiveFlags := []string{
 		"org",
-		"Project-type",
-		"Project-name",
-		"Package-name",
-		"Author",
-		"Author-email",
-		"License",
+		"project-type",
+		"project-name",
+		"package-name",
+		"author",
+		"email",
+		"license",
 		"vcs",
 	}
 
@@ -310,31 +310,31 @@ func interactive(c *conf) {
 		switch k {
 		case "org":
 			c.AuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
-		case "Project-type":
+		case "project-type":
 			c.projecType, err = q.ReadChoice(text, arrayKeys(listProject), inline.NONE)
-		case "Project-name":
+		case "project-name":
 			c.ProjectName, err = q.ReadString(text, inline.REQUIRED)
-		case "Package-name":
+		case "package-name":
 			setNames(c)
 			c.PackageName, err = q.ReadStringDefault(text, c.PackageName, inline.REQUIRED)
-		case "Author":
+		case "author":
 			if c.Author != "" {
 				c.Author, err = q.ReadStringDefault(text, c.Author, inline.REQUIRED)
 				break
 			}
 			c.Author, err = q.ReadString(text, inline.REQUIRED)
-		case "Author-email":
+		case "email":
 			if c.AuthorIsOrg {
-				c.AuthorEmail, err = q.ReadString(text, inline.NONE)
+				c.Email, err = q.ReadString(text, inline.NONE)
 				break
 			}
 
-			if c.AuthorEmail != "" {
-				c.AuthorEmail, err = q.ReadStringDefault(text, c.AuthorEmail, inline.REQUIRED)
+			if c.Email != "" {
+				c.Email, err = q.ReadStringDefault(text, c.Email, inline.REQUIRED)
 				break
 			}
-			c.AuthorEmail, err = q.ReadString(text, inline.REQUIRED)
-		case "License":
+			c.Email, err = q.ReadString(text, inline.REQUIRED)
+		case "license":
 			if c.license != "" {
 				c.license, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), c.license, inline.NONE)
 				break
