@@ -27,7 +27,7 @@ To only install the library, which could be used by a Go IDE:
 
 If you want not repeat the same input every time you create a project, then you
 could use an user configuration file in your home directory. It allows set the
-flags *-Author*, *-Author-email*, *-License*, and *-vcs*, with a value by default.
+flags *-author*, *-email*, *-license*, and *-vcs*, with a value by default.
 
 To create it, you have to use the flag *-config*, besides of the required flags
 at creating a project.
@@ -37,29 +37,28 @@ at creating a project.
 
 ### Create
 
-The required flags to build a new project are *-Project-type*, *-Project-name*,
-*-License* ,*-Author*, *-Author-email* and *-vcs*; *-Author-email* is not
-necessary when the author is an organization (*-org*).
+The required flags to build a new project are *-project-type*, *-project-name*,
+*-license* ,*-author*, *-email* and *-vcs*; *-email* is not necessary when
+the author is an organization (*-org*).
 
-By default, the package name (*-Package-name*) for a program (cmd) is named as
-the project name. For other types of project, it is removed "go-" from the
-project name.
+By default, the package name (*-package-name*) is named as the project name but
+in lower case, and removing the name "Go" of the prefix and suffix.
 
 The flag *-vcs* indicates the version control system to use, which allows to add
 the appropriate ignore file.
 
 Example:
 
-	gowizard -Project-name=Go-Foo -Author="John Foo" -Author-email="e@mail.com" \
-	-Project-type=pkg -License=bsd-2 -vcs=git -config
+	gowizard -project-name=Go-Foo -author="John Foo" -email="e@mail.com" \
+	-project-type=pkg -license=bsd-2 -vcs=git -config
 
 If the configuration file has been set, then it could be shorter now:
 
-	gowizard -Project-name=Go-Bar -Project-type=pkg
+	gowizard -project-name=Go-Bar -project-type=pkg
 
 or use another flags than values by default:
 
-	gowizard -Project-name=Go-Bar -Project-type=pkg -License=apache-2
+	gowizard -project-name=Go-Bar -project-type=pkg -license=apache-2
 
 Useful flags:
 
