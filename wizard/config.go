@@ -25,15 +25,25 @@ import (
 // Represents the configuration of the project.
 type conf struct {
 	projecType  string
-	projectName string
-	packageName string
+	ProjectName string
+	PackageName string
 	license     string
-	author      string
-	authorEmail string
-	authorIsOrg bool
+	Author      string
+	AuthorEmail string
+	AuthorIsOrg bool
 	vcs         string
 
 	addUserConf bool
+
+	// To pass to templates
+	ProjectHeader string
+	FullLicense string
+	IsCmdProject bool
+	IsCgoProject bool
+	Comment string
+	Year int
+	Affero string
+	Lesser string
 }
 
 // * * *
@@ -109,27 +119,41 @@ func initConfig() *conf {
 
 	cfg := &conf{
 		projecType:  *fProjecType,
-		projectName: *fProjectName,
-		packageName: *fPackageName,
+		ProjectName: *fProjectName,
+		PackageName: *fPackageName,
 		license:     *fLicense,
-		author:      *fAuthor,
-		authorEmail: *fAuthorEmail,
-		authorIsOrg: *fAuthorIsOrg,
+		Author:      *fAuthor,
+		AuthorEmail: *fAuthorEmail,
+		AuthorIsOrg: *fAuthorIsOrg,
 		vcs:         *fVCS,
 		addUserConf: *fAddUserConf,
 	}
 
 	// Get configuration per user
-	cfg.userConfig()
+	userConfig(cfg)
 
 	if *fInteractive {
-		cfg.interactive()
+		interactive(cfg)
 	} else {
-		cfg.setNames()
+		setNames(cfg)
 	}
 
 	// === Checking
-	cfg.checkAtCreate()
+	checkAtCreate(cfg)
+
+	// === Extra for templates
+	cfg.ProjectHeader = createHeader(cfg.ProjectName)
+
+	if cfg.license != "none" {
+		cfg.FullLicense = listLicense[cfg.license]
+	}
+	if cfg.projecType == "cgo" {
+		cfg.IsCgoProject = true
+	}
+	// For the Makefile
+	if cfg.projecType == "cmd" {
+		cfg.IsCmdProject = true
+	}
 
 	return cfg
 }
@@ -138,7 +162,7 @@ func initConfig() *conf {
 // === Checking
 
 // Common checking.
-func (c *conf) checkCommon(errors bool) {
+func checkCommon(c *conf, errors bool) {
 	// === License
 	c.license = strings.ToLower(c.license)
 	if _, present := listLicense[c.license]; !present {
@@ -146,7 +170,7 @@ func (c *conf) checkCommon(errors bool) {
 		errors = true
 	}
 
-	if c.license == "bsd-3" && !c.authorIsOrg {
+	if c.license == "bsd-3" && !c.AuthorIsOrg {
 		fmt.Fprintf(os.Stderr,
 			"license 'bsd-3' requires an organization as author\n")
 		errors = true
@@ -158,16 +182,16 @@ func (c *conf) checkCommon(errors bool) {
 }
 
 // Checks at creating project.
-func (c *conf) checkAtCreate() {
+func checkAtCreate(c *conf) {
 	var errors bool
 
 	// === Necessary fields
-	if c.projecType == "" || c.projectName == "" || c.license == "" ||
-		c.author == "" || c.vcs == "" {
+	if c.projecType == "" || c.ProjectName == "" || c.license == "" ||
+		c.Author == "" || c.vcs == "" {
 		fmt.Fprintf(os.Stderr, "missing required fields to create project\n")
 		usage()
 	}
-	if c.authorEmail == "" && !c.authorIsOrg {
+	if c.AuthorEmail == "" && !c.AuthorIsOrg {
 		fmt.Fprintf(os.Stderr, "the email address is required for people\n")
 		errors = true
 	}
@@ -186,14 +210,14 @@ func (c *conf) checkAtCreate() {
 		errors = true
 	}
 
-	c.checkCommon(errors)
+	checkCommon(c, errors)
 }
 
 //
 // === Utility
 
 // Loads configuration per user, if any.
-func (c *conf) userConfig() {
+func userConfig(c *conf) {
 	home, err := os.Getenverror("HOME")
 	if err != nil {
 		log.Print("no variable HOME:", err)
@@ -224,15 +248,15 @@ func (c *conf) userConfig() {
 	var errors bool
 	var errKeys []string
 
-	if c.author == "" {
-		c.author, err = cfg.String("DEFAULT", "author")
+	if c.Author == "" {
+		c.Author, err = cfg.String("DEFAULT", "author")
 		if err != nil {
 			errors = true
 			errKeys = append(errKeys, "author")
 		}
 	}
-	if c.authorEmail == "" {
-		c.authorEmail, err = cfg.String("DEFAULT", "author-email")
+	if c.AuthorEmail == "" {
+		c.AuthorEmail, err = cfg.String("DEFAULT", "author-email")
 		if err != nil {
 			errors = true
 			errKeys = append(errKeys, "author-email")
@@ -259,8 +283,7 @@ func (c *conf) userConfig() {
 }
 
 // Interactive mode.
-func (c *conf) interactive() {
-	var input string
+func interactive(c *conf) {
 	var err os.Error
 
 	// Sorted flags
@@ -276,7 +299,7 @@ func (c *conf) interactive() {
 	}
 
 	q := inline.NewQuestionByDefault()
-	q.ExitAtCtrlC(0) // Exit with Ctrl-C
+	q.ExitAtCtrlC(0)
 	defer q.Close()
 
 	fmt.Println("\n  = Go Wizard\n")
@@ -287,52 +310,47 @@ func (c *conf) interactive() {
 
 		switch k {
 		case "org":
-			c.authorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
+			c.AuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
 		case "Project-type":
-			input, err = q.ReadChoice(text, arrayKeys(listProject),
-				inline.NONE)
+			c.projecType, err = q.ReadChoice(text, arrayKeys(listProject), inline.NONE)
 		case "Project-name":
-			input, err = q.ReadString(text, inline.REQUIRED)
+			c.ProjectName, err = q.ReadString(text, inline.REQUIRED)
 		case "Package-name":
-			c.setNames()
-			input, err = q.ReadStringDefault(text, c.packageName, inline.REQUIRED)
+			setNames(c)
+			c.PackageName, err = q.ReadStringDefault(text, c.PackageName, inline.REQUIRED)
 		case "Author":
-			if c.author != "" {
-				input, err = q.ReadStringDefault(text, f.Value.String(), inline.REQUIRED)
+			if c.Author != "" {
+				c.Author, err = q.ReadStringDefault(text, c.Author, inline.REQUIRED)
 				break
 			}
-			input, err = q.ReadString(text, inline.REQUIRED)
+			c.Author, err = q.ReadString(text, inline.REQUIRED)
 		case "Author-email":
-			if c.authorIsOrg {
-				input, err = q.ReadString(text, inline.NONE)
+			if c.AuthorIsOrg {
+				c.AuthorEmail, err = q.ReadString(text, inline.NONE)
 				break
 			}
 
-			if c.authorEmail != "" {
-				input, err = q.ReadStringDefault(text, f.Value.String(), inline.REQUIRED)
+			if c.AuthorEmail != "" {
+				c.AuthorEmail, err = q.ReadStringDefault(text, c.AuthorEmail, inline.REQUIRED)
 				break
 			}
-			input, err = q.ReadString(text, inline.REQUIRED)
+			c.AuthorEmail, err = q.ReadString(text, inline.REQUIRED)
 		case "License":
 			if c.license != "" {
-				input, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), f.Value.String(), inline.NONE)
+				c.license, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), c.license, inline.NONE)
 				break
 			}
-			input, err = q.ReadChoice(text, arrayKeys(listLicense), inline.NONE)
+			c.license, err = q.ReadChoice(text, arrayKeys(listLicense), inline.NONE)
 		case "vcs":
 			if c.vcs != "" {
-				input, err = q.ReadChoiceDefault(text, arrayKeys(listVCS), f.Value.String(), inline.NONE)
+				c.vcs, err = q.ReadChoiceDefault(text, arrayKeys(listVCS), c.vcs, inline.NONE)
 				break
 			}
-			input, err = q.ReadChoice(text, arrayKeys(listVCS), inline.NONE)
+			c.vcs, err = q.ReadChoice(text, arrayKeys(listVCS), inline.NONE)
 		}
 
 		if err != nil {
 			log.Fatal(err)
-		}
-
-		if k != "org" {
-			flag.Set(k, input)
 		}
 	}
 
@@ -340,28 +358,28 @@ func (c *conf) interactive() {
 }
 
 // Sets names for both project and package.
-func (c *conf) setNames() {
+func setNames(c *conf) {
 	// === To remove them from the project name, if any.
 	reStart1 := regexp.MustCompile(`^go-`)
 	reStart2 := regexp.MustCompile(`^go`)
 	reEnd := regexp.MustCompile(`-go$`)
 
-	c.projectName = strings.TrimSpace(c.projectName)
+	c.ProjectName = strings.TrimSpace(c.ProjectName)
 
 	// A program is usually named as the project name.
 	// It is created removing prefix or suffix related to "go".
-	if c.packageName == "" {
-		c.packageName = strings.ToLower(c.projectName)
+	if c.PackageName == "" {
+		c.PackageName = strings.ToLower(c.ProjectName)
 
-		if reStart1.MatchString(c.packageName) {
-			c.packageName = reStart1.ReplaceAllString(c.packageName, "")
-		} else if reStart2.MatchString(c.packageName) {
-			c.packageName = reStart2.ReplaceAllString(c.packageName, "")
-		} else if reEnd.MatchString(c.packageName) {
-			c.packageName = reEnd.ReplaceAllString(c.packageName, "")
+		if reStart1.MatchString(c.PackageName) {
+			c.PackageName = reStart1.ReplaceAllString(c.PackageName, "")
+		} else if reStart2.MatchString(c.PackageName) {
+			c.PackageName = reStart2.ReplaceAllString(c.PackageName, "")
+		} else if reEnd.MatchString(c.PackageName) {
+			c.PackageName = reEnd.ReplaceAllString(c.PackageName, "")
 		}
 
 	} else {
-		c.packageName = strings.ToLower(strings.TrimSpace(c.packageName))
+		c.PackageName = strings.ToLower(strings.TrimSpace(c.PackageName))
 	}
 }

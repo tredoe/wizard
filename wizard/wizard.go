@@ -84,20 +84,18 @@ type project struct {
 
 	cfg  *conf
 	set  *template.Set          // set of templates
-	data map[string]interface{} // variables to pass to templates
 }
 
 // Creates information for the project.
 // "isFirstRun" indicates if it is the first time in be called.
 func NewProject(isFirstRun bool) *project {
 	cfg := initConfig()
-	p := new(project)
 
+	p := new(project)
 	if isFirstRun {
 		p.dirData = dirData()
 	}
-	p.dirProject = filepath.Join(p.cfg.projectName, p.cfg.packageName)
-	p.data = templateData(cfg)
+	p.dirProject = filepath.Join(cfg.ProjectName, cfg.PackageName)
 	p.set = new(template.Set)
 	p.cfg = cfg
 
@@ -138,12 +136,12 @@ func (p *project) Create() {
 
 	// === Render project files
 	if p.cfg.projecType != "cmd" {
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.packageName)+".go",
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.PackageName)+".go",
 			"Pkg")
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.packageName)+"_test.go",
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.PackageName)+"_test.go",
 			"Test")
 	} else {
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.packageName)+".go",
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.PackageName)+".go",
 			"Cmd")
 	}
 	p.parseFromVar(filepath.Join(p.dirProject, "Makefile"), "Makefile")
@@ -151,16 +149,16 @@ func (p *project) Create() {
 	// === Render common files
 	dirTmpl := filepath.Join(p.dirData, "tmpl") // Base directory of templates
 
-	p.parseFromFile(filepath.Join(p.cfg.projectName, "CONTRIBUTORS.mkd"),
+	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "CONTRIBUTORS.mkd"),
 		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"), false)
-	p.parseFromFile(filepath.Join(p.cfg.projectName, "NEWS.mkd"),
+	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "NEWS.mkd"),
 		filepath.Join(dirTmpl, "NEWS.mkd"), false)
-	p.parseFromFile(filepath.Join(p.cfg.projectName, "README.mkd"),
+	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "README.mkd"),
 		filepath.Join(dirTmpl, "README.mkd"), true)
 
 	// The file AUTHORS is for copyright holders.
 	if !strings.HasPrefix(p.cfg.license, "cc0") {
-		p.parseFromFile(filepath.Join(p.cfg.projectName, "AUTHORS.mkd"),
+		p.parseFromFile(filepath.Join(p.cfg.ProjectName, "AUTHORS.mkd"),
 			filepath.Join(dirTmpl, "AUTHORS.mkd"), false)
 	}
 
@@ -175,14 +173,14 @@ func (p *project) Create() {
 			tmplIgnore = hgIgnoreTop + tmplIgnore
 		}
 
-		if err := ioutil.WriteFile(filepath.Join(p.cfg.projectName, ignoreFile),
+		if err := ioutil.WriteFile(filepath.Join(p.cfg.ProjectName, ignoreFile),
 			[]byte(tmplIgnore), _PERM_FILE); err != nil {
 			log.Fatal("write error:", err)
 		}
 	}
 
 	// === License file
-	p.addLicense(p.cfg.projectName)
+	p.addLicense(p.cfg.ProjectName)
 
 	// === User configuration file
 	if p.cfg.addUserConf {
@@ -196,7 +194,7 @@ func (p *project) Create() {
 	}
 
 	// === Print messages
-	if p.data["org"].(bool) {
+	if p.cfg.AuthorIsOrg {
 		fmt.Print(`
   * The organization has been added as author.
     Update the CONTRIBUTORS file to add people.
@@ -230,29 +228,3 @@ _Found:
 	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED)
 }
 
-// Creates data to pass them to templates. Used at creating a new project.
-func templateData(cfg *conf) map[string]interface{} {
-	data := map[string]interface{}{
-		"project_name":    cfg.projectName,
-		"package_name":    cfg.packageName,
-		"org":             cfg.authorIsOrg,
-		"author":          cfg.author,
-		"author_email":    cfg.authorEmail,
-		"license":         cfg.license,
-		"vcs":             cfg.vcs,
-		"_project_header": createHeader(cfg.projectName),
-	}
-
-	if cfg.license != "none" {
-		data["full_license"] = listLicense[cfg.license]
-	}
-	if cfg.projecType == "cgo" {
-		data["is_cgo_project"] = true
-	}
-	// For the Makefile
-	if cfg.projecType == "cmd" {
-		data["is_cmd_project"] = true
-	}
-
-	return data
-}

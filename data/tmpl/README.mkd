@@ -1,5 +1,5 @@
-{{.project_name}}
-{{._project_header}}
+{{.ProjectName}}
+{{.ProjectHeader}}
 
 << DESCRIBE PROJECT >>
 
@@ -23,8 +23,8 @@
 
 ***{{template "Copyright" .}}***  
 See file AUTHORS and CONTRIBUTORS (if any).
-{{if .full_license}}
-Licensed under **{{.full_license}}**.  
+{{if .FullLicense}}
+Licensed under **{{.FullLicense}}**.  
 See file LICENSE.
 {{end}}
 
