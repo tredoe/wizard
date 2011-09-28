@@ -316,24 +316,24 @@ func interactive(c *conf) {
 			c.ProjectName, err = q.ReadString(text, inline.REQUIRED)
 		case "package-name":
 			setNames(c)
-			c.PackageName, err = q.ReadStringDefault(text, c.PackageName, inline.REQUIRED)
+			c.PackageName, err = q.ReadStringDefault(text, c.PackageName, inline.NONE)
 		case "author":
 			if c.Author != "" {
-				c.Author, err = q.ReadStringDefault(text, c.Author, inline.REQUIRED)
+				c.Author, err = q.ReadStringDefault(text, c.Author, inline.NONE)
 				break
 			}
 			c.Author, err = q.ReadString(text, inline.REQUIRED)
 		case "email":
 			if c.AuthorIsOrg {
-				c.Email, err = q.ReadString(text, inline.NONE)
+				c.Email, err = q.ReadEmail(text, inline.NONE)
 				break
 			}
 
 			if c.Email != "" {
-				c.Email, err = q.ReadStringDefault(text, c.Email, inline.REQUIRED)
+				c.Email, err = q.ReadEmailDefault(text, c.Email, inline.NONE)
 				break
 			}
-			c.Email, err = q.ReadString(text, inline.REQUIRED)
+			c.Email, err = q.ReadEmail(text, inline.REQUIRED)
 		case "license":
 			if c.license != "" {
 				c.license, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), c.license, inline.NONE)
