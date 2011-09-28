@@ -63,11 +63,8 @@ func initConfig() *conf {
 	fProjectName := flag.String("project-name", "", "The name of the project.")
 	fPackageName := flag.String("package-name", "", "The name of the package.")
 	fLicense := flag.String("license", "", "The license covering the package.")
-	fAuthor := flag.String("author", "",
-		"A string containing the author's name at a minimum.")
-	fEmail := flag.String("email", "",
-		"A string containing the author's e-mail address.")
-
+	fAuthor := flag.String("author", "", "The author's name.")
+	fEmail := flag.String("email", "", "The author's e-mail address.")
 	fAuthorIsOrg := flag.Bool("org", false, "Does the author is an organization?")
 	fVCS := flag.String("vcs", "", "Version control system")
 
