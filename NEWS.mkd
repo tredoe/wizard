@@ -17,6 +17,7 @@ listed below.*
 
 + Use a struct to handle the configuration instead of use global variables.
 + The command-line flags have been changed to lower case.
++ Updated Go-Inline's API.
 
 
 ### 2011-09-18  v0.9.9

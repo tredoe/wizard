@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/kless/goconfig/config"
-	"github.com/kless/Go-Inline/inline"
+	"github.com/kless/Go-Inline/quest"
 )
 
 // Represents the configuration of the project.
@@ -83,7 +83,7 @@ func initConfig() *conf {
 	flag.Usage = usage
 	flag.Parse()
 
-	if len(os.Args) == 1 { // flag.NArg()
+	if len(os.Args) == 1 {
 		usage()
 	}
 
@@ -294,55 +294,55 @@ func interactive(c *conf) {
 		"vcs",
 	}
 
-	q := inline.NewQuestionByDefault()
-	q.ExitAtCtrlC(0)
+	q := quest.NewQuestionByDefault()
 	defer q.Close()
+	q.ExitAtCtrlC(0)
 
 	fmt.Println("\n  = Go Wizard\n")
 
 	for _, k := range interactiveFlags {
 		f := flag.Lookup(k)
-		text := strings.TrimRight(f.Usage, ".")
+		prompt := q.NewPrompt(strings.TrimRight(f.Usage, "."))
 
 		switch k {
 		case "org":
-			c.AuthorIsOrg, err = q.ReadBoolDefault(text, false, inline.NONE)
+			c.AuthorIsOrg, err = prompt.ByDefault(false).ReadBool()
 		case "project-type":
-			c.projecType, err = q.ReadChoice(text, arrayKeys(listProject), inline.NONE)
+			c.projecType, err = prompt.ChoiceString(arrayKeys(listProject))
 		case "project-name":
-			c.ProjectName, err = q.ReadString(text, inline.REQUIRED)
+			c.ProjectName, err = prompt.Mod(quest.REQUIRED).ReadString()
 		case "package-name":
 			setNames(c)
-			c.PackageName, err = q.ReadStringDefault(text, c.PackageName, inline.NONE)
+			c.PackageName, err = prompt.ByDefault(c.PackageName).ReadString()
 		case "author":
 			if c.Author != "" {
-				c.Author, err = q.ReadStringDefault(text, c.Author, inline.NONE)
+				c.Author, err = prompt.ByDefault(c.Author).ReadString()
 				break
 			}
-			c.Author, err = q.ReadString(text, inline.REQUIRED)
+			c.Author, err = prompt.Mod(quest.REQUIRED).ReadString()
 		case "email":
 			if c.AuthorIsOrg {
-				c.Email, err = q.ReadEmail(text, inline.NONE)
+				c.Email, err = prompt.ReadEmail()
 				break
 			}
 
 			if c.Email != "" {
-				c.Email, err = q.ReadEmailDefault(text, c.Email, inline.NONE)
+				c.Email, err = prompt.ByDefault(c.Email).ReadEmail()
 				break
 			}
-			c.Email, err = q.ReadEmail(text, inline.REQUIRED)
+			c.Email, err = prompt.Mod(quest.REQUIRED).ReadEmail()
 		case "license":
 			if c.license != "" {
-				c.license, err = q.ReadChoiceDefault(text, arrayKeys(listLicense), c.license, inline.NONE)
+				c.license, err = prompt.ByDefault(c.license).ChoiceString(arrayKeys(listLicense))
 				break
 			}
-			c.license, err = q.ReadChoice(text, arrayKeys(listLicense), inline.NONE)
+			c.license, err = prompt.ChoiceString(arrayKeys(listLicense))
 		case "vcs":
 			if c.vcs != "" {
-				c.vcs, err = q.ReadChoiceDefault(text, arrayKeys(listVCS), c.vcs, inline.NONE)
+				c.vcs, err = prompt.ByDefault(c.vcs).ChoiceString(arrayKeys(listVCS))
 				break
 			}
-			c.vcs, err = q.ReadChoice(text, arrayKeys(listVCS), inline.NONE)
+			c.vcs, err = prompt.ChoiceString(arrayKeys(listVCS))
 		}
 
 		if err != nil {
