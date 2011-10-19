@@ -30,7 +30,7 @@ const (
 	_PERM_FILE      = 0644
 
 	_CHAR_CODE_COMMENT = "//" // For comments in source code files
-	_CHAR_HEADER       = '='  // Header under the project name
+	_CHAR_HEADER       = "="  // Header under the project name
 
 	// Configuration file per user
 	_USER_CONFIG = ".gowizard"

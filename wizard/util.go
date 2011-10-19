@@ -53,14 +53,3 @@ func createFile(dst string) *os.File {
 
 	return file
 }
-
-// Creates a string of characters with length of `name` to use it under that name.
-func createHeader(name string) string {
-	header := make([]byte, len(name))
-
-	for i, _ := range header {
-		header[i] = _CHAR_HEADER
-	}
-
-	return string(header)
-}

@@ -138,7 +138,7 @@ func initConfig() *conf {
 	checkAtCreate(cfg)
 
 	// === Extra for templates
-	cfg.ProjectHeader = createHeader(cfg.ProjectName)
+	cfg.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(cfg.ProjectName))
 
 	if cfg.license != "none" {
 		cfg.FullLicense = listLicense[cfg.license]
