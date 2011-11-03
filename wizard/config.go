@@ -30,7 +30,6 @@ type conf struct {
 	license     string
 	Author      string
 	Email       string
-	AuthorIsOrg bool
 	vcs         string
 
 	addUserConf bool
@@ -50,7 +49,7 @@ type conf struct {
 func usage() {
 	fmt.Fprintf(os.Stderr, `
 Usage: gowizard -project-type -project-name -license -author -email -vcs
-	[-package-name -org -config]
+	[-package-name -config]
 
 `)
 	flag.PrintDefaults()
@@ -64,20 +63,19 @@ func initConfig() *conf {
 	fPackageName := flag.String("package-name", "", "The name of the package.")
 	fLicense := flag.String("license", "", "The license covering the package.")
 	fAuthor := flag.String("author", "", "The author's name.")
-	fEmail := flag.String("email", "", "The author's e-mail address.")
-	fAuthorIsOrg := flag.Bool("org", false, "Does the author is an organization?")
-	fVCS := flag.String("vcs", "", "Version control system")
+	fEmail := flag.String("email", "", "The author's e-mail.")
+	fVCS := flag.String("vcs", "", "Version control system.")
 
 	// === Generic flags
-	fAddUserConf := flag.Bool("config", false, "Add the user configuration file")
-	fInteractive := flag.Bool("i", false, "Interactive mode")
+	fAddUserConf := flag.Bool("config", false, "Add the user configuration file.")
+	fInteractive := flag.Bool("i", false, "Interactive mode.")
 
 	fListLicense := flag.Bool("ll", false,
-		"Show the list of licenses for the flag 'license'")
+		"Show the list of licenses for the flag \"license\".")
 	fListProject := flag.Bool("lp", false,
-		"Show the list of project types for the flag 'project-type'")
+		"Show the list of project types for the flag \"project-type\".")
 	fListVCS := flag.Bool("lv", false,
-		"Show the list of version control systems")
+		"Show the list of version control systems.")
 
 	// === Parse the flags
 	flag.Usage = usage
@@ -120,7 +118,6 @@ func initConfig() *conf {
 		license:     *fLicense,
 		Author:      *fAuthor,
 		Email:       *fEmail,
-		AuthorIsOrg: *fAuthorIsOrg,
 		vcs:         *fVCS,
 		addUserConf: *fAddUserConf,
 	}
@@ -166,12 +163,6 @@ func checkCommon(c *conf, errors bool) {
 		errors = true
 	}
 
-	if c.license == "bsd-3" && !c.AuthorIsOrg {
-		fmt.Fprintf(os.Stderr,
-			"license 'bsd-3' requires an organization as author\n")
-		errors = true
-	}
-
 	if errors {
 		os.Exit(ERROR)
 	}
@@ -186,10 +177,6 @@ func checkAtCreate(c *conf) {
 		c.Author == "" || c.vcs == "" {
 		fmt.Fprintf(os.Stderr, "missing required fields to create project\n")
 		usage()
-	}
-	if c.Email == "" && !c.AuthorIsOrg {
-		fmt.Fprintf(os.Stderr, "the email address is required for people\n")
-		errors = true
 	}
 
 	// === Project type
@@ -284,7 +271,6 @@ func interactive(c *conf) {
 
 	// Sorted flags
 	interactiveFlags := []string{
-		"org",
 		"project-type",
 		"project-name",
 		"package-name",
@@ -305,8 +291,6 @@ func interactive(c *conf) {
 		prompt := q.NewPrompt(strings.TrimRight(f.Usage, "."))
 
 		switch k {
-		case "org":
-			c.AuthorIsOrg, err = prompt.ByDefault(false).ReadBool()
 		case "project-type":
 			c.projecType, err = prompt.ChoiceString(arrayKeys(listProject))
 		case "project-name":
@@ -321,11 +305,6 @@ func interactive(c *conf) {
 			}
 			c.Author, err = prompt.Mod(quest.REQUIRED).ReadString()
 		case "email":
-			if c.AuthorIsOrg {
-				c.Email, err = prompt.ReadEmail()
-				break
-			}
-
 			if c.Email != "" {
 				c.Email, err = prompt.ByDefault(c.Email).ReadEmail()
 				break

@@ -10,7 +10,6 @@
 package wizard
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -192,14 +191,6 @@ func (p *project) Create() {
 		} else {
 			log.Print("could not add user configuration file because $HOME is not set")
 		}
-	}
-
-	// === Print messages
-	if p.cfg.AuthorIsOrg {
-		fmt.Print(`
-  * The organization has been added as author.
-    Update the CONTRIBUTORS file to add people.
-`)
 	}
 }
 
