@@ -150,7 +150,7 @@ func (p *project) Create() {
 	p.parseFromVar(filepath.Join(p.dirProject, "Makefile"), "Makefile")
 
 	// === Render common files
-	dirTmpl := filepath.Join(p.dirData, "tmpl") // Base directory of templates
+	dirTmpl := filepath.Join(p.dirData, "templ") // Base directory of templates
 
 	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "CONTRIBUTORS.md"),
 		filepath.Join(dirTmpl, "CONTRIBUTORS.md"), false)
