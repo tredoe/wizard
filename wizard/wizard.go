@@ -107,22 +107,20 @@ func NewProject(isFirstRun bool) *project {
 // Adds license file in directory `dir`.
 func (p *project) addLicense(dir string) {
 	dirTmpl := filepath.Join(p.dirData, "license")
+	lic := p.cfg.license
 
-	switch p.cfg.license {
+	switch lic {
 	case "none":
 		break
-	case "bsd-2":
+	case "bsd-2", "bsd-3":
 		p.parseFromFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, "bsd-2.txt"), true)
-	case "bsd-3":
-		p.parseFromFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, "bsd-3.txt"), true)
+			filepath.Join(dirTmpl, lic+".txt"), true)
 	default:
 		copyFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, p.cfg.license+".txt"), _PERM_FILE)
+			filepath.Join(dirTmpl, lic+".txt"), _PERM_FILE)
 
 		// License LGPL must also add the GPL license text.
-		if p.cfg.license == "lgpl-3" {
+		if lic == "lgpl-3" {
 			copyFile(filepath.Join(dir, "LICENSE-GPL"),
 				filepath.Join(dirTmpl, "gpl-3.txt"), _PERM_FILE)
 		}
