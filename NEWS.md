@@ -16,8 +16,14 @@ listed below.*
 ### 2011-??-??  v1.0
 
 + Use a struct to handle the configuration instead of use global variables.
+
 + The command-line flags have been changed to lower case.
+
 + Updated Go-Inline's API.
+
++ Add copyright notice to templates of BSD licenses.
+
++ Removed code related to an organization.
 
 
 ### 2011-09-18  v0.9.9
