@@ -111,9 +111,12 @@ func (p *project) addLicense(dir string) {
 	switch p.cfg.license {
 	case "none":
 		break
+	case "bsd-2":
+		p.parseFromFile(filepath.Join(dir, "LICENSE"),
+			filepath.Join(dirTmpl, "bsd-2.txt"), true)
 	case "bsd-3":
 		p.parseFromFile(filepath.Join(dir, "LICENSE"),
-			filepath.Join(dirTmpl, "bsd-3.txt"), false)
+			filepath.Join(dirTmpl, "bsd-3.txt"), true)
 	default:
 		copyFile(filepath.Join(dir, "LICENSE"),
 			filepath.Join(dirTmpl, p.cfg.license+".txt"), _PERM_FILE)
@@ -149,17 +152,17 @@ func (p *project) Create() {
 	// === Render common files
 	dirTmpl := filepath.Join(p.dirData, "tmpl") // Base directory of templates
 
-	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "CONTRIBUTORS.mkd"),
-		filepath.Join(dirTmpl, "CONTRIBUTORS.mkd"), false)
-	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "NEWS.mkd"),
-		filepath.Join(dirTmpl, "NEWS.mkd"), false)
-	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "README.mkd"),
-		filepath.Join(dirTmpl, "README.mkd"), true)
+	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "CONTRIBUTORS.md"),
+		filepath.Join(dirTmpl, "CONTRIBUTORS.md"), false)
+	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "NEWS.md"),
+		filepath.Join(dirTmpl, "NEWS.md"), false)
+	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "README.md"),
+		filepath.Join(dirTmpl, "README.md"), true)
 
 	// The file AUTHORS is for copyright holders.
 	if !strings.HasPrefix(p.cfg.license, "cc0") {
-		p.parseFromFile(filepath.Join(p.cfg.ProjectName, "AUTHORS.mkd"),
-			filepath.Join(dirTmpl, "AUTHORS.mkd"), false)
+		p.parseFromFile(filepath.Join(p.cfg.ProjectName, "AUTHORS.md"),
+			filepath.Join(dirTmpl, "AUTHORS.md"), false)
 	}
 
 	// === Add file related to VCS
