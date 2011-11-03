@@ -280,7 +280,7 @@ func userConfig(c *conf) {
 
 // Interactive mode.
 func interactive(c *conf) {
-	var err os.Error
+	var err error
 
 	// Sorted flags
 	interactiveFlags := []string{
