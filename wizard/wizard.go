@@ -15,7 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"template"
+	"text/template"
 )
 
 //

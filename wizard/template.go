@@ -13,7 +13,7 @@ import (
 	"log"
 	"path/filepath"
 	"strings"
-	"template"
+	"text/template"
 	"time"
 )
 
