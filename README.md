@@ -49,9 +49,7 @@ the appropriate ignore file.
 The way fastest and simple to use it, is create a configuration file and then
 use the interactive mode:
 
-	gowizard -config -author="John Foo" -email="e@mailk.com" -license=bsd-2 \
-	-vcs=git
-
+	gowizard -config -author="John Foo" -email="e@mail.com" -license=bsd-2 -vcs=git
 	gowizard -i
 
 ### Suggestions about naming
@@ -71,7 +69,7 @@ years.
 ## Licensing
 
 ***Copyright 2010  The "GoWizard" Authors***  
-See file AUTHORS and CONTRIBUTORS (if any).
+See file AUTHORS and CONTRIBUTORS.
 
 Licensed under **BSD-2 Clause license**.  
 See file LICENSE.

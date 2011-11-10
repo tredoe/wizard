@@ -37,6 +37,7 @@ type Conf struct {
 	FullLicense   string
 	GNUextra      string
 	ProjectHeader string
+	HasCopyright  bool
 	IsCmdProject  bool
 	IsCgoProject  bool
 	Year          int
@@ -57,6 +58,9 @@ func ExtraConfig(cfg *Conf) error {
 
 	if cfg.License != "none" {
 		cfg.FullLicense = ListLicense[cfg.License]
+	}
+	if cfg.License != "cc0-1" {
+		cfg.HasCopyright = true
 	}
 	if cfg.ProjecType == "cgo" {
 		cfg.IsCgoProject = true

@@ -22,7 +22,7 @@
 ## Licensing
 
 ***{{template "Copyright" .}}***  
-See file AUTHORS and CONTRIBUTORS (if any).
+See file {{if .HasCopyright}}AUTHORS and {{end}}CONTRIBUTORS.
 {{if .FullLicense}}
 Licensed under **{{.FullLicense}}**.  
 See file LICENSE.
