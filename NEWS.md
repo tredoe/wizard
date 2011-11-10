@@ -22,8 +22,6 @@
 
 + Add copyright notice to templates of BSD licenses.
 
-+ Removed code related to an organization.
-
 
 ### 2011-09-18  v0.9.9
 

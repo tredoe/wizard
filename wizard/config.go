@@ -29,6 +29,8 @@ type Conf struct {
 	Author      string
 	Email       string
 	VCS         string
+	OrgName     string // the author develops the program for an organization
+	IsForOrg    bool
 
 	AddUserConf bool
 
@@ -143,6 +145,13 @@ func UserConfig(c *Conf) error {
 	var hasError bool
 	var errKeys []string
 
+	if c.OrgName == "" {
+		c.OrgName, err = cfg.String("DEFAULT", "org-name")
+		if err != nil {
+			hasError = true
+			errKeys = append(errKeys, "org-name")
+		}
+	}
 	if c.Author == "" {
 		c.Author, err = cfg.String("DEFAULT", "author")
 		if err != nil {

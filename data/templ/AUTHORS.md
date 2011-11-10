@@ -13,5 +13,5 @@ explanation.*
 
 * * *
 
-{{.Author}}{{with .Email}} <{{.}}>{{end}}
+{{if .IsForOrg}}{{.OrgName}}{{else}}{{.Author}}{{with .Email}} <{{.}}>{{end}}{{end}}
 

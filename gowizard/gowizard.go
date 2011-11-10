@@ -22,7 +22,7 @@ import (
 func usage() {
 	fmt.Fprintf(os.Stderr, `
 Usage: gowizard -project-type -project-name -license -author -email -vcs
-	[-package-name -config]
+	[-package-name -org -config]
 
 `)
 	flag.PrintDefaults()
@@ -55,6 +55,8 @@ func initConfig() (*wizard.Conf, error) {
 	fAuthor := flag.String("author", "", "The author's name.")
 	fEmail := flag.String("email", "", "The author's e-mail.")
 	fVCS := flag.String("vcs", "", "Version control system.")
+	fOrgName := flag.String("org-name", "", "The organization's name.")
+	fIsForOrg := flag.Bool("org", false, "Does an organization is the copyright holder?")
 
 	// === Generic flags
 	fAddUserConf := flag.Bool("config", false, "Add the user configuration file.")
@@ -109,6 +111,9 @@ func initConfig() (*wizard.Conf, error) {
 		Author:      *fAuthor,
 		Email:       *fEmail,
 		VCS:         *fVCS,
+		OrgName:     *fOrgName,
+		IsForOrg:    *fIsForOrg,
+
 		AddUserConf: *fAddUserConf,
 	}
 
@@ -141,6 +146,8 @@ func interactive(c *wizard.Conf) error {
 		"project-type",
 		"project-name",
 		"package-name",
+		"org",
+		"org-name",
 		"author",
 		"email",
 		"license",
@@ -165,31 +172,41 @@ func interactive(c *wizard.Conf) error {
 		case "package-name":
 			wizard.SetNames(c)
 			c.PackageName, err = prompt.ByDefault(c.PackageName).ReadString()
+		case "org":
+			c.IsForOrg, err = prompt.ByDefault(c.IsForOrg).ReadBool()
+		case "org-name":
+			if c.IsForOrg {
+				if c.OrgName != "" {
+					c.OrgName, err = prompt.ByDefault(c.OrgName).ReadString()
+				} else {
+					c.OrgName, err = prompt.Mod(quest.REQUIRED).ReadString()
+				}
+			}
 		case "author":
 			if c.Author != "" {
 				c.Author, err = prompt.ByDefault(c.Author).ReadString()
-				break
+			} else {
+				c.Author, err = prompt.Mod(quest.REQUIRED).ReadString()
 			}
-			c.Author, err = prompt.Mod(quest.REQUIRED).ReadString()
 		case "email":
 			if c.Email != "" {
 				c.Email, err = prompt.ByDefault(c.Email).ReadEmail()
-				break
+			} else {
+				c.Email, err = prompt.Mod(quest.REQUIRED).ReadEmail()
 			}
-			c.Email, err = prompt.Mod(quest.REQUIRED).ReadEmail()
 		case "license":
 			if c.License != "" {
 				c.License, err = prompt.ByDefault(c.License).
 					ChoiceString(arrayKeys(wizard.ListLicense))
-				break
+			} else {
+				c.License, err = prompt.ChoiceString(arrayKeys(wizard.ListLicense))
 			}
-			c.License, err = prompt.ChoiceString(arrayKeys(wizard.ListLicense))
 		case "vcs":
 			if c.VCS != "" {
 				c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(arrayKeys(wizard.ListVCS))
-				break
+			} else {
+				c.VCS, err = prompt.ChoiceString(arrayKeys(wizard.ListVCS))
 			}
-			c.VCS, err = prompt.ChoiceString(arrayKeys(wizard.ListVCS))
 		}
 
 		if err != nil {
