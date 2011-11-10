@@ -10,20 +10,16 @@
 package wizard
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 )
 
-//
-// === Variables
-
 const (
-	ERROR = 1 // Exit status code if there is any error.
-
 	// Permissions
 	_PERM_DIRECTORY = 0755
 	_PERM_FILE      = 0644
@@ -37,23 +33,23 @@ const (
 	// Subdirectory where is installed through "goinstall"
 	_SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/GoWizard/data"
 )
-
+/*
 // VCS configuration files to push to a server.
 var configVCS = map[string]string{
 	"bzr": ".bzr/branch/branch.conf",
 	"git": ".git/config",
 	"hg":  ".hg/hgrc",
 }
-
+*/
 // Project types
-var listProject = map[string]string{
+var ListProject = map[string]string{
 	"cmd": "Command line program",
 	"pkg": "Package",
 	"cgo": "Package that calls C code",
 }
 
 // Available licenses
-var listLicense = map[string]string{
+var ListLicense = map[string]string{
 	"apache-2": "Apache License, version 2.0",
 	"bsd-2":    "BSD-2 Clause license",
 	"bsd-3":    "BSD-3 Clause license",
@@ -65,7 +61,7 @@ var listLicense = map[string]string{
 }
 
 // Version control systems (VCS)
-var listVCS = map[string]string{
+var ListVCS = map[string]string{
 	"bzr":   "Bazaar",
 	"git":   "Git",
 	"hg":    "Mercurial",
@@ -73,40 +69,39 @@ var listVCS = map[string]string{
 	"none":  "none",
 }
 
-//
-// === Type
+// * * *
 
 // Represents all information to create a project
 type project struct {
 	dirData    string // directory with templates
 	dirProject string // directory of project created
 
-	cfg *conf
+	cfg *Conf
 	set *template.Set // set of templates
 }
 
 // Creates information for the project.
 // "isFirstRun" indicates if it is the first time in be called.
-func NewProject(isFirstRun bool) *project {
-	cfg := initConfig()
+func NewProject(cfg *Conf, isFirstRun bool) (*project, error) {
+	var err error
 
 	p := new(project)
 	if isFirstRun {
-		p.dirData = dirData()
+		if p.dirData, err = dirData(); err != nil {
+			return nil, err
+		}
 	}
 	p.dirProject = filepath.Join(cfg.ProjectName, cfg.PackageName)
 	p.set = new(template.Set)
 	p.cfg = cfg
 
-	return p
+	return p, nil
 }
-
-// * * *
 
 // Adds license file in directory `dir`.
 func (p *project) addLicense(dir string) {
 	dirTmpl := filepath.Join(p.dirData, "license")
-	lic := p.cfg.license
+	lic := p.cfg.License
 
 	switch lic {
 	case "none":
@@ -127,15 +122,15 @@ func (p *project) addLicense(dir string) {
 }
 
 // Creates a new project.
-func (p *project) Create() {
+func (p *project) Create() error {
 	if err := os.MkdirAll(p.dirProject, _PERM_DIRECTORY); err != nil {
-		log.Fatal("directory error:", err)
+		return fmt.Errorf("directory error: %s", err)
 	}
 
 	p.parseTemplates(_CHAR_CODE_COMMENT, 0)
 
 	// === Render project files
-	if p.cfg.projecType != "cmd" {
+	if p.cfg.ProjecType != "cmd" {
 		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.PackageName)+".go",
 			"Pkg")
 		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.PackageName)+"_test.go",
@@ -157,25 +152,25 @@ func (p *project) Create() {
 		filepath.Join(dirTmpl, "README.md"), true)
 
 	// The file AUTHORS is for copyright holders.
-	if !strings.HasPrefix(p.cfg.license, "cc0") {
+	if !strings.HasPrefix(p.cfg.License, "cc0") {
 		p.parseFromFile(filepath.Join(p.cfg.ProjectName, "AUTHORS.md"),
 			filepath.Join(dirTmpl, "AUTHORS.md"), false)
 	}
 
 	// === Add file related to VCS
-	switch p.cfg.vcs {
+	switch p.cfg.VCS {
 	case "other", "none":
 		break
 	default:
-		ignoreFile := "." + p.cfg.vcs + "ignore"
+		ignoreFile := "." + p.cfg.VCS + "ignore"
 
-		if p.cfg.vcs == "hg" {
+		if p.cfg.VCS == "hg" {
 			tmplIgnore = hgIgnoreTop + tmplIgnore
 		}
 
 		if err := ioutil.WriteFile(filepath.Join(p.cfg.ProjectName, ignoreFile),
 			[]byte(tmplIgnore), _PERM_FILE); err != nil {
-			log.Fatal("write error:", err)
+			return fmt.Errorf("write error: %s", err)
 		}
 	}
 
@@ -183,22 +178,24 @@ func (p *project) Create() {
 	p.addLicense(p.cfg.ProjectName)
 
 	// === User configuration file
-	if p.cfg.addUserConf {
+	if p.cfg.AddUserConf {
 		envHome := os.Getenv("HOME")
 
 		if envHome != "" {
 			p.parseFromVar(filepath.Join(envHome, _USER_CONFIG), "Config")
 		} else {
-			log.Print("could not add user configuration file because $HOME is not set")
+			fmt.Print("could not add user configuration file because $HOME is not set")
 		}
 	}
+
+	return nil
 }
 
 //
 // === Utility
 
 // Gets the path of the templates directory.
-func dirData() string {
+func dirData() (string, error) {
 	goEnv := os.Getenv("GOPATH")
 
 	if goEnv != "" {
@@ -213,9 +210,9 @@ func dirData() string {
 
 _Found:
 	if goEnv == "" {
-		log.Fatal("Environment variable GOROOT neither" +
+		return "", errors.New("Environment variable GOROOT neither" +
 			" GOROOT_FINAL has been set")
 	}
 
-	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED)
+	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED), nil
 }

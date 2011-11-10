@@ -10,46 +10,35 @@
 package wizard
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
-// Gets an array from map keys.
-func arrayKeys(m map[string]string) []string {
-	a := make([]string, len(m))
-
-	i := 0
-	for k, _ := range m {
-		a[i] = k
-		i++
-	}
-
-	return a
-}
-
 // Copies a file from source to destination.
-func copyFile(destination, source string, perm uint32) {
+func copyFile(destination, source string, perm uint32) error {
 	src, err := ioutil.ReadFile(source)
 	if err != nil {
-		log.Fatal("copy error reading:", err)
+		return fmt.Errorf("copy error reading: %s", err)
 	}
 
 	err = ioutil.WriteFile(destination, src, perm)
 	if err != nil {
-		log.Fatal("copy error writing:", err)
+		return fmt.Errorf("copy error writing: %s", err)
 	}
+
+	return nil
 }
 
 // Creates a file.
-func createFile(dst string) *os.File {
+func createFile(dst string) (*os.File, error) {
 	file, err := os.Create(dst)
 	if err != nil {
-		log.Fatal("file error:", err)
+		return nil, fmt.Errorf("file error: %s", err)
 	}
 	if err = file.Chmod(_PERM_FILE); err != nil {
-		log.Fatal("file error:", err)
+		return nil, fmt.Errorf("file error: %s", err)
 	}
 
-	return file
+	return file, nil
 }

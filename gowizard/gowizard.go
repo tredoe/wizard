@@ -10,14 +10,219 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
+	"strings"
 
+	"github.com/kless/Go-Inline/quest"
 	"github.com/kless/GoWizard/wizard"
 )
 
-func main() {
-	p := wizard.NewProject(true)
-	p.Create()
+func usage() {
+	fmt.Fprintf(os.Stderr, `
+Usage: gowizard -project-type -project-name -license -author -email -vcs
+	[-package-name -config]
 
+`)
+	flag.PrintDefaults()
+	os.Exit(ERROR)
+}
+
+func main() {
+	cfg, err := initConfig()
+	if err != nil {
+		fatalf(err.Error())
+	}
+
+	p, err := wizard.NewProject(cfg, true)
+	if err != nil {
+		fatalf(err.Error())
+	}
+
+	p.Create()
 	os.Exit(0)
+}
+
+// * * *
+
+// Loads configuration from flags and user configuration.
+func initConfig() (*wizard.Conf, error) {
+	fProjecType := flag.String("project-type", "", "The project type.")
+	fProjectName := flag.String("project-name", "", "The name of the project.")
+	fPackageName := flag.String("package-name", "", "The name of the package.")
+	fLicense := flag.String("license", "", "The license covering the package.")
+	fAuthor := flag.String("author", "", "The author's name.")
+	fEmail := flag.String("email", "", "The author's e-mail.")
+	fVCS := flag.String("vcs", "", "Version control system.")
+
+	// === Generic flags
+	fAddUserConf := flag.Bool("config", false, "Add the user configuration file.")
+	fInteractive := flag.Bool("i", false, "Interactive mode.")
+
+	fListLicense := flag.Bool("ll", false,
+		"Show the list of licenses for the flag \"license\".")
+	fListProject := flag.Bool("lp", false,
+		"Show the list of project types for the flag \"project-type\".")
+	fListVCS := flag.Bool("lv", false,
+		"Show the list of version control systems.")
+
+	// === Parse the flags
+	flag.Usage = usage
+	flag.Parse()
+
+	if len(os.Args) == 1 {
+		usage()
+	}
+
+	// === Options
+	if *fListProject {
+		fmt.Println("  = Project types\n")
+		for k, v := range wizard.ListProject {
+			fmt.Printf("  %s: %s\n", k, v)
+		}
+	}
+	if *fListLicense {
+		fmt.Println("  = Licenses\n")
+		for k, v := range wizard.ListLicense {
+			fmt.Printf("  %s: %s\n", k, v)
+		}
+	}
+	if *fListVCS {
+		fmt.Println("  = Version control systems\n")
+		for k, v := range wizard.ListVCS {
+			fmt.Printf("  %s: %s\n", k, v)
+		}
+	}
+	// * * *
+
+	// Exit if it is not on interactive way
+	if !*fInteractive && (*fListProject || *fListLicense || *fListVCS) {
+		os.Exit(0)
+	}
+
+	cfg := &wizard.Conf{
+		ProjecType:  *fProjecType,
+		ProjectName: *fProjectName,
+		PackageName: *fPackageName,
+		License:     *fLicense,
+		Author:      *fAuthor,
+		Email:       *fEmail,
+		VCS:         *fVCS,
+		AddUserConf: *fAddUserConf,
+	}
+
+	// Get configuration per user
+	err := wizard.UserConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	if *fInteractive {
+		if err = interactive(cfg); err != nil {
+			return nil, err
+		}
+	} else {
+		wizard.SetNames(cfg)
+	}
+
+	if err = wizard.ExtraConfig(cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+// Interactive mode.
+func interactive(c *wizard.Conf) error {
+	var err error
+
+	// Sorted flags
+	interactiveFlags := []string{
+		"project-type",
+		"project-name",
+		"package-name",
+		"author",
+		"email",
+		"license",
+		"vcs",
+	}
+
+	q := quest.NewQuestionByDefault()
+	defer q.Close()
+	q.ExitAtCtrlC(0)
+
+	fmt.Println("\n  = Go Wizard\n")
+
+	for _, k := range interactiveFlags {
+		f := flag.Lookup(k)
+		prompt := q.NewPrompt(strings.TrimRight(f.Usage, "."))
+
+		switch k {
+		case "project-type":
+			c.ProjecType, err = prompt.ChoiceString(arrayKeys(wizard.ListProject))
+		case "project-name":
+			c.ProjectName, err = prompt.Mod(quest.REQUIRED).ReadString()
+		case "package-name":
+			wizard.SetNames(c)
+			c.PackageName, err = prompt.ByDefault(c.PackageName).ReadString()
+		case "author":
+			if c.Author != "" {
+				c.Author, err = prompt.ByDefault(c.Author).ReadString()
+				break
+			}
+			c.Author, err = prompt.Mod(quest.REQUIRED).ReadString()
+		case "email":
+			if c.Email != "" {
+				c.Email, err = prompt.ByDefault(c.Email).ReadEmail()
+				break
+			}
+			c.Email, err = prompt.Mod(quest.REQUIRED).ReadEmail()
+		case "license":
+			if c.License != "" {
+				c.License, err = prompt.ByDefault(c.License).
+					ChoiceString(arrayKeys(wizard.ListLicense))
+				break
+			}
+			c.License, err = prompt.ChoiceString(arrayKeys(wizard.ListLicense))
+		case "vcs":
+			if c.VCS != "" {
+				c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(arrayKeys(wizard.ListVCS))
+				break
+			}
+			c.VCS, err = prompt.ChoiceString(arrayKeys(wizard.ListVCS))
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Println()
+	return nil
+}
+
+//
+// === Utility
+
+// Gets an array from map keys.
+func arrayKeys(m map[string]string) []string {
+	a := make([]string, len(m))
+
+	i := 0
+	for k, _ := range m {
+		a[i] = k
+		i++
+	}
+
+	return a
+}
+
+//
+// === Error
+
+const ERROR = 1
+
+func fatalf(format string, a ...interface{}) {
+	fmt.Fprintf(os.Stderr, "gowizard: "+format, a...)
+	os.Exit(ERROR)
 }

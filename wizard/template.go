@@ -10,7 +10,7 @@
 package wizard
 
 import (
-	"log"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -86,7 +86,9 @@ import (
 
 )
 
+func main() {
 
+}
 `
 	tmplPkg      = `{{template "Header" .}}
 package {{.PackageName}}
@@ -108,7 +110,6 @@ import (
 func Test(t *testing.T) {
 
 }
-
 `
 	tmplMakefile = `include $(GOROOT)/src/Make.inc
 
@@ -117,7 +118,6 @@ GOFILES=\
 	{{.PackageName}}.go\
 
 include $(GOROOT)/src/Make.{{if .IsCmdProject}}cmd{{else}}pkg{{end}}
-
 `
 )
 
@@ -148,34 +148,42 @@ main
 `
 
 // Renders the template "src", creating a file in "dst".
-func (p *project) parseFromFile(dst, src string, useNest bool) {
-	file := createFile(dst)
+func (p *project) parseFromFile(dst, src string, useNest bool) error {
+	file, err := createFile(dst)
+	if err != nil {
+		return err
+	}
 
 	tmpl, err := template.ParseFile(src)
 	if err != nil {
-		log.Fatal("parsing error:", err)
+		fmt.Errorf("parsing error: %s", err)
 	}
 
 	if !useNest {
 		if err = tmpl.Execute(file, p.cfg); err != nil {
-			log.Fatal("execution failed:", err)
+			fmt.Errorf("execution failed: %s", err)
 		}
 	} else {
 		p.set.Add(tmpl)
 
 		if err = p.set.Execute(file, filepath.Base(src), p.cfg); err != nil {
-			log.Fatal("execution failed:", err)
+			fmt.Errorf("execution failed: %s", err)
 		}
 	}
+	return nil
 }
 
 // Renders the template "tmplName" in "set" to the file "dst".
-func (p *project) parseFromVar(dst string, tmplName string) {
-	file := createFile(dst)
-
-	if err := p.set.Execute(file, tmplName, p.cfg); err != nil {
-		log.Fatal("execution failed:", err)
+func (p *project) parseFromVar(dst string, tmplName string) error {
+	file, err := createFile(dst)
+	if err != nil {
+		return err
 	}
+
+	if err = p.set.Execute(file, tmplName, p.cfg); err != nil {
+		fmt.Errorf("execution failed: %s", err)
+	}
+	return nil
 }
 
 // Parses the templates.
@@ -184,7 +192,7 @@ func (p *project) parseFromVar(dst string, tmplName string) {
 func (p *project) parseTemplates(charComment string, year int) {
 	var tmplHeader string
 
-	licenseName := strings.Split(p.cfg.license, "-")[0]
+	licenseName := strings.Split(p.cfg.License, "-")[0]
 	p.cfg.Comment = charComment
 
 	if year == 0 {
@@ -221,7 +229,7 @@ func (p *project) parseTemplates(charComment string, year int) {
 			Parse(tmplCopyleft)))
 	}
 
-	if p.cfg.projecType == "cmd" {
+	if p.cfg.ProjecType == "cmd" {
 		p.set.Add(template.Must(template.New("Cmd").Parse(tmplCmd)))
 	} else {
 		tPkg := template.Must(template.New("Pkg").Parse(tmplPkg))
@@ -229,7 +237,7 @@ func (p *project) parseTemplates(charComment string, year int) {
 		p.set.Add(tPkg, tTest)
 	}
 
-	if p.cfg.addUserConf {
+	if p.cfg.AddUserConf {
 		p.set.Add(template.Must(template.New("Config").Parse(tmplUserConfig)))
 	}
 
