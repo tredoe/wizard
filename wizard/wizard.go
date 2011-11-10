@@ -106,15 +106,15 @@ func (p *project) addLicense(dir string) {
 	case "none":
 		break
 	case "bsd-2", "bsd-3":
-		p.parseFromFile(filepath.Join(dir, "LICENSE"),
+		p.parseFromFile(filepath.Join(dir, "LICENSE.txt"),
 			filepath.Join(dirTmpl, lic+".txt"), true)
 	default:
-		copyFile(filepath.Join(dir, "LICENSE"),
+		copyFile(filepath.Join(dir, "LICENSE.txt"),
 			filepath.Join(dirTmpl, lic+".txt"), _PERM_FILE)
 
 		// License LGPL must also add the GPL license text.
 		if lic == "lgpl-3" {
-			copyFile(filepath.Join(dir, "LICENSE-GPL"),
+			copyFile(filepath.Join(dir, "LICENSE-GPL.txt"),
 				filepath.Join(dirTmpl, "gpl-3.txt"), _PERM_FILE)
 		}
 	}
