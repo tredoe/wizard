@@ -10,7 +10,6 @@
 package wizard
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -177,42 +176,5 @@ func (p *project) Create() error {
 	// === License file
 	p.addLicense(p.cfg.ProjectName)
 
-	// === User configuration file
-	if p.cfg.AddUserConf {
-		envHome := os.Getenv("HOME")
-
-		if envHome != "" {
-			p.parseFromVar(filepath.Join(envHome, _USER_CONFIG), "Config")
-		} else {
-			fmt.Print("could not add user configuration file because $HOME is not set")
-		}
-	}
-
 	return nil
-}
-
-//
-// === Utility
-
-// Gets the path of the templates directory.
-func dirData() (string, error) {
-	goEnv := os.Getenv("GOPATH")
-
-	if goEnv != "" {
-		goto _Found
-	}
-	if goEnv = os.Getenv("GOROOT"); goEnv != "" {
-		goto _Found
-	}
-	if goEnv = os.Getenv("GOROOT_FINAL"); goEnv != "" {
-		goto _Found
-	}
-
-_Found:
-	if goEnv == "" {
-		return "", errors.New("Environment variable GOROOT neither" +
-			" GOROOT_FINAL has been set")
-	}
-
-	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED), nil
 }

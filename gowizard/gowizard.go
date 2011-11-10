@@ -21,8 +21,11 @@ import (
 
 func usage() {
 	fmt.Fprintf(os.Stderr, `
-Usage: gowizard -project-type -project-name -license -author -email -vcs
-	[-package-name -org -config]
+Usage: gowizard -i
+
+	+ -config -author -email -license -vcs [-org-name]
+	+ -project-type -project-name -license -author -email -vcs
+	  [-package-name -org -org-name]
 
 `)
 	flag.PrintDefaults()
@@ -41,7 +44,6 @@ func main() {
 	}
 
 	p.Create()
-	os.Exit(0)
 }
 
 // * * *
@@ -63,11 +65,11 @@ func initConfig() (*wizard.Conf, error) {
 	fInteractive := flag.Bool("i", false, "Interactive mode.")
 
 	fListLicense := flag.Bool("ll", false,
-		"Show the list of licenses for the flag \"license\".")
+		"Show the list of licenses (for flag \"license\").")
 	fListProject := flag.Bool("lp", false,
-		"Show the list of project types for the flag \"project-type\".")
+		"Show the list of project types (for flag \"project-type\").")
 	fListVCS := flag.Bool("lv", false,
-		"Show the list of version control systems.")
+		"Show the list of version control systems (for flag \"vcs\").")
 
 	// === Parse the flags
 	flag.Usage = usage
@@ -113,8 +115,12 @@ func initConfig() (*wizard.Conf, error) {
 		VCS:         *fVCS,
 		OrgName:     *fOrgName,
 		IsForOrg:    *fIsForOrg,
+	}
 
-		AddUserConf: *fAddUserConf,
+	// Add configuration.
+	if *fAddUserConf {
+		wizard.AddUserConf(cfg)
+		os.Exit(0)
 	}
 
 	// Get configuration per user

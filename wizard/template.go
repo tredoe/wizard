@@ -126,8 +126,8 @@ const tmplUserConfig = `[DEFAULT]
 org-name: {{.OrgName}}
 author: {{.Author}}
 email: {{.Email}}
-license: {{.license}}
-vcs: {{.vcs}}
+license: {{.License}}
+vcs: {{.VCS}}
 `
 
 // === File ignore for VCS
@@ -236,10 +236,6 @@ func (p *project) parseTemplates(charComment string, year int) {
 		tPkg := template.Must(template.New("Pkg").Parse(tmplPkg))
 		tTest := template.Must(template.New("Test").Parse(tmplTest))
 		p.set.Add(tPkg, tTest)
-	}
-
-	if p.cfg.AddUserConf {
-		p.set.Add(template.Must(template.New("Config").Parse(tmplUserConfig)))
 	}
 
 	tHeader := template.Must(template.New("Header").Parse(tmplHeader))

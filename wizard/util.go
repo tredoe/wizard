@@ -10,10 +10,33 @@
 package wizard
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"text/template"
 )
+
+// Creates the user configuration file.
+func AddUserConf(cfg *Conf) error {
+	tmpl := template.Must(template.New("Config").Parse(tmplUserConfig))
+
+	envHome := os.Getenv("HOME")
+	if envHome == "" {
+		return errors.New("could not add user configuration file because $HOME is not set")
+	}
+
+	file, err := createFile(filepath.Join(envHome, _USER_CONFIG))
+	if err != nil {
+		return err
+	}
+
+	if err := tmpl.Execute(file, cfg); err != nil {
+		return fmt.Errorf("execution failed: %s", err)
+	}
+	return nil
+}
 
 // Copies a file from source to destination.
 func copyFile(destination, source string, perm uint32) error {
@@ -41,4 +64,27 @@ func createFile(dst string) (*os.File, error) {
 	}
 
 	return file, nil
+}
+
+// Gets the path of the templates directory.
+func dirData() (string, error) {
+	goEnv := os.Getenv("GOPATH")
+
+	if goEnv != "" {
+		goto _Found
+	}
+	if goEnv = os.Getenv("GOROOT"); goEnv != "" {
+		goto _Found
+	}
+	if goEnv = os.Getenv("GOROOT_FINAL"); goEnv != "" {
+		goto _Found
+	}
+
+_Found:
+	if goEnv == "" {
+		return "", errors.New("Environment variable GOROOT neither" +
+			" GOROOT_FINAL has been set")
+	}
+
+	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED), nil
 }

@@ -38,8 +38,7 @@ at creating a project.
 ### Create
 
 The required flags to build a new project are *-project-type*, *-project-name*,
-*-license* ,*-author*, *-email* and *-vcs*; *-email* is not necessary when
-the author is an organization (*-org*).
+*-license* ,*-author*, *-email* and *-vcs*.
 
 By default, the package name (*-package-name*) is named as the project name but
 in lower case, and removing the name "Go" of the prefix and suffix.
@@ -47,23 +46,13 @@ in lower case, and removing the name "Go" of the prefix and suffix.
 The flag *-vcs* indicates the version control system to use, which allows to add
 the appropriate ignore file.
 
-Example:
+The way fastest and simple to use it, is create a configuration file and then
+use the interactive mode:
 
-	gowizard -project-name=Go-Foo -author="John Foo" -email="e@mail.com" \
-	-project-type=pkg -license=bsd-2 -vcs=git -config
+	gowizard -config -author="John Foo" -email="e@mailk.com" -license=bsd-2 \
+	-vcs=git
 
-If the configuration file has been set, then it could be shorter now:
-
-	gowizard -project-name=Go-Bar -project-type=pkg
-
-or use another flags than values by default:
-
-	gowizard -project-name=Go-Bar -project-type=pkg -license=apache-2
-
-Useful flags:
-
-+ ***-i***: the interactive mode is a simple way to get all required
-information, showing the required choices for the flags that need it.
+	gowizard -i
 
 ### Suggestions about naming
 

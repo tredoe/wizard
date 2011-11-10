@@ -32,8 +32,6 @@ type Conf struct {
 	OrgName     string // the author develops the program for an organization
 	IsForOrg    bool
 
-	AddUserConf bool
-
 	// To pass to templates
 	Comment       string
 	FullLicense   string
