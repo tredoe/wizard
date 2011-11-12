@@ -10,11 +10,14 @@
 package wizard
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -83,6 +86,30 @@ func AddLicense(p *project, isNewProject bool) error {
 	return nil
 }
 
+// Finds the first line that matches the copyright header to return the year.
+func ProjectYear(filename string) (int, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return 0, fmt.Errorf("no project directory: %s", err)
+	}
+	defer file.Close()
+
+	fileBuf := bufio.NewReader(file)
+
+	for {
+		line, err := fileBuf.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
+
+		if reCopyright.MatchString(line) || reCopyleft.MatchString(line) {
+			//strYear := strings.Split(line, " ")[1]
+			return strconv.Atoi(strings.Split(line, " ")[1])
+		}
+	}
+	panic("no reached")
+}
+
 // * * *
 
 // Copies a file from source to destination.
@@ -129,7 +156,7 @@ func dirData() (string, error) {
 
 _Found:
 	if goEnv == "" {
-		return "", errors.New("Environment variable GOROOT neither" +
+		return "", errors.New("environment variable GOROOT neither" +
 			" GOROOT_FINAL has been set")
 	}
 

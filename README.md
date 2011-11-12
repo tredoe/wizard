@@ -52,9 +52,10 @@ use the interactive mode:
 	gowizard -add-config -author="John Foo" -email="e@mail.com" -license=bsd-2 -vcs=git
 	gowizard -i
 
-To add a new license (inner of the project directory):
+To add a license to the actual project:
 
-	gowizard -add-license -license=gpl
+	cd <project name>
+	gowizard -add-license=gpl
 
 ### Suggestions about naming
 

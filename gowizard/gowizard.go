@@ -25,7 +25,7 @@ func usage() {
 Usage: gowizard -i
 
 	+ -add-config -author -email -license -vcs [-org-name]
-	+ -add-license -license
+	+ -add-license
 	+ -project-type -project-name -license -author -email -vcs
 	  [-package-name -org -org-name]
 
@@ -63,12 +63,12 @@ func initConfig() (*wizard.Conf, error) {
 	fIsForOrg := flag.Bool("org", false, "Does an organization is the copyright holder?")
 
 	// === Generic flags
+	fAddLicense := flag.String("add-license", "", "Add a license file.")
 	fAddConfig := flag.Bool("add-config", false, "Add the user configuration file.")
-	fAddLicense := flag.Bool("add-license", false, "Add a license file.")
 	fInteractive := flag.Bool("i", false, "Interactive mode.")
 
 	fListLicense := flag.Bool("ll", false,
-		"Show the list of licenses (for flag \"license\").")
+		"Show the list of licenses (for flags \"license\" and \"add-license\").")
 	fListProject := flag.Bool("lp", false,
 		"Show the list of project types (for flag \"project-type\").")
 	fListVCS := flag.Bool("lv", false,
@@ -126,11 +126,12 @@ func initConfig() (*wizard.Conf, error) {
 		os.Exit(0)
 	}
 
-	// New license.
-	if *fAddLicense {
-		if *fLicense == "" {
+	// New license for existent project.
+	if *fAddLicense != "" {
+		cfg.License = *fAddLicense
+		/*if *fLicense == "" {
 			fatalf("required license")
-		}
+		}*/
 
 		// The project name is the name of the actual directory.
 		wd, err := os.Getwd()
@@ -139,13 +140,17 @@ func initConfig() (*wizard.Conf, error) {
 		}
 		cfg.ProjectName = filepath.Base(wd)
 
-		//TODO: search year in README
+		// Get year of project's creation
+		year, err := wizard.ProjectYear("README.md")
+		if err != nil {
+			fatalf(err.Error())
+		}
 
 		project, err := wizard.NewProject(cfg)
 		if err != nil {
 			fatalf(err.Error())
 		}
-		project.ParseLicense(wizard.CHAR_COMMENT, 0)
+		project.ParseLicense(wizard.CHAR_COMMENT, year)
 
 		if err = wizard.AddLicense(project, false); err != nil {
 			os.Exit(ERROR)

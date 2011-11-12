@@ -12,9 +12,16 @@ package wizard
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
 	"time"
+)
+
+// To get the project's creation year
+var (
+	reCopyright = regexp.MustCompile(`(Copyright)[ ]+[0-9]{4}[ ].*Authors`)
+	reCopyleft  = regexp.MustCompile(`(Written in)[ ]+[0-9]{4}[ ].*Authors`)
 )
 
 // Copyright and licenses
