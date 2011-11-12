@@ -1,4 +1,5 @@
 {{template "Copyright" .}}
+All rights reserved.
 
 BSD 3-Clause License
 

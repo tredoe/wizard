@@ -1,6 +1,6 @@
 // Copyright 2010  The "GoWizard" Authors
 //
-// Use of this source code is governed by the BSD-2 Clause license
+// Use of this source code is governed by the BSD 2-Clause License
 // that can be found in the LICENSE file.
 //
 // This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES

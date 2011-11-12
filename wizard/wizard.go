@@ -1,6 +1,6 @@
 // Copyright 2010  The "GoWizard" Authors
 //
-// Use of this source code is governed by the BSD-2 Clause license
+// Use of this source code is governed by the BSD 2-Clause License
 // that can be found in the LICENSE file.
 //
 // This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
@@ -51,8 +51,8 @@ var ListProject = map[string]string{
 // The first field in []string is the file name without extension.
 var ListLicense = map[string][]string{
 	"apache": {"Apache", "Apache License, version 2.0"},
-	"bsd-2":  {"BSD-2", "BSD-2 Clause license"},
-	"bsd-3":  {"BSD-3", "BSD-3 Clause license"},
+	"bsd-2":  {"BSD-2", "BSD 2-Clause License"},
+	"bsd-3":  {"BSD-3", "BSD 3-Clause License"},
 	"cc0":    {"CC0", "Creative Commons CC0, version 1.0 Universal"},
 	"gpl":    {"GPL", "GNU General Public License, version 3 or later"},
 	"lgpl":   {"LGPL", "GNU Lesser General Public License, version 3 or later"},

@@ -1,6 +1,6 @@
 // Copyright 2010  The "GoWizard" Authors
 //
-// Use of this source code is governed by the BSD-2 Clause license
+// Use of this source code is governed by the BSD 2-Clause License
 // that can be found in the LICENSE file.
 //
 // This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
@@ -129,9 +129,6 @@ func initConfig() (*wizard.Conf, error) {
 	// New license for existent project.
 	if *fAddLicense != "" {
 		cfg.License = *fAddLicense
-		/*if *fLicense == "" {
-			fatalf("required license")
-		}*/
 
 		// The project name is the name of the actual directory.
 		wd, err := os.Getwd()
