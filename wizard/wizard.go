@@ -23,23 +23,23 @@ const (
 	_PERM_DIRECTORY = 0755
 	_PERM_FILE      = 0644
 
-	_CHAR_CODE_COMMENT = "//" // For comments in source code files
-	_CHAR_HEADER       = "="  // Header under the project name
+	CHAR_COMMENT = "//" // For comments in source code files
+	_CHAR_HEADER = "="  // Header under the project name
 
 	// Configuration file per user
 	_USER_CONFIG = ".gowizard"
 
 	// Subdirectory where is installed through "goinstall"
-	_SUBDIR_GOINSTALLED = "src/pkg/github.com/kless/GoWizard/data"
+	_DIR_DATA = "src/pkg/github.com/kless/GoWizard/data"
 )
-/*
-// VCS configuration files to push to a server.
+
+/*// VCS configuration files to push to a server.
 var configVCS = map[string]string{
 	"bzr": ".bzr/branch/branch.conf",
 	"git": ".git/config",
 	"hg":  ".hg/hgrc",
-}
-*/
+}*/
+
 // Project types
 var ListProject = map[string]string{
 	"cmd": "Command line program",
@@ -48,15 +48,16 @@ var ListProject = map[string]string{
 }
 
 // Available licenses
-var ListLicense = map[string]string{
-	"apache-2": "Apache License, version 2.0",
-	"bsd-2":    "BSD-2 Clause license",
-	"bsd-3":    "BSD-3 Clause license",
-	"cc0-1":    "Creative Commons CC0, version 1.0 Universal",
-	"gpl-3":    "GNU General Public License, version 3 or later",
-	"lgpl-3":   "GNU Lesser General Public License, version 3 or later",
-	"agpl-3":   "GNU Affero General Public License, version 3 or later",
-	"none":     "Proprietary license",
+// The first field in []string is the file name without extension.
+var ListLicense = map[string][]string{
+	"apache": {"Apache", "Apache License, version 2.0"},
+	"bsd-2":  {"BSD-2", "BSD-2 Clause license"},
+	"bsd-3":  {"BSD-3", "BSD-3 Clause license"},
+	"cc0":    {"CC0", "Creative Commons CC0, version 1.0 Universal"},
+	"gpl":    {"GPL", "GNU General Public License, version 3 or later"},
+	"lgpl":   {"LGPL", "GNU Lesser General Public License, version 3 or later"},
+	"agpl":   {"AGPL", "GNU Affero General Public License, version 3 or later"},
+	"none":   {"none", "Proprietary license"},
 }
 
 // Version control systems (VCS)
@@ -81,43 +82,19 @@ type project struct {
 
 // Creates information for the project.
 // "isFirstRun" indicates if it is the first time in be called.
-func NewProject(cfg *Conf, isFirstRun bool) (*project, error) {
+func NewProject(cfg *Conf) (*project, error) {
 	var err error
-
 	p := new(project)
-	if isFirstRun {
-		if p.dirData, err = dirData(); err != nil {
-			return nil, err
-		}
+
+	if p.dirData, err = dirData(); err != nil {
+		return nil, err
 	}
+
 	p.dirProject = filepath.Join(cfg.ProjectName, cfg.PackageName)
 	p.set = new(template.Set)
 	p.cfg = cfg
 
 	return p, nil
-}
-
-// Adds license file in directory `dir`.
-func (p *project) addLicense(dir string) {
-	dirTmpl := filepath.Join(p.dirData, "license")
-	lic := p.cfg.License
-
-	switch lic {
-	case "none":
-		break
-	case "bsd-2", "bsd-3":
-		p.parseFromFile(filepath.Join(dir, "LICENSE.txt"),
-			filepath.Join(dirTmpl, lic+".txt"), true)
-	default:
-		copyFile(filepath.Join(dir, "LICENSE.txt"),
-			filepath.Join(dirTmpl, lic+".txt"), _PERM_FILE)
-
-		// License LGPL must also add the GPL license text.
-		if lic == "lgpl-3" {
-			copyFile(filepath.Join(dir, "LICENSE-GPL.txt"),
-				filepath.Join(dirTmpl, "gpl-3.txt"), _PERM_FILE)
-		}
-	}
 }
 
 // Creates a new project.
@@ -126,7 +103,8 @@ func (p *project) Create() error {
 		return fmt.Errorf("directory error: %s", err)
 	}
 
-	p.parseTemplates(_CHAR_CODE_COMMENT, 0)
+	p.ParseLicense(CHAR_COMMENT, 0)
+	p.parseProject()
 
 	// === Render project files
 	if p.cfg.ProjecType != "cmd" {
@@ -174,7 +152,7 @@ func (p *project) Create() error {
 	}
 
 	// === License file
-	p.addLicense(p.cfg.ProjectName)
+	AddLicense(p, true)
 
 	return nil
 }

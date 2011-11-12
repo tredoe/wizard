@@ -49,8 +49,12 @@ the appropriate ignore file.
 The way fastest and simple to use it, is create a configuration file and then
 use the interactive mode:
 
-	gowizard -config -author="John Foo" -email="e@mail.com" -license=bsd-2 -vcs=git
+	gowizard -add-config -author="John Foo" -email="e@mail.com" -license=bsd-2 -vcs=git
 	gowizard -i
+
+To add a new license (inner of the project directory):
+
+	gowizard -add-license -license=gpl
 
 ### Suggestions about naming
 

@@ -13,6 +13,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/kless/Go-Inline/quest"
@@ -23,7 +24,8 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `
 Usage: gowizard -i
 
-	+ -config -author -email -license -vcs [-org-name]
+	+ -add-config -author -email -license -vcs [-org-name]
+	+ -add-license -license
 	+ -project-type -project-name -license -author -email -vcs
 	  [-package-name -org -org-name]
 
@@ -38,7 +40,7 @@ func main() {
 		fatalf(err.Error())
 	}
 
-	p, err := wizard.NewProject(cfg, true)
+	p, err := wizard.NewProject(cfg)
 	if err != nil {
 		fatalf(err.Error())
 	}
@@ -61,7 +63,8 @@ func initConfig() (*wizard.Conf, error) {
 	fIsForOrg := flag.Bool("org", false, "Does an organization is the copyright holder?")
 
 	// === Generic flags
-	fAddUserConf := flag.Bool("config", false, "Add the user configuration file.")
+	fAddConfig := flag.Bool("add-config", false, "Add the user configuration file.")
+	fAddLicense := flag.Bool("add-license", false, "Add a license file.")
 	fInteractive := flag.Bool("i", false, "Interactive mode.")
 
 	fListLicense := flag.Bool("ll", false,
@@ -88,8 +91,8 @@ func initConfig() (*wizard.Conf, error) {
 	}
 	if *fListLicense {
 		fmt.Println("  = Licenses\n")
-		for k, v := range wizard.ListLicense {
-			fmt.Printf("  %s: %s\n", k, v)
+		for _, v := range wizard.ListLicense {
+			fmt.Printf("  %s: %s\n", v[0], v[1])
 		}
 	}
 	if *fListVCS {
@@ -118,8 +121,35 @@ func initConfig() (*wizard.Conf, error) {
 	}
 
 	// Add configuration.
-	if *fAddUserConf {
-		wizard.AddUserConf(cfg)
+	if *fAddConfig {
+		wizard.AddConfig(cfg)
+		os.Exit(0)
+	}
+
+	// New license.
+	if *fAddLicense {
+		if *fLicense == "" {
+			fatalf("required license")
+		}
+
+		// The project name is the name of the actual directory.
+		wd, err := os.Getwd()
+		if err != nil {
+			fatalf(err.Error())
+		}
+		cfg.ProjectName = filepath.Base(wd)
+
+		//TODO: search year in README
+
+		project, err := wizard.NewProject(cfg)
+		if err != nil {
+			fatalf(err.Error())
+		}
+		project.ParseLicense(wizard.CHAR_COMMENT, 0)
+
+		if err = wizard.AddLicense(project, false); err != nil {
+			os.Exit(ERROR)
+		}
 		os.Exit(0)
 	}
 
@@ -172,7 +202,7 @@ func interactive(c *wizard.Conf) error {
 
 		switch k {
 		case "project-type":
-			c.ProjecType, err = prompt.ChoiceString(arrayKeys(wizard.ListProject))
+			c.ProjecType, err = prompt.ChoiceString(keys(wizard.ListProject))
 		case "project-name":
 			c.ProjectName, err = prompt.Mod(quest.REQUIRED).ReadString()
 		case "package-name":
@@ -203,15 +233,15 @@ func interactive(c *wizard.Conf) error {
 		case "license":
 			if c.License != "" {
 				c.License, err = prompt.ByDefault(c.License).
-					ChoiceString(arrayKeys(wizard.ListLicense))
+					ChoiceString(extraKeys(wizard.ListLicense))
 			} else {
-				c.License, err = prompt.ChoiceString(arrayKeys(wizard.ListLicense))
+				c.License, err = prompt.ChoiceString(extraKeys(wizard.ListLicense))
 			}
 		case "vcs":
 			if c.VCS != "" {
-				c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(arrayKeys(wizard.ListVCS))
+				c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(keys(wizard.ListVCS))
 			} else {
-				c.VCS, err = prompt.ChoiceString(arrayKeys(wizard.ListVCS))
+				c.VCS, err = prompt.ChoiceString(keys(wizard.ListVCS))
 			}
 		}
 
@@ -228,15 +258,26 @@ func interactive(c *wizard.Conf) error {
 // === Utility
 
 // Gets an array from map keys.
-func arrayKeys(m map[string]string) []string {
+func keys(m map[string]string) []string {
 	a := make([]string, len(m))
-
 	i := 0
+
 	for k, _ := range m {
 		a[i] = k
 		i++
 	}
+	return a
+}
 
+// Gets an array from the first slice in the map's value.
+func extraKeys(m map[string][]string) []string {
+	a := make([]string, len(m))
+	i := 0
+
+	for _, v := range m {
+		a[i] = v[0]
+		i++
+	}
 	return a
 }
 
@@ -246,6 +287,6 @@ func arrayKeys(m map[string]string) []string {
 const ERROR = 1
 
 func fatalf(format string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, "gowizard: "+format, a...)
+	fmt.Fprintf(os.Stderr, "gowizard: "+format+"\n", a...)
 	os.Exit(ERROR)
 }

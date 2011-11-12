@@ -57,9 +57,9 @@ func ExtraConfig(cfg *Conf) error {
 	cfg.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(cfg.ProjectName))
 
 	if cfg.License != "none" {
-		cfg.FullLicense = ListLicense[cfg.License]
+		cfg.FullLicense = ListLicense[cfg.License][1]
 	}
-	if cfg.License != "cc0-1" {
+	if cfg.License != "cc0" {
 		cfg.HasCopyright = true
 	}
 	if cfg.ProjecType == "cgo" {
@@ -70,123 +70,6 @@ func ExtraConfig(cfg *Conf) error {
 		cfg.IsCmdProject = true
 	}
 
-	return nil
-}
-
-//
-// === Checking
-
-// Common checking.
-func checkCommon(c *Conf, hasError bool) error {
-	// === License
-	c.License = strings.ToLower(c.License)
-	if _, present := ListLicense[c.License]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable license: %q\n", c.License)
-		hasError = true
-	}
-
-	if hasError {
-		return errors.New("required field")
-	}
-	return nil
-}
-
-// Checks at creating project.
-func checkAtCreate(c *Conf) error {
-	var hasError bool
-
-	// === Necessary fields
-	if c.ProjecType == "" || c.ProjectName == "" || c.License == "" ||
-		c.Author == "" || c.VCS == "" {
-		return errors.New("missing required fields to create project")
-	}
-
-	// === Project type
-	c.ProjecType = strings.ToLower(c.ProjecType)
-	if _, present := ListProject[c.ProjecType]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", c.ProjecType)
-		hasError = true
-	}
-
-	// === VCS
-	c.VCS = strings.ToLower(c.VCS)
-	if _, present := ListVCS[c.VCS]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", c.VCS)
-		hasError = true
-	}
-
-	return checkCommon(c, hasError)
-}
-
-//
-// === Utility
-
-// Loads configuration per user, if any.
-func UserConfig(c *Conf) error {
-	home, err := os.Getenverror("HOME")
-	if err != nil {
-		return fmt.Errorf("no variable HOME: %s", err)
-	}
-
-	pathUserConfig := filepath.Join(home, _USER_CONFIG)
-
-	// To know if the file exist.
-	switch info, err := os.Stat(pathUserConfig); {
-	case err != nil:
-		return fmt.Errorf("user configuration does not exist: %s", err)
-	case !info.IsRegular():
-		return fmt.Errorf("not a file: %s", _USER_CONFIG)
-	}
-
-	cfg, err := config.ReadDefault(pathUserConfig)
-	if err != nil {
-		return fmt.Errorf("error parsing configuration: %s", err)
-	}
-
-	// === Get values
-	var hasError bool
-	var errKeys []string
-
-	if c.OrgName == "" {
-		c.OrgName, err = cfg.String("DEFAULT", "org-name")
-		if err != nil {
-			hasError = true
-			errKeys = append(errKeys, "org-name")
-		}
-	}
-	if c.Author == "" {
-		c.Author, err = cfg.String("DEFAULT", "author")
-		if err != nil {
-			hasError = true
-			errKeys = append(errKeys, "author")
-		}
-	}
-	if c.Email == "" {
-		c.Email, err = cfg.String("DEFAULT", "email")
-		if err != nil {
-			hasError = true
-			errKeys = append(errKeys, "email")
-		}
-	}
-	if c.License == "" {
-		c.License, err = cfg.String("DEFAULT", "license")
-		if err != nil {
-			hasError = true
-			errKeys = append(errKeys, "license")
-		}
-	}
-	if c.VCS == "" {
-		c.VCS, err = cfg.String("DEFAULT", "vcs")
-		if err != nil {
-			hasError = true
-			errKeys = append(errKeys, "vcs")
-		}
-	}
-
-	if hasError {
-		return fmt.Errorf("error at user configuration: %s\n",
-			strings.Join(errKeys, ","))
-	}
 	return nil
 }
 
@@ -215,4 +98,119 @@ func SetNames(c *Conf) {
 	} else {
 		c.PackageName = strings.ToLower(strings.TrimSpace(c.PackageName))
 	}
+}
+
+// Loads configuration per user, if any.
+func UserConfig(c *Conf) error {
+	home, err := os.Getenverror("HOME")
+	if err != nil {
+		return fmt.Errorf("no variable HOME: %s", err)
+	}
+
+	pathUserConfig := filepath.Join(home, _USER_CONFIG)
+
+	// To know if the file exist.
+	switch info, err := os.Stat(pathUserConfig); {
+	case err != nil:
+		return fmt.Errorf("user configuration does not exist: %s", err)
+	case !info.IsRegular():
+		return fmt.Errorf("not a file: %s", _USER_CONFIG)
+	}
+
+	cfg, err := config.ReadDefault(pathUserConfig)
+	if err != nil {
+		return fmt.Errorf("error parsing configuration: %s", err)
+	}
+
+	// === Get values
+	var errKeys []string
+	ok := true
+
+	if c.OrgName == "" {
+		c.OrgName, err = cfg.String("DEFAULT", "org-name")
+		if err != nil {
+			ok = false
+			errKeys = append(errKeys, "org-name")
+		}
+	}
+	if c.Author == "" {
+		c.Author, err = cfg.String("DEFAULT", "author")
+		if err != nil {
+			ok = false
+			errKeys = append(errKeys, "author")
+		}
+	}
+	if c.Email == "" {
+		c.Email, err = cfg.String("DEFAULT", "email")
+		if err != nil {
+			ok = false
+			errKeys = append(errKeys, "email")
+		}
+	}
+	if c.License == "" {
+		c.License, err = cfg.String("DEFAULT", "license")
+		if err != nil {
+			ok = false
+			errKeys = append(errKeys, "license")
+		}
+	}
+	if c.VCS == "" {
+		c.VCS, err = cfg.String("DEFAULT", "vcs")
+		if err != nil {
+			ok = false
+			errKeys = append(errKeys, "vcs")
+		}
+	}
+
+	if !ok {
+		return fmt.Errorf("error at user configuration: %s\n",
+			strings.Join(errKeys, ","))
+	}
+	return nil
+}
+
+//
+// === Checking
+
+// Checks at creating project.
+func checkAtCreate(c *Conf) error {
+	ok := true
+
+	// === Necessary fields
+	if c.ProjecType == "" || c.ProjectName == "" || c.License == "" ||
+		c.Author == "" || c.VCS == "" {
+		return errors.New("missing required fields to create project")
+	}
+
+	// === Project type
+	c.ProjecType = strings.ToLower(c.ProjecType)
+	if _, present := ListProject[c.ProjecType]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", c.ProjecType)
+		ok = false
+	}
+
+	// === VCS
+	c.VCS = strings.ToLower(c.VCS)
+	if _, present := ListVCS[c.VCS]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", c.VCS)
+		ok = false
+	}
+
+	// === License
+	c.License = strings.ToLower(c.License)
+	licenseOk := checkLicense(c.License)
+
+	if !ok || !licenseOk {
+		return errors.New("required field")
+	}
+	return nil
+}
+
+// Checks license.
+func checkLicense(name string) bool {
+	if _, ok := ListLicense[name]; !ok {
+		fmt.Fprintf(os.Stderr, "unavailable license: %q\n", name)
+		return false
+	}
+	return true
 }

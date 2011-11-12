@@ -15,11 +15,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
 // Creates the user configuration file.
-func AddUserConf(cfg *Conf) error {
+func AddConfig(cfg *Conf) error {
 	tmpl := template.Must(template.New("Config").Parse(tmplUserConfig))
 
 	envHome := os.Getenv("HOME")
@@ -37,6 +38,52 @@ func AddUserConf(cfg *Conf) error {
 	}
 	return nil
 }
+
+// Creates a license file.
+func AddLicense(p *project, isNewProject bool) error {
+	licenseLower := p.cfg.License
+	dirProject := p.cfg.ProjectName
+
+	if !isNewProject {
+		licenseLower = strings.ToLower(licenseLower)
+		if ok := checkLicense(licenseLower); !ok {
+			return errors.New("error")
+		}
+
+		dirProject = "." // actual directory
+	}
+
+	dirData := filepath.Join(p.dirData, "license")
+	license := ListLicense[licenseLower][0]
+
+	filename := func(name string) string {
+		if strings.HasPrefix(name, "BSD") {
+			name = strings.TrimRight(name, "-23")
+		}
+		return "LICENSE-"+name+".txt"
+	}
+
+	switch licenseLower {
+	case "none":
+		break
+	case "bsd-2", "bsd-3":
+		p.parseFromFile(filepath.Join(dirProject, filename(license)),
+			filepath.Join(dirData, license+".txt"), true)
+	default:
+		copyFile(filepath.Join(dirProject, filename(license)),
+			filepath.Join(dirData, license+".txt"), _PERM_FILE)
+
+		// License LGPL must also add the GPL license text.
+		if licenseLower == "lgpl" {
+			copyFile(filepath.Join(dirProject, filename("GPL")),
+				filepath.Join(dirData, "GPL.txt"), _PERM_FILE)
+		}
+	}
+
+	return nil
+}
+
+// * * *
 
 // Copies a file from source to destination.
 func copyFile(destination, source string, perm uint32) error {
@@ -86,5 +133,5 @@ _Found:
 			" GOROOT_FINAL has been set")
 	}
 
-	return filepath.Join(goEnv, _SUBDIR_GOINSTALLED), nil
+	return filepath.Join(goEnv, _DIR_DATA), nil
 }

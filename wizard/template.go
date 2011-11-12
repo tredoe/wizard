@@ -187,10 +187,10 @@ func (p *project) parseFromVar(dst string, tmplName string) error {
 	return nil
 }
 
-// Parses the templates.
+// Parses the license header.
 // "charComment" is the character used to comment in code files.
 // If "year" is nil then gets the actual year.
-func (p *project) parseTemplates(charComment string, year int) {
+func (p *project) ParseLicense(charComment string, year int) {
 	var tmplHeader string
 
 	licenseName := strings.Split(p.cfg.License, "-")[0]
@@ -210,18 +210,19 @@ func (p *project) parseTemplates(charComment string, year int) {
 	case "cc0":
 		tmplHeader = tmplCC0
 	case "gpl", "lgpl", "agpl":
+		tmplHeader = tmplGNU
+
 		if licenseName == "agpl" {
 			p.cfg.GNUextra = "Affero"
 		} else if licenseName == "lgpl" {
 			p.cfg.GNUextra = "Lesser"
 		}
-
-		tmplHeader = tmplGNU
 	case "none":
 		tmplHeader = tmplNone
 	}
 
-	// === Add all templates
+	p.set.Add(template.Must(template.New("Header").Parse(tmplHeader)))
+
 	if licenseName != "cc0" {
 		p.set.Add(template.Must(template.New("Copyright").
 			Parse(tmplCopyright)))
@@ -229,7 +230,10 @@ func (p *project) parseTemplates(charComment string, year int) {
 		p.set.Add(template.Must(template.New("Copyright").
 			Parse(tmplCopyleft)))
 	}
+}
 
+// Parses the templates for the project.
+func (p *project) parseProject() {
 	if p.cfg.ProjecType == "cmd" {
 		p.set.Add(template.Must(template.New("Cmd").Parse(tmplCmd)))
 	} else {
@@ -238,7 +242,5 @@ func (p *project) parseTemplates(charComment string, year int) {
 		p.set.Add(tPkg, tTest)
 	}
 
-	tHeader := template.Must(template.New("Header").Parse(tmplHeader))
-	tMakefile := template.Must(template.New("Makefile").Parse(tmplMakefile))
-	p.set.Add(tHeader, tMakefile)
+	p.set.Add(template.Must(template.New("Makefile").Parse(tmplMakefile)))
 }
