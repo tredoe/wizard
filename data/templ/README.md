@@ -12,7 +12,12 @@
 ## Configuration
 
 << INSTRUCTIONS TO CONFIGURE THE PROGRAM, IF ANY >>
+{{if not .IsCmdProject}}
+To run the tests:
 
+	cd $GOROOT/src/pkg/<< IMPORT PATH >> &&
+	gotest -v && make clean && cd -
+{{end}}
 
 ## Operating instructions
 
