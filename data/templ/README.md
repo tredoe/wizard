@@ -24,7 +24,7 @@ To run the tests:
 << INSTRUCTIONS TO RUN THE PROGRAM >>
 
 
-## Licensing
+## {{if .HasCopyright}}Copyright{{else}}Copyleft{{end}} and licensing
 
 ***{{template "Copyright" .}}***  
 See file {{if .HasCopyright}}AUTHORS and {{end}}CONTRIBUTORS.

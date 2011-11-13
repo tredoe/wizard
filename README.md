@@ -71,7 +71,7 @@ Copyright notices only need the year the file was created, so don't add new
 years.
 
 
-## Licensing
+## Copyright and licensing
 
 ***Copyright 2010  The "GoWizard" Authors***  
 See file AUTHORS and CONTRIBUTORS.
