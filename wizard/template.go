@@ -162,7 +162,7 @@ func (p *project) parseFromFile(dst, src string, useNest bool) error {
 		return err
 	}
 
-	tmpl, err := template.ParseFile(src)
+	tmpl, err := template.ParseFiles(src)
 	if err != nil {
 		fmt.Errorf("parsing error: %s", err)
 	}
@@ -174,7 +174,8 @@ func (p *project) parseFromFile(dst, src string, useNest bool) error {
 	} else {
 		p.set.Add(tmpl)
 
-		if err = p.set.Execute(file, filepath.Base(src), p.cfg); err != nil {
+		p.set.New(filepath.Base(src))
+		if err = p.set.Execute(file, p.cfg); err != nil {
 			fmt.Errorf("execution failed: %s", err)
 		}
 	}
@@ -188,7 +189,8 @@ func (p *project) parseFromVar(dst string, tmplName string) error {
 		return err
 	}
 
-	if err = p.set.Execute(file, tmplName, p.cfg); err != nil {
+	p.set.New(tmplName)
+	if err = p.set.Execute(file, p.cfg); err != nil {
 		fmt.Errorf("execution failed: %s", err)
 	}
 	return nil
@@ -204,7 +206,7 @@ func (p *project) ParseLicense(charComment string, year int) {
 	p.cfg.Comment = charComment
 
 	if year == 0 {
-		p.cfg.Year = int(time.LocalTime().Year)
+		p.cfg.Year = time.Now().Year()
 	} else {
 		p.cfg.Year = year
 	}
@@ -246,7 +248,8 @@ func (p *project) parseProject() {
 	} else {
 		tPkg := template.Must(template.New("Pkg").Parse(tmplPkg))
 		tTest := template.Must(template.New("Test").Parse(tmplTest))
-		p.set.Add(tPkg, tTest)
+		p.set.Add(tPkg)
+		p.set.Add(tTest)
 	}
 
 	p.set.Add(template.Must(template.New("Makefile").Parse(tmplMakefile)))

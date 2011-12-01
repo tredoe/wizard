@@ -77,7 +77,7 @@ type project struct {
 	dirProject string // directory of project created
 
 	cfg *Conf
-	set *template.Set // set of templates
+	set *template.Template // set of templates
 }
 
 // Creates information for the project.
@@ -91,7 +91,7 @@ func NewProject(cfg *Conf) (*project, error) {
 	}
 
 	p.dirProject = filepath.Join(cfg.ProjectName, cfg.PackageName)
-	p.set = new(template.Set)
+	//p.set = new(template.Set)
 	p.cfg = cfg
 
 	return p, nil

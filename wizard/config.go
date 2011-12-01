@@ -113,7 +113,7 @@ func UserConfig(c *Conf) error {
 	switch info, err := os.Stat(pathUserConfig); {
 	case err != nil:
 		return fmt.Errorf("user configuration does not exist: %s", err)
-	case !info.IsRegular():
+	case info.IsDir():
 		return fmt.Errorf("not a file: %s", _USER_CONFIG)
 	}
 
