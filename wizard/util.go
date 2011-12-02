@@ -49,15 +49,15 @@ func AddLicense(p *project, isNewProject bool) error {
 
 	if !isNewProject {
 		licenseLower = strings.ToLower(licenseLower)
-		if ok := checkLicense(licenseLower); !ok {
-			return errors.New("error")
+		if err := CheckLicense(licenseLower); err != nil {
+			return err
 		}
 
 		dirProject = "." // actual directory
 	}
 
 	dirData := filepath.Join(p.dirData, "license")
-	license := ListLicense[licenseLower][0]
+	license := ListLowerLicense[licenseLower]
 
 	filename := func(name string) string {
 		if strings.HasPrefix(name, "BSD") {

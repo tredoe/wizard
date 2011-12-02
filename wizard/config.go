@@ -57,7 +57,7 @@ func ExtraConfig(cfg *Conf) error {
 	cfg.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(cfg.ProjectName))
 
 	if cfg.License != "none" {
-		cfg.FullLicense = ListLicense[cfg.License][1]
+		cfg.FullLicense = ListLicense[ListLowerLicense[cfg.License]]
 	}
 	if cfg.License != "cc0" {
 		cfg.HasCopyright = true
@@ -198,19 +198,22 @@ func checkAtCreate(c *Conf) error {
 
 	// === License
 	c.License = strings.ToLower(c.License)
-	licenseOk := checkLicense(c.License)
 
-	if !ok || !licenseOk {
+	// * * *
+
+	if !ok {
 		return errors.New("required field")
+	}
+	if err := CheckLicense(c.License); err != nil {
+		return err
 	}
 	return nil
 }
 
 // Checks license.
-func checkLicense(name string) bool {
-	if _, ok := ListLicense[name]; !ok {
-		fmt.Fprintf(os.Stderr, "unavailable license: %q\n", name)
-		return false
+func CheckLicense(name string) error {
+	if _, ok := ListLowerLicense[name]; !ok {
+		return fmt.Errorf("unavailable license: %s", name)
 	}
-	return true
+	return nil
 }

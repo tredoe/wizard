@@ -91,8 +91,8 @@ func initConfig() (*wizard.Conf, error) {
 	}
 	if *fListLicense {
 		fmt.Println("  = Licenses\n")
-		for _, v := range wizard.ListLicense {
-			fmt.Printf("  %s: %s\n", v[0], v[1])
+		for k, v := range wizard.ListLicense {
+			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
 	if *fListVCS {
@@ -234,10 +234,14 @@ func interactive(c *wizard.Conf) error {
 			}
 		case "license":
 			if c.License != "" {
-				c.License, err = prompt.ByDefault(c.License).
-					ChoiceString(extraKeys(wizard.ListLicense))
+				if err = wizard.CheckLicense(c.License); err != nil {
+					break
+				}
+
+				c.License, err = prompt.ByDefault(wizard.ListLowerLicense[c.License]).
+					ChoiceString(keys(wizard.ListLicense))
 			} else {
-				c.License, err = prompt.ChoiceString(extraKeys(wizard.ListLicense))
+				c.License, err = prompt.ChoiceString(keys(wizard.ListLicense))
 			}
 		case "vcs":
 			if c.VCS != "" {
@@ -266,18 +270,6 @@ func keys(m map[string]string) []string {
 
 	for k, _ := range m {
 		a[i] = k
-		i++
-	}
-	return a
-}
-
-// Gets an array from the first slice in the map's value.
-func extraKeys(m map[string][]string) []string {
-	a := make([]string, len(m))
-	i := 0
-
-	for _, v := range m {
-		a[i] = v[0]
 		i++
 	}
 	return a
