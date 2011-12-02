@@ -71,7 +71,7 @@ func AddLicense(p *project, isNewProject bool) error {
 		break
 	case "bsd-2", "bsd-3":
 		p.parseFromFile(filepath.Join(dirProject, filename(license)),
-			filepath.Join(dirData, license+".txt"), true)
+			filepath.Join(dirData, license+".txt"))
 	default:
 		copyFile(filepath.Join(dirProject, filename(license)),
 			filepath.Join(dirData, license+".txt"), _PERM_FILE)
@@ -107,7 +107,7 @@ func ProjectYear(filename string) (int, error) {
 			return strconv.Atoi(strings.Split(line, " ")[1])
 		}
 	}
-	panic("no reached")
+	panic("unreached")
 }
 
 // * * *

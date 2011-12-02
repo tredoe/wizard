@@ -76,8 +76,8 @@ type project struct {
 	dirData    string // directory with templates
 	dirProject string // directory of project created
 
-	cfg *Conf
-	set *template.Template // set of templates
+	cfg  *Conf
+	tmpl *template.Template // set of templates
 }
 
 // Creates information for the project.
@@ -91,8 +91,8 @@ func NewProject(cfg *Conf) (*project, error) {
 	}
 
 	p.dirProject = filepath.Join(cfg.ProjectName, cfg.PackageName)
-	//p.set = new(template.Set)
 	p.cfg = cfg
+	p.tmpl = new(template.Template)
 
 	return p, nil
 }
@@ -122,16 +122,16 @@ func (p *project) Create() error {
 	dirTmpl := filepath.Join(p.dirData, "templ") // Base directory of templates
 
 	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "CONTRIBUTORS.md"),
-		filepath.Join(dirTmpl, "CONTRIBUTORS.md"), false)
+		filepath.Join(dirTmpl, "CONTRIBUTORS.md"))
 	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "NEWS.md"),
-		filepath.Join(dirTmpl, "NEWS.md"), false)
+		filepath.Join(dirTmpl, "NEWS.md"))
 	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "README.md"),
-		filepath.Join(dirTmpl, "README.md"), true)
+		filepath.Join(dirTmpl, "README.md"))
 
 	// The file AUTHORS is for copyright holders.
 	if !strings.HasPrefix(p.cfg.License, "cc0") {
 		p.parseFromFile(filepath.Join(p.cfg.ProjectName, "AUTHORS.md"),
-			filepath.Join(dirTmpl, "AUTHORS.md"), false)
+			filepath.Join(dirTmpl, "AUTHORS.md"))
 	}
 
 	// === Add file related to VCS

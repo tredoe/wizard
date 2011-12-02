@@ -156,29 +156,21 @@ main
 `
 
 // Renders the template "src", creating a file in "dst".
-func (p *project) parseFromFile(dst, src string, useNest bool) error {
+func (p *project) parseFromFile(dst, src string) error {
 	file, err := createFile(dst)
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.ParseFiles(src)
+	p.tmpl, err = p.tmpl.ParseFiles(src)
 	if err != nil {
 		fmt.Errorf("parsing error: %s", err)
 	}
 
-	if !useNest {
-		if err = tmpl.Execute(file, p.cfg); err != nil {
-			fmt.Errorf("execution failed: %s", err)
-		}
-	} else {
-		p.set.Add(tmpl)
-
-		p.set.New(filepath.Base(src))
-		if err = p.set.Execute(file, p.cfg); err != nil {
-			fmt.Errorf("execution failed: %s", err)
-		}
+	if err = p.tmpl.ExecuteTemplate(file, filepath.Base(src), p.cfg); err != nil {
+		fmt.Errorf("execution failed: %s", err)
 	}
+
 	return nil
 }
 
@@ -189,8 +181,7 @@ func (p *project) parseFromVar(dst string, tmplName string) error {
 		return err
 	}
 
-	p.set.New(tmplName)
-	if err = p.set.Execute(file, p.cfg); err != nil {
+	if err = p.tmpl.ExecuteTemplate(file, tmplName, p.cfg); err != nil {
 		fmt.Errorf("execution failed: %s", err)
 	}
 	return nil
@@ -230,27 +221,23 @@ func (p *project) ParseLicense(charComment string, year int) {
 		tmplHeader = tmplNone
 	}
 
-	p.set.Add(template.Must(template.New("Header").Parse(tmplHeader)))
+	p.tmpl = template.Must(p.tmpl.New("Header").Parse(tmplHeader))
 
 	if licenseName != "cc0" {
-		p.set.Add(template.Must(template.New("Copyright").
-			Parse(tmplCopyright)))
+		p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyright))
 	} else {
-		p.set.Add(template.Must(template.New("Copyright").
-			Parse(tmplCopyleft)))
+		p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyleft))
 	}
 }
 
 // Parses the templates for the project.
 func (p *project) parseProject() {
 	if p.cfg.ProjecType == "cmd" {
-		p.set.Add(template.Must(template.New("Cmd").Parse(tmplCmd)))
+		p.tmpl = template.Must(p.tmpl.New("Cmd").Parse(tmplCmd))
 	} else {
-		tPkg := template.Must(template.New("Pkg").Parse(tmplPkg))
-		tTest := template.Must(template.New("Test").Parse(tmplTest))
-		p.set.Add(tPkg)
-		p.set.Add(tTest)
+		p.tmpl = template.Must(p.tmpl.New("Pkg").Parse(tmplPkg))
+		p.tmpl = template.Must(p.tmpl.New("Test").Parse(tmplTest))
 	}
 
-	p.set.Add(template.Must(template.New("Makefile").Parse(tmplMakefile)))
+	p.tmpl = template.Must(p.tmpl.New("Makefile").Parse(tmplMakefile))
 }
