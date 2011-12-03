@@ -110,10 +110,10 @@ func UserConfig(c *Conf) error {
 	pathUserConfig := filepath.Join(home, _USER_CONFIG)
 
 	// To know if the file exist.
-	switch info, err := os.Stat(pathUserConfig); {
+	switch stat, err := os.Stat(pathUserConfig); {
 	case err != nil:
 		return fmt.Errorf("user configuration does not exist: %s", err)
-	case info.IsDir():
+	case stat.Mode()&os.ModeType != 0:
 		return fmt.Errorf("not a file: %s", _USER_CONFIG)
 	}
 
