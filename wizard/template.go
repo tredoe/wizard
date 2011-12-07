@@ -29,14 +29,7 @@ const (
 	tmplCopyright = `Copyright {{.Year}}  The "{{.ProjectName}}" Authors`
 	tmplCopyleft  = `Written in {{.Year}} by the "{{.ProjectName}}" Authors`
 
-	tmplBSD = `{{.Comment}} {{template "Copyright" .}}
-{{.Comment}}
-{{.Comment}} Use of this source code is governed by the {{.FullLicense}}
-{{.Comment}} that can be found in the LICENSE file.
-{{.Comment}}
-{{.Comment}} This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
-{{.Comment}} OR CONDITIONS OF ANY KIND, either express or implied. See the License
-{{.Comment}} for more details.
+	tmplNone = `{{.Comment}} {{template "Copyright" .}}
 `
 
 	tmplApache = `{{.Comment}} {{template "Copyright" .}}
@@ -52,6 +45,16 @@ const (
 {{.Comment}} WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 {{.Comment}} See the License for the specific language governing permissions and
 {{.Comment}} limitations under the License.
+`
+
+	tmplBSD = `{{.Comment}} {{template "Copyright" .}}
+{{.Comment}}
+{{.Comment}} Use of this source code is governed by the {{.FullLicense}}
+{{.Comment}} that can be found in the LICENSE file.
+{{.Comment}}
+{{.Comment}} This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+{{.Comment}} OR CONDITIONS OF ANY KIND, either express or implied. See the License
+{{.Comment}} for more details.
 `
 
 	tmplGNU = `{{.Comment}} {{template "Copyright" .}}
@@ -70,17 +73,24 @@ const (
 {{.Comment}} along with this program.  If not, see <http://www.gnu.org/licenses/>.
 `
 
-	tmplNone = `{{.Comment}} {{template "Copyright" .}}
+	tmplCC0 = `{{.Comment}} {{template "Copyright" .}}
+{{.Comment}}
+{{.Comment}} To the extent possible under law, the author(s) have waived all copyright
+{{.Comment}} and related or neighboring rights to this work to the public domain worldwide.
+{{.Comment}} This software is distributed without any warranty.
+{{.Comment}}
+{{.Comment}} You should have received a copy of the CC0 Public Domain Dedication along
+{{.Comment}} with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 `
 
-	tmplCC0 = `{{.Comment}} {{template "Copyright" .}}
+	tmplUnlicense = `{{.Comment}} {{template "Copyright" .}}
 {{.Comment}}
 {{.Comment}} To the extent possible under law, the author(s) have waived all copyright
 {{.Comment}} and related or neighboring rights to this software to the public domain worldwide.
 {{.Comment}} This software is distributed without any warranty.
 {{.Comment}}
-{{.Comment}} You should have received a copy of the CC0 Public Domain Dedication along
-{{.Comment}} with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+{{.Comment}} You should have received a copy of the Unlicense along with this software.
+{{.Comment}} If not, see <http://unlicense.org/>.
 `
 )
 
@@ -217,13 +227,15 @@ func (p *project) ParseLicense(charComment string, year int) {
 		} else if licenseName == "lgpl" {
 			p.cfg.GNUextra = "Lesser"
 		}
+	case "unlicense":
+		tmplHeader = tmplUnlicense
 	case "none":
 		tmplHeader = tmplNone
 	}
 
 	p.tmpl = template.Must(p.tmpl.New("Header").Parse(tmplHeader))
 
-	if licenseName != "cc0" {
+	if licenseName != "unlicense" && licenseName != "cc0" {
 		p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyright))
 	} else {
 		p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyleft))

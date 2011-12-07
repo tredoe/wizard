@@ -14,7 +14,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/template"
 )
 
@@ -49,25 +48,27 @@ var ListProject = map[string]string{
 
 // Available licenses
 var ListLicense = map[string]string{
-	"Apache": "Apache License, version 2.0",
-	"BSD-2": "BSD 2-Clause License",
-	"BSD-3": "BSD 3-Clause License",
-	"CC0": "Creative Commons CC0, version 1.0 Universal",
-	"GPL": "GNU General Public License, version 3 or later",
-	"LGPL": "GNU Lesser General Public License, version 3 or later",
-	"AGPL": "GNU Affero General Public License, version 3 or later",
-	"none": "Proprietary license",
+	"Apache":    "Apache License, version 2.0",
+	"BSD-2":     "BSD 2-Clause License",
+	"BSD-3":     "BSD 3-Clause License",
+	"CC0":       "Creative Commons CC0, version 1.0 Universal (Not intended for software)",
+	"GPL":       "GNU General Public License, version 3 or later",
+	"LGPL":      "GNU Lesser General Public License, version 3 or later",
+	"AGPL":      "GNU Affero General Public License, version 3 or later",
+	"Unlicense": "Public domain",
+	"none":      "Proprietary license",
 }
 
 var ListLowerLicense = map[string]string{
-	"apache": "Apache",
-	"bsd-2":  "BSD-2",
-	"bsd-3":  "BSD-3",
-	"cc0":    "CC0",
-	"gpl":    "GPL",
-	"lgpl":   "LGPL",
-	"agpl":   "AGPL",
-	"none":   "none",
+	"apache":    "Apache",
+	"bsd-2":     "BSD-2",
+	"bsd-3":     "BSD-3",
+	"cc0":       "CC0",
+	"gpl":       "GPL",
+	"lgpl":      "LGPL",
+	"agpl":      "AGPL",
+	"unlicense": "Unlicense",
+	"none":      "none",
 }
 
 // Version control systems (VCS)
@@ -139,7 +140,7 @@ func (p *project) Create() error {
 		filepath.Join(dirTmpl, "README.md"))
 
 	// The file AUTHORS is for copyright holders.
-	if !strings.HasPrefix(p.cfg.License, "cc0") {
+	if p.cfg.License != "unlicense" && p.cfg.License != "cc0" {
 		p.parseFromFile(filepath.Join(p.cfg.ProjectName, "AUTHORS.md"),
 			filepath.Join(dirTmpl, "AUTHORS.md"))
 	}

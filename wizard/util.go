@@ -63,7 +63,14 @@ func AddLicense(p *project, isNewProject bool) error {
 		if strings.HasPrefix(name, "BSD") {
 			name = strings.TrimRight(name, "-23")
 		}
-		return "LICENSE-"+name+".txt"
+
+		if name == "unlicense" {
+			return "UNLICENSE.txt"
+		}
+		if isNewProject {
+			return "LICENSE.txt"
+		}
+		return "LICENSE-" + name + ".txt"
 	}
 
 	switch licenseLower {
@@ -78,6 +85,7 @@ func AddLicense(p *project, isNewProject bool) error {
 
 		// License LGPL must also add the GPL license text.
 		if licenseLower == "lgpl" {
+			isNewProject = false
 			copyFile(filepath.Join(dirProject, filename("GPL")),
 				filepath.Join(dirData, "GPL.txt"), _PERM_FILE)
 		}

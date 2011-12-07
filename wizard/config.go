@@ -59,7 +59,7 @@ func ExtraConfig(cfg *Conf) error {
 	if cfg.License != "none" {
 		cfg.FullLicense = ListLicense[ListLowerLicense[cfg.License]]
 	}
-	if cfg.License != "cc0" {
+	if cfg.License != "unlicense" && cfg.License != "cc0" {
 		cfg.HasCopyright = true
 	}
 	if cfg.ProjecType == "cgo" {
