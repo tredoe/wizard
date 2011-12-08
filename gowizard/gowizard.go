@@ -21,28 +21,35 @@ import (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `
-Usage: gowizard -i
+	fmt.Fprintf(os.Stderr, `Tool to create skeleton of Go projects
+Usage: gowizard -i [-cfg | -add]
 
-	+ -add-config -author -email -license -vcs [-org-name]
-	+ -add-license
-	+ -project-type -project-name -license -author -email -vcs
-	  [-package-name -org -org-name]
+ * Configuration: -cfg -author -email -license -vcs [-org]
+ * Project: -type -project -license -author -email -vcs [-org -program]
+ * Program: -add -type -program -license
 
 `)
 	flag.PrintDefaults()
-	os.Exit(ERROR)
+	os.Exit(2)
 }
 
 func main() {
+	fatalf := func(format string, a ...interface{}) {
+		fmt.Fprintf(os.Stderr, "gowizard: "+format+"\n", a...)
+		os.Exit(1)
+	}
+
 	cfg, err := initConfig()
 	if err != nil {
-		fatalf(err.Error())
+		fatalf("%s", err)
+	}
+	if cfg == nil { // flag "-cfg"
+		os.Exit(0)
 	}
 
 	p, err := wizard.NewProject(cfg)
 	if err != nil {
-		fatalf(err.Error())
+		fatalf("%s", err)
 	}
 
 	p.Create()
@@ -51,41 +58,40 @@ func main() {
 // * * *
 
 // Loads configuration from flags and user configuration.
+// If returns "Conf" like nil when it is used the flag "cfg".
 func initConfig() (*wizard.Conf, error) {
-	fProjecType := flag.String("project-type", "", "The project type.")
-	fProjectName := flag.String("project-name", "", "The name of the project.")
-	fPackageName := flag.String("package-name", "", "The name of the package.")
-	fLicense := flag.String("license", "", "The license covering the package.")
-	fAuthor := flag.String("author", "", "The author's name.")
-	fEmail := flag.String("email", "", "The author's e-mail.")
-	fVCS := flag.String("vcs", "", "Version control system.")
-	fOrgName := flag.String("org-name", "", "The organization's name.")
-	fIsForOrg := flag.Bool("org", false, "Does an organization is the copyright holder?")
+	var (
+		fType    = flag.String("type", "", "The type of project.")
+		fProject = flag.String("project", "", "The name of the project.")
+		fProgram = flag.String("program", "", "The name of the program.")
+		fLicense = flag.String("license", "", "The license covering the program.")
+		fAuthor  = flag.String("author", "", "The author's name.")
+		fEmail   = flag.String("email", "", "The author's e-mail.")
+		fVCS     = flag.String("vcs", "", "Version control system.")
+		fOrg     = flag.String("org", "", "The organization holder of the copyright.")
 
-	// === Generic flags
-	fAddLicense := flag.String("add-license", "", "Add a license file.")
-	fAddConfig := flag.Bool("add-config", false, "Add the user configuration file.")
-	fInteractive := flag.Bool("i", false, "Interactive mode.")
+		fAdd         = flag.Bool("add", false, "Add a program.")
+		fConfig      = flag.Bool("cfg", false, "Add the user configuration file.")
+		fInteractive = flag.Bool("i", false, "Interactive mode.")
 
-	fListLicense := flag.Bool("ll", false,
-		"Show the list of licenses (for flags \"license\" and \"add-license\").")
-	fListProject := flag.Bool("lp", false,
-		"Show the list of project types (for flag \"project-type\").")
-	fListVCS := flag.Bool("lv", false,
-		"Show the list of version control systems (for flag \"vcs\").")
+		// Listing
+		fListType    = flag.Bool("lt", false, "Show the list of project types (for flag \"type\").")
+		fListLicense = flag.Bool("ll", false, "Show the list of licenses (for flag \"license\").")
+		fListVCS     = flag.Bool("lv", false, "Show the list of version control systems (for flag \"vcs\").")
+	)
 
 	// === Parse the flags
 	flag.Usage = usage
 	flag.Parse()
 
-	if len(os.Args) == 1 {
+	if flag.NFlag() == 0 || (*fAdd && *fConfig) {
 		usage()
 	}
 
-	// === Options
-	if *fListProject {
+	// === Listing
+	if *fListType {
 		fmt.Println("  = Project types\n")
-		for k, v := range wizard.ListProject {
+		for k, v := range wizard.ListType {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
@@ -101,137 +107,124 @@ func initConfig() (*wizard.Conf, error) {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
+
+	if *fListType || *fListLicense || *fListVCS {
+		os.Exit(0)
+	}
 	// * * *
 
-	// Exit if it is not on interactive way
-	if !*fInteractive && (*fListProject || *fListLicense || *fListVCS) {
-		os.Exit(0)
-	}
-
 	cfg := &wizard.Conf{
-		ProjecType:  *fProjecType,
-		ProjectName: *fProjectName,
-		PackageName: *fPackageName,
-		License:     *fLicense,
-		Author:      *fAuthor,
-		Email:       *fEmail,
-		VCS:         *fVCS,
-		OrgName:     *fOrgName,
-		IsForOrg:    *fIsForOrg,
+		Type:    *fType,
+		Project: *fProject,
+		Program: *fProgram,
+		License: *fLicense,
+		Author:  *fAuthor,
+		Email:   *fEmail,
+		VCS:     *fVCS,
+		Org:     *fOrg,
+
+		IsNewProject: !*fAdd,
 	}
 
-	// Add configuration.
-	if *fAddConfig {
-		wizard.AddConfig(cfg)
-		os.Exit(0)
-	}
-
-	// New license for existent project.
-	if *fAddLicense != "" {
-		cfg.License = *fAddLicense
-
-		// The project name is the name of the actual directory.
-		wd, err := os.Getwd()
-		if err != nil {
-			fatalf(err.Error())
-		}
-		cfg.ProjectName = filepath.Base(wd)
-
-		// Get year of project's creation
-		year, err := wizard.ProjectYear("README.md")
-		if err != nil {
-			fatalf(err.Error())
-		}
-
-		project, err := wizard.NewProject(cfg)
-		if err != nil {
-			fatalf(err.Error())
-		}
-		project.ParseLicense(wizard.CHAR_COMMENT, year)
-
-		if err = wizard.AddLicense(project, false); err != nil {
-			os.Exit(ERROR)
-		}
-		os.Exit(0)
-	}
-
-	// Get configuration per user
-	err := wizard.UserConfig(cfg)
-	if err != nil {
+	// Get configuration per user, if any
+	if err := cfg.UserConfig(); err != nil {
 		return nil, err
 	}
 
-	if *fInteractive {
-		if err = interactive(cfg); err != nil {
+	// New program for existent project.
+	if *fAdd {
+		cfg.Program = *fProgram
+
+		if *fLicense != "" {
+			cfg.License = *fLicense
+		}
+
+		// The project's name is the name of the actual directory.
+		wd, err := os.Getwd()
+		if err != nil {
 			return nil, err
 		}
-	} else {
-		wizard.SetNames(cfg)
+		cfg.Project = filepath.Base(wd)
+
+		// Get year of project's creation
+		cfg.Year, err = wizard.ProjectYear("README.md")
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	if err = wizard.ExtraConfig(cfg); err != nil {
+	// Interactive mode
+	if *fInteractive {
+		if err := interactive(cfg, *fConfig, *fAdd); err != nil {
+			return nil, err
+		}
+	} else if !*fConfig {
+		cfg.SetNames(*fAdd)
+	}
+
+	// Add configuration.
+	if *fConfig {
+		cfg.AddConfig()
+		return nil, nil
+	}
+
+	if err := cfg.ExtraConfig(); err != nil {
 		return nil, err
 	}
 	return cfg, nil
 }
 
 // Interactive mode.
-func interactive(c *wizard.Conf) error {
+func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
+	var sFlags []string
+	var msg string
 	var err error
 
-	// Sorted flags
-	interactiveFlags := []string{
-		"project-type",
-		"project-name",
-		"package-name",
-		"org",
-		"org-name",
-		"author",
-		"email",
-		"license",
-		"vcs",
+	// === Sorted flags
+	if addConfig {
+		msg = "New configuration"
+		sFlags = []string{"author", "email", "license", "vcs", "org"}
+	} else if addProgram {
+		msg = "Add program"
+		sFlags = []string{"type", "program", "license"}
+	} else {
+		msg = "New project"
+		sFlags = []string{
+			"type",
+			"project",
+			"program",
+			"org",
+			"author",
+			"email",
+			"license",
+			"vcs",
+		}
 	}
 
 	q := quest.NewQuestionByDefault()
 	defer q.Close()
 	q.ExitAtCtrlC(0)
 
-	fmt.Println("\n  = Go Wizard\n")
+	fmt.Printf("\n  = Go Wizard :: %s\n\n", msg)
 
-	for _, k := range interactiveFlags {
+	for _, k := range sFlags {
 		f := flag.Lookup(k)
 		prompt := q.NewPrompt(strings.TrimRight(f.Usage, "."))
 
 		switch k {
-		case "project-type":
-			c.ProjecType, err = prompt.ChoiceString(keys(wizard.ListProject))
-		case "project-name":
-			c.ProjectName, err = prompt.Mod(quest.REQUIRED).ReadString()
-		case "package-name":
-			wizard.SetNames(c)
-			c.PackageName, err = prompt.ByDefault(c.PackageName).ReadString()
+		case "type":
+			c.Type, err = prompt.ChoiceString(keys(wizard.ListType))
+		case "project":
+			c.Project, err = prompt.Mod(quest.REQUIRED).ReadString()
+		case "program":
+			c.SetNames(addProgram)
+			c.Program, err = prompt.ByDefault(c.Program).Mod(quest.REQUIRED).ReadString()
 		case "org":
-			c.IsForOrg, err = prompt.ByDefault(c.IsForOrg).ReadBool()
-		case "org-name":
-			if c.IsForOrg {
-				if c.OrgName != "" {
-					c.OrgName, err = prompt.ByDefault(c.OrgName).ReadString()
-				} else {
-					c.OrgName, err = prompt.Mod(quest.REQUIRED).ReadString()
-				}
-			}
+			c.Org, err = prompt.ByDefault(c.Org).ReadString()
 		case "author":
-			if c.Author != "" {
-				c.Author, err = prompt.ByDefault(c.Author).ReadString()
-			} else {
-				c.Author, err = prompt.Mod(quest.REQUIRED).ReadString()
-			}
+			c.Author, err = prompt.ByDefault(c.Author).Mod(quest.REQUIRED).ReadString()
 		case "email":
-			if c.Email != "" {
-				c.Email, err = prompt.ByDefault(c.Email).ReadEmail()
-			} else {
-				c.Email, err = prompt.Mod(quest.REQUIRED).ReadEmail()
-			}
+			c.Email, err = prompt.ByDefault(c.Email).Mod(quest.REQUIRED).ReadEmail()
 		case "license":
 			if c.License != "" {
 				if err = wizard.CheckLicense(c.License); err != nil {
@@ -273,14 +266,4 @@ func keys(m map[string]string) []string {
 		i++
 	}
 	return a
-}
-
-//
-// === Error
-
-const ERROR = 1
-
-func fatalf(format string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, "gowizard: "+format+"\n", a...)
-	os.Exit(ERROR)
 }

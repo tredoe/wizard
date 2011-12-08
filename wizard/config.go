@@ -16,21 +16,21 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"text/template"
 
 	"github.com/kless/goconfig/config"
 )
 
 // Represents the configuration of the project.
 type Conf struct {
-	ProjecType  string
-	ProjectName string
-	PackageName string
-	License     string
-	Author      string
-	Email       string
-	VCS         string
-	OrgName     string // the author develops the program for an organization
-	IsForOrg    bool
+	Type    string
+	Project string
+	Program string
+	License string
+	Author  string
+	Email   string
+	VCS     string
+	Org     string // the author develops the program for an organization
 
 	// To pass to templates
 	Comment       string
@@ -38,23 +38,26 @@ type Conf struct {
 	GNUextra      string
 	ProjectHeader string
 	HasCopyright  bool
-	IsCmdProject  bool
-	IsCgoProject  bool
+	IsCmd         bool
+	IsCgo         bool
 	Year          int
+
+	// Is a new project? If it is not then it is created a new program
+	IsNewProject bool
 }
 
 // TODO: to be used by a GUI, in the first there is to get a new type Conf.
 // Then, it is passed to ExtraConfig().
 
 // Checks values in configuration and add extra fields to pass to templates.
-func ExtraConfig(cfg *Conf) error {
+func (cfg *Conf) ExtraConfig() error {
 	// === Checking
-	if err := checkAtCreate(cfg); err != nil {
+	if err := cfg.check(); err != nil {
 		return err
 	}
 
 	// === Extra for templates
-	cfg.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(cfg.ProjectName))
+	cfg.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(cfg.Project))
 
 	if cfg.License != "none" {
 		cfg.FullLicense = ListLicense[ListLowerLicense[cfg.License]]
@@ -62,46 +65,74 @@ func ExtraConfig(cfg *Conf) error {
 	if cfg.License != "unlicense" && cfg.License != "cc0" {
 		cfg.HasCopyright = true
 	}
-	if cfg.ProjecType == "cgo" {
-		cfg.IsCgoProject = true
+	if cfg.Type == "cgo" {
+		cfg.IsCgo = true
 	}
 	// For the Makefile
-	if cfg.ProjecType == "cmd" {
-		cfg.IsCmdProject = true
+	if cfg.Type == "cmd" {
+		cfg.IsCmd = true
 	}
 
 	return nil
 }
 
 // Sets names for both project and package.
-func SetNames(c *Conf) {
+func (c *Conf) SetNames(addProgram bool) {
+	if addProgram {
+		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
+		return
+	}
+
 	// === To remove them from the project name, if any.
 	reStart1 := regexp.MustCompile(`^go-`)
 	reStart2 := regexp.MustCompile(`^go`)
 	reEnd := regexp.MustCompile(`-go$`)
 
-	c.ProjectName = strings.TrimSpace(c.ProjectName)
+	c.Project = strings.TrimSpace(c.Project)
 
 	// A program is usually named as the project name.
 	// It is created removing prefix or suffix related to "go".
-	if c.PackageName == "" {
-		c.PackageName = strings.ToLower(c.ProjectName)
+	if c.Program == "" {
+		c.Program = strings.ToLower(c.Project)
 
-		if reStart1.MatchString(c.PackageName) {
-			c.PackageName = reStart1.ReplaceAllString(c.PackageName, "")
-		} else if reStart2.MatchString(c.PackageName) {
-			c.PackageName = reStart2.ReplaceAllString(c.PackageName, "")
-		} else if reEnd.MatchString(c.PackageName) {
-			c.PackageName = reEnd.ReplaceAllString(c.PackageName, "")
+		if reStart1.MatchString(c.Program) {
+			c.Program = reStart1.ReplaceAllString(c.Program, "")
+		} else if reStart2.MatchString(c.Program) {
+			c.Program = reStart2.ReplaceAllString(c.Program, "")
+		} else if reEnd.MatchString(c.Program) {
+			c.Program = reEnd.ReplaceAllString(c.Program, "")
 		}
 
 	} else {
-		c.PackageName = strings.ToLower(strings.TrimSpace(c.PackageName))
+		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
 	}
 }
 
+//
+// === User configuration
+
+// Creates the user configuration file.
+func (cfg *Conf) AddConfig() error {
+	tmpl := template.Must(template.New("Config").Parse(tmplUserConfig))
+
+	envHome := os.Getenv("HOME")
+	if envHome == "" {
+		return errors.New("could not add user configuration file because $HOME is not set")
+	}
+
+	file, err := createFile(filepath.Join(envHome, _USER_CONFIG))
+	if err != nil {
+		return err
+	}
+
+	if err := tmpl.Execute(file, cfg); err != nil {
+		return fmt.Errorf("execution failed: %s", err)
+	}
+	return nil
+}
+
 // Loads configuration per user, if any.
-func UserConfig(c *Conf) error {
+func (c *Conf) UserConfig() error {
 	home, err := os.Getenverror("HOME")
 	if err != nil {
 		return fmt.Errorf("no variable HOME: %s", err)
@@ -111,10 +142,10 @@ func UserConfig(c *Conf) error {
 
 	// To know if the file exist.
 	switch stat, err := os.Stat(pathUserConfig); {
-	case err != nil:
-		return fmt.Errorf("user configuration does not exist: %s", err)
+	case err != nil: // not exist
+		return nil
 	case stat.Mode()&os.ModeType != 0:
-		return fmt.Errorf("not a file: %s", _USER_CONFIG)
+		return fmt.Errorf("expected file: %s", _USER_CONFIG)
 	}
 
 	cfg, err := config.ReadDefault(pathUserConfig)
@@ -126,11 +157,11 @@ func UserConfig(c *Conf) error {
 	var errKeys []string
 	ok := true
 
-	if c.OrgName == "" {
-		c.OrgName, err = cfg.String("DEFAULT", "org-name")
+	if c.Org == "" {
+		c.Org, err = cfg.String("DEFAULT", "org")
 		if err != nil {
 			ok = false
-			errKeys = append(errKeys, "org-name")
+			errKeys = append(errKeys, "org")
 		}
 	}
 	if c.Author == "" {
@@ -173,26 +204,31 @@ func UserConfig(c *Conf) error {
 // === Checking
 
 // Checks at creating project.
-func checkAtCreate(c *Conf) error {
+func (c *Conf) check() error {
 	ok := true
 
 	// === Necessary fields
-	if c.ProjecType == "" || c.ProjectName == "" || c.License == "" ||
-		c.Author == "" || c.VCS == "" {
-		return errors.New("missing required fields to create project")
+	if c.Type == "" || c.Program == "" || c.License == "" {
+		return errors.New("missing required fields")
+	}
+
+	if c.IsNewProject {
+		if c.Author == "" || c.VCS == "" {
+			return errors.New("missing required fields to create project")
+		}
+
+		// === VCS
+		c.VCS = strings.ToLower(c.VCS)
+		if _, present := ListVCS[c.VCS]; !present {
+			fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", c.VCS)
+			ok = false
+		}
 	}
 
 	// === Project type
-	c.ProjecType = strings.ToLower(c.ProjecType)
-	if _, present := ListProject[c.ProjecType]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", c.ProjecType)
-		ok = false
-	}
-
-	// === VCS
-	c.VCS = strings.ToLower(c.VCS)
-	if _, present := ListVCS[c.VCS]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", c.VCS)
+	c.Type = strings.ToLower(c.Type)
+	if _, present := ListType[c.Type]; !present {
+		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", c.Type)
 		ok = false
 	}
 

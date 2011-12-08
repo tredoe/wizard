@@ -20,7 +20,17 @@
 
 + Updated Go-Inline's API.
 
-+ Add copyright notice to templates of BSD licenses.
++ Added copyright notice to templates of BSD licenses.
+
++ Added license for the public domain.
+
++ Added flag "-add" to add a program to the actual project.
+
++ Work with multiple licenses.
+
++ Renamed flags to simplify its use.
+
++ The interactive mode can add programs and create the user configuration file.
 
 
 ### 2011-09-18  v0.9.9

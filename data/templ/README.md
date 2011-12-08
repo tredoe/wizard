@@ -1,4 +1,4 @@
-{{.ProjectName}}
+{{.Project}}
 {{.ProjectHeader}}
 
 << DESCRIBE PROJECT >>
@@ -12,7 +12,7 @@
 ## Configuration
 
 << INSTRUCTIONS TO CONFIGURE THE PROGRAM, IF ANY >>
-{{if not .IsCmdProject}}
+{{if not .IsCmd}}
 To run the tests:
 
 	cd $GOROOT/src/pkg/<< IMPORT PATH >> &&

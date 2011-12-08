@@ -40,7 +40,7 @@ var configVCS = map[string]string{
 }*/
 
 // Project types
-var ListProject = map[string]string{
+var ListType = map[string]string{
 	"cmd": "Command line program",
 	"pkg": "Package",
 	"cgo": "Package that calls C code",
@@ -92,7 +92,6 @@ type project struct {
 }
 
 // Creates information for the project.
-// "isFirstRun" indicates if it is the first time in be called.
 func NewProject(cfg *Conf) (*project, error) {
 	var err error
 	p := new(project)
@@ -101,7 +100,12 @@ func NewProject(cfg *Conf) (*project, error) {
 		return nil, err
 	}
 
-	p.dirProject = filepath.Join(cfg.ProjectName, cfg.PackageName)
+	if cfg.IsNewProject {
+		p.dirProject = filepath.Join(cfg.Project, cfg.Program)
+	} else {
+		p.dirProject = cfg.Program
+	}
+
 	p.cfg = cfg
 	p.tmpl = new(template.Template)
 
@@ -114,17 +118,20 @@ func (p *project) Create() error {
 		return fmt.Errorf("directory error: %s", err)
 	}
 
-	p.ParseLicense(CHAR_COMMENT, 0)
+	p.parseLicense(CHAR_COMMENT)
 	p.parseProject()
 
+	// === License file
+	p.addLicense()
+
 	// === Render project files
-	if p.cfg.ProjecType != "cmd" {
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.PackageName)+".go",
+	if p.cfg.Type != "cmd" {
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+".go",
 			"Pkg")
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.PackageName)+"_test.go",
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+"_test.go",
 			"Test")
 	} else {
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.PackageName)+".go",
+		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+".go",
 			"Cmd")
 	}
 	p.parseFromVar(filepath.Join(p.dirProject, "Makefile"), "Makefile")
@@ -132,16 +139,20 @@ func (p *project) Create() error {
 	// === Render common files
 	dirTmpl := filepath.Join(p.dirData, "templ") // Base directory of templates
 
-	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "CONTRIBUTORS.md"),
+	p.parseFromFile(filepath.Join(p.cfg.Project, "CONTRIBUTORS.md"),
 		filepath.Join(dirTmpl, "CONTRIBUTORS.md"))
-	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "NEWS.md"),
+	p.parseFromFile(filepath.Join(p.cfg.Project, "NEWS.md"),
 		filepath.Join(dirTmpl, "NEWS.md"))
-	p.parseFromFile(filepath.Join(p.cfg.ProjectName, "README.md"),
+	p.parseFromFile(filepath.Join(p.cfg.Project, "README.md"),
 		filepath.Join(dirTmpl, "README.md"))
+
+	if !p.cfg.IsNewProject {
+		return nil
+	}
 
 	// The file AUTHORS is for copyright holders.
 	if p.cfg.License != "unlicense" && p.cfg.License != "cc0" {
-		p.parseFromFile(filepath.Join(p.cfg.ProjectName, "AUTHORS.md"),
+		p.parseFromFile(filepath.Join(p.cfg.Project, "AUTHORS.md"),
 			filepath.Join(dirTmpl, "AUTHORS.md"))
 	}
 
@@ -156,14 +167,11 @@ func (p *project) Create() error {
 			tmplIgnore = hgIgnoreTop + tmplIgnore
 		}
 
-		if err := ioutil.WriteFile(filepath.Join(p.cfg.ProjectName, ignoreFile),
+		if err := ioutil.WriteFile(filepath.Join(p.cfg.Project, ignoreFile),
 			[]byte(tmplIgnore), _PERM_FILE); err != nil {
 			return fmt.Errorf("write error: %s", err)
 		}
 	}
-
-	// === License file
-	AddLicense(p, true)
 
 	return nil
 }

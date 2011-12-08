@@ -26,8 +26,8 @@ var (
 
 // Copyright and licenses
 const (
-	tmplCopyright = `Copyright {{.Year}}  The "{{.ProjectName}}" Authors`
-	tmplCopyleft  = `Written in {{.Year}} by the "{{.ProjectName}}" Authors`
+	tmplCopyright = `Copyright {{.Year}}  The "{{.Project}}" Authors`
+	tmplCopyleft  = `Written in {{.Year}} by the "{{.Project}}" Authors`
 
 	tmplNone = `{{.Comment}} {{template "Copyright" .}}
 `
@@ -108,8 +108,8 @@ func main() {
 }
 `
 	tmplPkg      = `{{template "Header" .}}
-package {{.PackageName}}
-{{if .IsCgoProject}}
+package {{.Program}}
+{{if .IsCgo}}
 import "C"{{end}}
 import (
 
@@ -118,7 +118,7 @@ import (
 
 `
 	tmplTest     = `{{template "Header" .}}
-package {{.PackageName}}
+package {{.Program}}
 
 import (
 	"testing"
@@ -130,17 +130,17 @@ func Test(t *testing.T) {
 `
 	tmplMakefile = `include $(GOROOT)/src/Make.inc
 
-TARG={{if .IsCmdProject}}{{else}}<< IMPORT PATH >>/{{end}}{{.PackageName}}
+TARG={{if .IsCmd}}{{else}}<< IMPORT PATH >>/{{end}}{{.Program}}
 GOFILES=\
-	{{.PackageName}}.go\
+	{{.Program}}.go\
 
-include $(GOROOT)/src/Make.{{if .IsCmdProject}}cmd{{else}}pkg{{end}}
+include $(GOROOT)/src/Make.{{if .IsCmd}}cmd{{else}}pkg{{end}}
 `
 )
 
 // User configuration
 const tmplUserConfig = `[DEFAULT]
-org-name: {{.OrgName}}
+org: {{.Org}}
 author: {{.Author}}
 email: {{.Email}}
 license: {{.License}}
@@ -199,17 +199,15 @@ func (p *project) parseFromVar(dst string, tmplName string) error {
 
 // Parses the license header.
 // "charComment" is the character used to comment in code files.
-// If "year" is nil then gets the actual year.
-func (p *project) ParseLicense(charComment string, year int) {
+func (p *project) parseLicense(charComment string) {
 	var tmplHeader string
 
 	licenseName := strings.Split(p.cfg.License, "-")[0]
 	p.cfg.Comment = charComment
 
-	if year == 0 {
+	// If "year" is nil then gets the actual year.
+	if p.cfg.Year == 0 {
 		p.cfg.Year = time.Now().Year()
-	} else {
-		p.cfg.Year = year
 	}
 
 	switch licenseName {
@@ -244,7 +242,7 @@ func (p *project) ParseLicense(charComment string, year int) {
 
 // Parses the templates for the project.
 func (p *project) parseProject() {
-	if p.cfg.ProjecType == "cmd" {
+	if p.cfg.Type == "cmd" {
 		p.tmpl = template.Must(p.tmpl.New("Cmd").Parse(tmplCmd))
 	} else {
 		p.tmpl = template.Must(p.tmpl.New("Pkg").Parse(tmplPkg))

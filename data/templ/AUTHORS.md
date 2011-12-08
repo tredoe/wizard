@@ -1,6 +1,6 @@
 ###### Notice
 
-*This is the official list of **{{.ProjectName}}** authors for copyright purposes.*
+*This is the official list of **{{.Project}}** authors for copyright purposes.*
 
 *This file is distinct from the CONTRIBUTORS file. See the latter for an
 explanation.*
@@ -13,5 +13,5 @@ explanation.*
 
 * * *
 
-{{if .IsForOrg}}{{.OrgName}}{{else}}{{.Author}}{{with .Email}} <{{.}}>{{end}}{{end}}
+{{with .Org}}{{.}}{{else}}{{.Author}}{{with .Email}} <{{.}}>{{end}}{{end}}
 

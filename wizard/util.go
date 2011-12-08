@@ -19,75 +19,44 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"text/template"
 )
 
-// Creates the user configuration file.
-func AddConfig(cfg *Conf) error {
-	tmpl := template.Must(template.New("Config").Parse(tmplUserConfig))
-
-	envHome := os.Getenv("HOME")
-	if envHome == "" {
-		return errors.New("could not add user configuration file because $HOME is not set")
-	}
-
-	file, err := createFile(filepath.Join(envHome, _USER_CONFIG))
-	if err != nil {
+// Creates a license file.
+func (p *project) addLicense() error {
+	licenseLower := strings.ToLower(p.cfg.License)
+	if err := CheckLicense(licenseLower); err != nil {
 		return err
 	}
 
-	if err := tmpl.Execute(file, cfg); err != nil {
-		return fmt.Errorf("execution failed: %s", err)
-	}
-	return nil
-}
-
-// Creates a license file.
-func AddLicense(p *project, isNewProject bool) error {
-	licenseLower := p.cfg.License
-	dirProject := p.cfg.ProjectName
-
-	if !isNewProject {
-		licenseLower = strings.ToLower(licenseLower)
-		if err := CheckLicense(licenseLower); err != nil {
-			return err
-		}
-
+	dirProject := p.cfg.Project
+	if !p.cfg.IsNewProject {
 		dirProject = "." // actual directory
 	}
 
 	dirData := filepath.Join(p.dirData, "license")
 	license := ListLowerLicense[licenseLower]
 
-	filename := func(name string) string {
-		if strings.HasPrefix(name, "BSD") {
-			name = strings.TrimRight(name, "-23")
+	licenseDst := func(name string) string {
+		if name == "Unlicense" {
+			name = "UNLICENSE.txt"
+		} else {
+			name = "LICENSE_" + name + ".txt"
 		}
 
-		if name == "unlicense" {
-			return "UNLICENSE.txt"
-		}
-		if isNewProject {
-			return "LICENSE.txt"
-		}
-		return "LICENSE-" + name + ".txt"
+		return filepath.Join(dirProject, name)
 	}
 
 	switch licenseLower {
 	case "none":
 		break
 	case "bsd-2", "bsd-3":
-		p.parseFromFile(filepath.Join(dirProject, filename(license)),
-			filepath.Join(dirData, license+".txt"))
+		p.parseFromFile(licenseDst(license), filepath.Join(dirData, license+".txt"))
 	default:
-		copyFile(filepath.Join(dirProject, filename(license)),
-			filepath.Join(dirData, license+".txt"), _PERM_FILE)
+		copyFile(licenseDst(license), filepath.Join(dirData, license+".txt"))
 
 		// License LGPL must also add the GPL license text.
 		if licenseLower == "lgpl" {
-			isNewProject = false
-			copyFile(filepath.Join(dirProject, filename("GPL")),
-				filepath.Join(dirData, "GPL.txt"), _PERM_FILE)
+			copyFile(licenseDst("GPL"), filepath.Join(dirData, "GPL.txt"))
 		}
 	}
 
@@ -111,7 +80,6 @@ func ProjectYear(filename string) (int, error) {
 		}
 
 		if reCopyright.MatchString(line) || reCopyleft.MatchString(line) {
-			//strYear := strings.Split(line, " ")[1]
 			return strconv.Atoi(strings.Split(line, " ")[1])
 		}
 	}
@@ -121,13 +89,13 @@ func ProjectYear(filename string) (int, error) {
 // * * *
 
 // Copies a file from source to destination.
-func copyFile(destination, source string, perm uint32) error {
+func copyFile(destination, source string) error {
 	src, err := ioutil.ReadFile(source)
 	if err != nil {
 		return fmt.Errorf("copy error reading: %s", err)
 	}
 
-	err = ioutil.WriteFile(destination, src, perm)
+	err = ioutil.WriteFile(destination, src, _PERM_FILE)
 	if err != nil {
 		return fmt.Errorf("copy error writing: %s", err)
 	}

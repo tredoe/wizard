@@ -25,37 +25,29 @@ To only install the library, which could be used by a Go IDE:
 
 ## Configuration
 
-If you want not repeat the same input every time you create a project, then you
-could use an user configuration file in your home directory. It allows set the
-flags *-author*, *-email*, *-license*, and *-vcs*, with a value by default.
+To don't repeat the same every time you create a project, you could use an user
+configuration file in your home directory to have values by default.
 
-To create it, you have to use the flag *-config*, besides of the required flags
-at creating a project.
+	gowizard -i -cfg
 
 
 ## Operating instructions
 
-#### Create
+#### Create project
 
-The required flags to build a new project are *-project-type*, *-project-name*,
-*-license* ,*-author*, *-email* and *-vcs*.
-
-By default, the package name (*-package-name*) is named as the project name but
+By default, the program name (flag *-program*) is named as the project name but
 in lower case, and removing the name "Go" of the prefix and suffix.
 
-The flag *-vcs* indicates the version control system to use, which allows to add
-the appropriate ignore file.
+The way fastest and simple to create it, is using the interactive mode:
 
-The way fastest and simple to use it, is create a configuration file and then
-use the interactive mode:
-
-	gowizard -add-config -author="John Foo" -email="e@mail.com" -license=bsd-2 -vcs=git
 	gowizard -i
 
-To add a license to the actual project:
+#### Add program
+
+To add a program to the actual project:
 
 	cd <project name>
-	gowizard -add-license=gpl
+	gowizard -i -add
 
 #### Suggestions about naming
 
