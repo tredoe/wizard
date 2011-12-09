@@ -39,6 +39,8 @@ func (p *project) addLicense() error {
 	licenseDst := func(name string) string {
 		if name == "Unlicense" {
 			name = "UNLICENSE.txt"
+		} else if p.cfg.IsNewProject {
+			name = "LICENSE.txt"
 		} else {
 			name = "LICENSE_" + name + ".txt"
 		}
@@ -56,6 +58,7 @@ func (p *project) addLicense() error {
 
 		// License LGPL must also add the GPL license text.
 		if licenseLower == "lgpl" {
+			p.cfg.IsNewProject = false
 			copyFile(licenseDst("GPL"), filepath.Join(dirData, "GPL.txt"))
 		}
 	}
