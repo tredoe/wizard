@@ -32,6 +32,8 @@
 
 + The interactive mode can add programs and create the user configuration file.
 
++ Add a patents file when the copyright is holded by a company.
+
 
 ### 2011-09-18  v0.9.9
 

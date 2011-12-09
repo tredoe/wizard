@@ -114,6 +114,8 @@ func NewProject(cfg *Conf) (*project, error) {
 
 // Creates a new project.
 func (p *project) Create() error {
+	dirTmpl := filepath.Join(p.dirData, "templ") // Base directory of templates
+
 	if err := os.MkdirAll(p.dirProject, _PERM_DIRECTORY); err != nil {
 		return fmt.Errorf("directory error: %s", err)
 	}
@@ -125,6 +127,8 @@ func (p *project) Create() error {
 	p.addLicense()
 
 	// === Render project files
+	p.parseFromVar(filepath.Join(p.dirProject, "Makefile"), "Makefile")
+
 	if p.cfg.Type != "cmd" {
 		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+".go",
 			"Pkg")
@@ -134,11 +138,12 @@ func (p *project) Create() error {
 		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+".go",
 			"Cmd")
 	}
-	p.parseFromVar(filepath.Join(p.dirProject, "Makefile"), "Makefile")
+
+	if !p.cfg.IsNewProject {
+		return nil
+	}
 
 	// === Render common files
-	dirTmpl := filepath.Join(p.dirData, "templ") // Base directory of templates
-
 	p.parseFromFile(filepath.Join(p.cfg.Project, "CONTRIBUTORS.md"),
 		filepath.Join(dirTmpl, "CONTRIBUTORS.md"))
 	p.parseFromFile(filepath.Join(p.cfg.Project, "NEWS.md"),
@@ -146,14 +151,16 @@ func (p *project) Create() error {
 	p.parseFromFile(filepath.Join(p.cfg.Project, "README.md"),
 		filepath.Join(dirTmpl, "README.md"))
 
-	if !p.cfg.IsNewProject {
-		return nil
-	}
-
 	// The file AUTHORS is for copyright holders.
 	if p.cfg.License != "unlicense" && p.cfg.License != "cc0" {
 		p.parseFromFile(filepath.Join(p.cfg.Project, "AUTHORS.md"),
 			filepath.Join(dirTmpl, "AUTHORS.md"))
+	}
+
+	// Render patents file when it is a company
+	if p.cfg.Org != "" {
+		p.parseFromFile(filepath.Join(p.cfg.Project, "PATENTS.txt"),
+			filepath.Join(dirTmpl, "PATENTS.txt"))
 	}
 
 	// === Add file related to VCS
