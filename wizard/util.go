@@ -81,7 +81,11 @@ func ProjectYear(filename string) (int, error) {
 		}
 
 		if reCopyright.MatchString(line) || reCopyleft.MatchString(line) {
-			return strconv.Atoi(strings.Split(line, " ")[1])
+			for _,v := range strings.Split(line, " ") {
+				if reYear.MatchString(v) {
+					return strconv.Atoi(v)
+				}
+			}
 		}
 	}
 	panic("unreached")

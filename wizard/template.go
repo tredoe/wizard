@@ -22,6 +22,7 @@ import (
 var (
 	reCopyright = regexp.MustCompile(`(Copyright)[ ]+[0-9]{4}[ ].*Authors`)
 	reCopyleft  = regexp.MustCompile(`(Written in)[ ]+[0-9]{4}[ ].*Authors`)
+	reYear      = regexp.MustCompile(`[0-9]{4}`)
 )
 
 // Copyright and licenses

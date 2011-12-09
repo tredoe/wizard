@@ -157,7 +157,7 @@ func (p *project) Create() error {
 			filepath.Join(dirTmpl, "AUTHORS.md"))
 	}
 
-	// Render patents file when it is a company
+	// Add the patents file when it is a company.
 	if p.cfg.Org != "" {
 		p.parseFromFile(filepath.Join(p.cfg.Project, "PATENTS.txt"),
 			filepath.Join(dirTmpl, "PATENTS.txt"))
