@@ -20,6 +20,8 @@ import (
 	"github.com/kless/GoWizard/wizard"
 )
 
+const README = "README.md" // to get the year of creation
+
 func usage() {
 	fmt.Fprintf(os.Stderr, `Tool to create skeleton of Go projects
 Usage: gowizard -i [-cfg | -add]
@@ -126,9 +128,11 @@ func initConfig() (*wizard.Conf, error) {
 		IsNewProject: !*fAdd,
 	}
 
-	// Get configuration per user, if any
-	if err := cfg.UserConfig(); err != nil {
-		return nil, err
+	// Get configuration per user, if any.
+	if !*fConfig {
+		if err := cfg.UserConfig(); err != nil {
+			return nil, err
+		}
 	}
 
 	// New program for existent project.
@@ -146,11 +150,16 @@ func initConfig() (*wizard.Conf, error) {
 		}
 		cfg.Project = filepath.Base(wd)
 
-		// Get year of project's creation
-		cfg.Year, err = wizard.ProjectYear("README.md")
+		// Get year of project's creation.
+		cfg.Year, err = wizard.ProjectYear(README)
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	// Check flags
+	if err := cfg.Checking(*fInteractive, *fConfig, *fAdd); err != nil {
+		return nil, err
 	}
 
 	// Interactive mode
@@ -158,8 +167,6 @@ func initConfig() (*wizard.Conf, error) {
 		if err := interactive(cfg, *fConfig, *fAdd); err != nil {
 			return nil, err
 		}
-	} else if !*fConfig {
-		cfg.SetNames(*fAdd)
 	}
 
 	// Add configuration.
@@ -168,9 +175,7 @@ func initConfig() (*wizard.Conf, error) {
 		return nil, nil
 	}
 
-	if err := cfg.ExtraConfig(); err != nil {
-		return nil, err
-	}
+	cfg.AddTemplateData()
 	return cfg, nil
 }
 
@@ -213,9 +218,9 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 		switch k {
 		case "type":
-			c.Type, err = prompt.ChoiceString(keys(wizard.ListType))
+			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(keys(wizard.ListType))
 		case "project":
-			c.Project, err = prompt.Mod(quest.REQUIRED).ReadString()
+			c.Project, err = prompt.ByDefault(c.Project).Mod(quest.REQUIRED).ReadString()
 		case "program":
 			c.SetNames(addProgram)
 			c.Program, err = prompt.ByDefault(c.Program).Mod(quest.REQUIRED).ReadString()
@@ -226,22 +231,12 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 		case "email":
 			c.Email, err = prompt.ByDefault(c.Email).Mod(quest.REQUIRED).ReadEmail()
 		case "license":
-			if c.License != "" {
-				if err = wizard.CheckLicense(c.License); err != nil {
-					break
-				}
-
-				c.License, err = prompt.ByDefault(wizard.ListLowerLicense[c.License]).
-					ChoiceString(keys(wizard.ListLicense))
-			} else {
-				c.License, err = prompt.ChoiceString(keys(wizard.ListLicense))
-			}
+			// It is got in upper case
+			c.License, err = prompt.ByDefault(wizard.ListLowerLicense[c.License]).
+				ChoiceString(keys(wizard.ListLicense))
+			c.License = strings.ToLower(c.License)
 		case "vcs":
-			if c.VCS != "" {
-				c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(keys(wizard.ListVCS))
-			} else {
-				c.VCS, err = prompt.ChoiceString(keys(wizard.ListVCS))
-			}
+			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(keys(wizard.ListVCS))
 		}
 
 		if err != nil {

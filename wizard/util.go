@@ -23,18 +23,13 @@ import (
 
 // Creates a license file.
 func (p *project) addLicense() error {
-	licenseLower := strings.ToLower(p.cfg.License)
-	if err := CheckLicense(licenseLower); err != nil {
-		return err
-	}
-
 	dirProject := p.cfg.Project
 	if !p.cfg.IsNewProject {
 		dirProject = "." // actual directory
 	}
 
 	dirData := filepath.Join(p.dirData, "license")
-	license := ListLowerLicense[licenseLower]
+	license := ListLowerLicense[p.cfg.License]
 
 	licenseDst := func(name string) string {
 		if name == "Unlicense" {
@@ -48,7 +43,7 @@ func (p *project) addLicense() error {
 		return filepath.Join(dirProject, name)
 	}
 
-	switch licenseLower {
+	switch p.cfg.License {
 	case "none":
 		break
 	case "bsd-2", "bsd-3":
@@ -56,10 +51,13 @@ func (p *project) addLicense() error {
 	default:
 		copyFile(licenseDst(license), filepath.Join(dirData, license+".txt"))
 
-		// License LGPL must also add the GPL license text.
-		if licenseLower == "lgpl" {
+		// The license LGPL must also add the GPL license text.
+		if p.cfg.License == "lgpl" {
+			tmp := p.cfg.IsNewProject
+
 			p.cfg.IsNewProject = false
 			copyFile(licenseDst("GPL"), filepath.Join(dirData, "GPL.txt"))
+			p.cfg.IsNewProject = tmp
 		}
 	}
 

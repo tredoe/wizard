@@ -49,31 +49,23 @@ type Conf struct {
 // TODO: to be used by a GUI, in the first there is to get a new type Conf.
 // Then, it is passed to ExtraConfig().
 
-// Checks values in configuration and add extra fields to pass to templates.
-func (cfg *Conf) ExtraConfig() error {
-	// === Checking
-	if err := cfg.check(); err != nil {
-		return err
-	}
+// Adds extra fields to pass to templates.
+func (c *Conf) AddTemplateData() {
+	c.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(c.Project))
 
-	// === Extra for templates
-	cfg.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(cfg.Project))
-
-	if cfg.License != "none" {
-		cfg.FullLicense = ListLicense[ListLowerLicense[cfg.License]]
+	if c.License != "none" {
+		c.FullLicense = ListLicense[ListLowerLicense[c.License]]
 	}
-	if cfg.License != "unlicense" && cfg.License != "cc0" {
-		cfg.HasCopyright = true
+	if c.License != "unlicense" && c.License != "cc0" {
+		c.HasCopyright = true
 	}
-	if cfg.Type == "cgo" {
-		cfg.IsCgo = true
+	if c.Type == "cgo" {
+		c.IsCgo = true
 	}
 	// For the Makefile
-	if cfg.Type == "cmd" {
-		cfg.IsCmd = true
+	if c.Type == "cmd" {
+		c.IsCmd = true
 	}
-
-	return nil
 }
 
 // Sets names for both project and package.
@@ -203,53 +195,60 @@ func (c *Conf) UserConfig() error {
 //
 // === Checking
 
-// Checks at creating project.
-func (c *Conf) check() error {
-	ok := true
+// Checks values in the configuration.
+func (c *Conf) Checking(interactive, addConfig, addProgram bool) error {
+	var required []string
 
-	// === Necessary fields
-	if c.Type == "" || c.Program == "" || c.License == "" {
-		return errors.New("missing required fields")
-	}
-
-	if c.IsNewProject {
-		if c.Author == "" || c.VCS == "" {
-			return errors.New("missing required fields to create project")
+	if !interactive {
+		if !addConfig {
+			c.SetNames(addProgram)
 		}
 
-		// === VCS
+		// === Necessary fields
+		if addConfig {
+			required = []string{c.Author, c.Email, c.License, c.VCS}
+		} else if addProgram {
+			required = []string{c.Type, c.Program, c.License}
+		} else {
+			required = []string{c.Type, c.Project, c.Program, c.License, c.Author,
+				c.Email, c.VCS}
+		}
+
+		for _, v := range required {
+			if v == "" {
+				return errors.New("missing required field")
+			}
+		}
+	}
+
+	// === Maps
+
+	// Project type
+	if c.Type != "" {
+		c.Type = strings.ToLower(c.Type)
+
+		if _, ok := ListType[c.Type]; !ok {
+			return fmt.Errorf("unavailable project type: %q", c.Type)
+		}
+	}
+
+	// License
+	if c.License != "" {
+		c.License = strings.ToLower(c.License)
+
+		if _, ok := ListLowerLicense[c.License]; !ok {
+			return fmt.Errorf("unavailable license: %q", c.License)
+		}
+	}
+
+	// VCS
+	if c.VCS != "" {
 		c.VCS = strings.ToLower(c.VCS)
-		if _, present := ListVCS[c.VCS]; !present {
-			fmt.Fprintf(os.Stderr, "unavailable version control system: %q\n", c.VCS)
-			ok = false
+
+		if _, ok := ListVCS[c.VCS]; !ok {
+			return fmt.Errorf("unavailable VCS: %q", c.VCS)
 		}
 	}
 
-	// === Project type
-	c.Type = strings.ToLower(c.Type)
-	if _, present := ListType[c.Type]; !present {
-		fmt.Fprintf(os.Stderr, "unavailable project type: %q\n", c.Type)
-		ok = false
-	}
-
-	// === License
-	c.License = strings.ToLower(c.License)
-
-	// * * *
-
-	if !ok {
-		return errors.New("required field")
-	}
-	if err := CheckLicense(c.License); err != nil {
-		return err
-	}
-	return nil
-}
-
-// Checks license.
-func CheckLicense(name string) error {
-	if _, ok := ListLowerLicense[name]; !ok {
-		return fmt.Errorf("unavailable license: %s", name)
-	}
 	return nil
 }
