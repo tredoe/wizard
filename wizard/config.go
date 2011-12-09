@@ -38,6 +38,7 @@ type Conf struct {
 	GNUextra      string
 	ProjectHeader string
 	HasCopyright  bool
+	IsUnlicense   bool
 	IsCmd         bool
 	IsCgo         bool
 	Year          int
@@ -56,9 +57,12 @@ func (c *Conf) AddTemplateData() {
 	if c.License != "none" {
 		c.FullLicense = ListLicense[ListLowerLicense[c.License]]
 	}
-	if c.License != "unlicense" && c.License != "cc0" {
+	if c.License == "unlicense" {
+		c.IsUnlicense = true
+	} else if c.License != "cc0" {
 		c.HasCopyright = true
 	}
+
 	if c.Type == "cgo" {
 		c.IsCgo = true
 	}

@@ -28,7 +28,7 @@ To run the tests:
 
 *{{template "Copyright" .}}*. See file {{if .HasCopyright}}AUTHORS and {{end}}CONTRIBUTORS.  
 {{if .FullLicense}}Unless otherwise noted, the source files are distributed under the
-*{{.FullLicense}}* found in the LICENSE file.
+*{{.FullLicense}}* found in the {{if .IsUnlicense}}UN{{end}}LICENSE file.
 {{end}}
 
 * * *

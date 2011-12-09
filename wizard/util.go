@@ -32,7 +32,7 @@ func (p *project) addLicense() error {
 	license := ListLowerLicense[p.cfg.License]
 
 	licenseDst := func(name string) string {
-		if name == "Unlicense" {
+		if p.cfg.IsUnlicense {
 			name = "UNLICENSE.txt"
 		} else if p.cfg.IsNewProject {
 			name = "LICENSE.txt"
