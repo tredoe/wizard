@@ -7,17 +7,17 @@
 ## Installation
 
 	goinstall << DOWNLOAD URL >>
-
-
-## Configuration
-
-<< INSTRUCTIONS TO CONFIGURE THE PROGRAM, IF ANY >>
 {{if not .IsCmd}}
 To run the tests:
 
 	cd $GOROOT/src/pkg/<< IMPORT PATH >> &&
 	gotest -v && make clean && cd -
 {{end}}
+
+## Configuration
+
+<< INSTRUCTIONS TO CONFIGURE THE PROGRAM, IF ANY >>
+
 
 ## Operating instructions
 
@@ -26,11 +26,9 @@ To run the tests:
 
 ## {{if .HasCopyright}}Copyright{{else}}Copyleft{{end}} and licensing
 
-***{{template "Copyright" .}}***  
-See file {{if .HasCopyright}}AUTHORS and {{end}}CONTRIBUTORS.
-{{if .FullLicense}}
-Licensed under **{{.FullLicense}}**.  
-See file LICENSE.
+*{{template "Copyright" .}}*. See file {{if .HasCopyright}}AUTHORS and {{end}}CONTRIBUTORS.  
+{{if .FullLicense}}Unless otherwise noted, the source files are distributed under the
+*{{.FullLicense}}* found in the LICENSE file.
 {{end}}
 
 * * *
