@@ -23,6 +23,8 @@ import (
 
 // Creates a license file.
 func (p *project) addLicense() error {
+	var addPatent bool
+
 	dirProject := p.cfg.Project
 	if !p.cfg.IsNewProject {
 		dirProject = "." // actual directory
@@ -43,22 +45,38 @@ func (p *project) addLicense() error {
 		return filepath.Join(dirProject, name)
 	}
 
-	switch p.cfg.License {
+	switch lic := p.cfg.License; lic {
 	case "none":
 		break
 	case "bsd-2", "bsd-3":
 		p.parseFromFile(licenseDst(license), filepath.Join(dirData, license+".txt"))
+		addPatent = true
 	default:
 		copyFile(licenseDst(license), filepath.Join(dirData, license+".txt"))
 
 		// The license LGPL must also add the GPL license text.
-		if p.cfg.License == "lgpl" {
+		if lic == "lgpl" {
 			tmp := p.cfg.IsNewProject
 
 			p.cfg.IsNewProject = false
 			copyFile(licenseDst("GPL"), filepath.Join(dirData, "GPL.txt"))
 			p.cfg.IsNewProject = tmp
 		}
+
+		if lic == "unlicense" {
+			addPatent = true
+		}
+	}
+
+	if addPatent {
+		// The owner is the organization, else the Authors of the project
+		p.cfg.Owner = p.cfg.Org
+		if p.cfg.Owner == "" {
+			p.cfg.Owner = fmt.Sprintf("%q Authors", p.cfg.Project)
+		}
+
+		p.parseFromFile(filepath.Join(dirProject, "PATENTS.txt"),
+			filepath.Join(dirData, "PATENTS.txt"))
 	}
 
 	return nil
@@ -81,7 +99,7 @@ func ProjectYear(filename string) (int, error) {
 		}
 
 		if reCopyright.MatchString(line) || reCopyleft.MatchString(line) {
-			for _,v := range strings.Split(line, " ") {
+			for _, v := range strings.Split(line, " ") {
 				if reYear.MatchString(v) {
 					return strconv.Atoi(v)
 				}

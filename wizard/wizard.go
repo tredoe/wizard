@@ -157,12 +157,6 @@ func (p *project) Create() error {
 			filepath.Join(dirTmpl, "AUTHORS.md"))
 	}
 
-	// Add the patents file when it is a company.
-	if p.cfg.Org != "" {
-		p.parseFromFile(filepath.Join(p.cfg.Project, "PATENTS.txt"),
-			filepath.Join(dirTmpl, "PATENTS.txt"))
-	}
-
 	// === Add file related to VCS
 	switch p.cfg.VCS {
 	case "other", "none":

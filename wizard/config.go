@@ -37,6 +37,7 @@ type Conf struct {
 	FullLicense   string
 	GNUextra      string
 	ProjectHeader string
+	Owner         string // organization or project's Authors; for patents file
 	HasCopyright  bool
 	IsUnlicense   bool
 	IsCmd         bool
