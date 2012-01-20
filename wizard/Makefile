@@ -8,4 +8,3 @@ GOFILES=\
 	wizard.go\
 
 include $(GOROOT)/src/Make.pkg
-
