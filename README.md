@@ -49,13 +49,29 @@ To add a program to the actual project:
 	cd <project name>
 	gowizard -i -add
 
-#### Suggestions about naming
+#### Suggestion about naming
 
 > Frequently, the name that you use for your package will include the name "Go"
 as a prefix, suffix, or part of its acronym, and you may or may not want this
 to be a part of the actual command or package name in a go source file.
 
 http://code.google.com/p/go-wiki/wiki/PackagePublishing#Subdirectories
+
+#### Suggestion about licenses
+
+> The Apache License 2.0 is the best non-copyleft license that does what a
+copyright license can to mitigate threats from software patents. It's a
+well-established, mature license that users, developers, and distributors alike
+are all comfortable with. You can tell it's important by the way that other free
+software licenses work to cooperate with it: the drafting processes for GPLv3
+and the Mozilla Public License 2.0 named compatibility with the Apache License
+2.0 as a goal from day one. The Apache Software Foundation deserves a lot of
+credit for pushing to do more to tackle software patents in a license, and
+implementing an effective strategy in the Apache License.
+
+http://www.fsf.org/blogs/licensing/new-license-recommendations-guide  
+http://www.gnu.org/licenses/license-recommendations.html  
+http://www.freebsd.org/doc/en/articles/bsdl-gpl/
 
 #### Maintenance
 
