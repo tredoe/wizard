@@ -212,7 +212,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 	}
 
 	q := quest.NewQuestionByDefault()
-	defer q.Close()
+	defer q.Restore()
 	q.ExitAtCtrlC(0)
 
 	fmt.Printf("\n  = Go Wizard :: %s\n\n", msg)

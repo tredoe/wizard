@@ -16,11 +16,11 @@ files got from compiling and linking.
 
 ## Installation
 
-	goinstall github.com/kless/GoWizard/gowizard
+	go get github.com/kless/GoWizard/gowizard
 
 To only install the library, which could be used by a Go IDE:
 
-	goinstall github.com/kless/GoWizard/wizard
+	go get github.com/kless/GoWizard/wizard
 
 
 ## Configuration
