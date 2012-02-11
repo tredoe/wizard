@@ -72,7 +72,6 @@ func (c *Conf) AddTemplateData() {
 	if c.Type == "cgo" {
 		c.IsCgo = true
 	}
-	// For the Makefile
 	if c.Type == "cmd" {
 		c.IsCmd = true
 	}

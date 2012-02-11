@@ -134,14 +134,6 @@ func Test(t *testing.T) {
 
 }
 `
-	tmplMakefile = `include $(GOROOT)/src/Make.inc
-
-TARG={{if .IsCmd}}{{else}}<< IMPORT PATH >>/{{end}}{{.Program}}
-GOFILES=\
-	{{.Program}}.go\
-
-include $(GOROOT)/src/Make.{{if .IsCmd}}cmd{{else}}pkg{{end}}
-`
 )
 
 // User configuration
@@ -254,6 +246,4 @@ func (p *project) parseProject() {
 		p.tmpl = template.Must(p.tmpl.New("Pkg").Parse(tmplPkg))
 		p.tmpl = template.Must(p.tmpl.New("Test").Parse(tmplTest))
 	}
-
-	p.tmpl = template.Must(p.tmpl.New("Makefile").Parse(tmplMakefile))
 }

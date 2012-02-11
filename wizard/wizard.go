@@ -132,8 +132,6 @@ func (p *project) Create() error {
 	p.addLicense()
 
 	// === Render project files
-	p.parseFromVar(filepath.Join(p.dirProject, "Makefile"), "Makefile")
-
 	if p.cfg.Type != "cmd" {
 		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+".go",
 			"Pkg")
