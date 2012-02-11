@@ -34,7 +34,7 @@ const (
 	_USER_CONFIG = ".gowizard"
 
 	// Subdirectory where is installed through "goinstall"
-	_DIR_DATA = "src/pkg/github.com/kless/GoWizard/data"
+	_DIR_DATA = "src/github.com/kless/GoWizard/data"
 )
 
 /*// VCS configuration files to push to a server.

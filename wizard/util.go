@@ -146,23 +146,19 @@ func createFile(dst string) (*os.File, error) {
 
 // Gets the path of the templates directory.
 func dirData() (string, error) {
+	dir := ""
 	goEnv := os.Getenv("GOPATH")
 
-	if goEnv != "" {
-		goto _Found
-	}
-	if goEnv = os.Getenv("GOROOT"); goEnv != "" {
-		goto _Found
-	}
-	if goEnv = os.Getenv("GOROOT_FINAL"); goEnv != "" {
-		goto _Found
-	}
-
-_Found:
 	if goEnv == "" {
-		return "", errors.New("environment variable GOROOT neither" +
-			" GOROOT_FINAL has been set")
+		return "", errors.New("dirData: environment variable GOPATH is not set")
 	}
 
-	return filepath.Join(goEnv, _DIR_DATA), nil
+	for _, v := range strings.Split(goEnv, ":") {
+		dir = filepath.Join(v, _DIR_DATA)
+		if stat, err := os.Stat(dir); err == nil && stat.IsDir() {
+			return dir, nil
+		}
+	}
+
+	return "", errors.New("dirData: templates directory not found")
 }
