@@ -16,6 +16,7 @@ package wizard
 
 import (
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -101,9 +102,14 @@ func NewProject(cfg *Conf) (*project, error) {
 	var err error
 	p := new(project)
 
-	if p.dataDir, err = dataDir(); err != nil {
-		return nil, err
+	// == Gets the path of the templates directory
+	tree, pkg, err := build.FindTree(_DATA_PATH)
+	if err != nil {
+		return nil, fmt.Errorf("NewProject: data directory not found: %s", err)
 	}
+
+	p.dataDir = filepath.Join(tree.SrcDir(), pkg)
+	// ==
 
 	if cfg.IsNewProject {
 		p.projectDir = filepath.Join(cfg.Project, cfg.Program)

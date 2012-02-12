@@ -16,9 +16,7 @@ package wizard
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
-	"go/build"
 	"io"
 	"io/ioutil"
 	"os"
@@ -143,14 +141,4 @@ func createFile(dst string) (*os.File, error) {
 	}
 
 	return file, nil
-}
-
-// Gets the path of the templates directory.
-func dataDir() (string, error) {
-	tree, pkg, err := build.FindTree(_DATA_PATH)
-	if err != nil {
-		return "", errors.New("dataDir: data directory not found")
-	}
-
-	return filepath.Join(tree.SrcDir(), pkg), nil
 }
