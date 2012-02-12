@@ -18,6 +18,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"go/build"
 	"io"
 	"io/ioutil"
 	"os"
@@ -30,12 +31,12 @@ import (
 func (p *project) addLicense() error {
 	var addPatent bool
 
-	dirProject := p.cfg.Project
+	projectDir := p.cfg.Project
 	if !p.cfg.IsNewProject {
-		dirProject = "." // actual directory
+		projectDir = "." // actual directory
 	}
 
-	dirData := filepath.Join(p.dirData, "license")
+	dataDir := filepath.Join(p.dataDir, "license")
 	license := ListLowerLicense[p.cfg.License]
 
 	licenseDst := func(name string) string {
@@ -47,24 +48,24 @@ func (p *project) addLicense() error {
 			name = "LICENSE_" + name + ".txt"
 		}
 
-		return filepath.Join(dirProject, name)
+		return filepath.Join(projectDir, name)
 	}
 
 	switch lic := p.cfg.License; lic {
 	case "none":
 		break
 	case "bsd-2", "bsd-3":
-		p.parseFromFile(licenseDst(license), filepath.Join(dirData, license+".txt"))
+		p.parseFromFile(licenseDst(license), filepath.Join(dataDir, license+".txt"))
 		addPatent = true
 	default:
-		copyFile(licenseDst(license), filepath.Join(dirData, license+".txt"))
+		copyFile(licenseDst(license), filepath.Join(dataDir, license+".txt"))
 
 		// The license LGPL must also add the GPL license text.
 		if lic == "lgpl" {
 			tmp := p.cfg.IsNewProject
 
 			p.cfg.IsNewProject = false
-			copyFile(licenseDst("GPL"), filepath.Join(dirData, "GPL.txt"))
+			copyFile(licenseDst("GPL"), filepath.Join(dataDir, "GPL.txt"))
 			p.cfg.IsNewProject = tmp
 		}
 
@@ -80,8 +81,8 @@ func (p *project) addLicense() error {
 			p.cfg.Owner = fmt.Sprintf("%q Authors", p.cfg.Project)
 		}
 
-		p.parseFromFile(filepath.Join(dirProject, "PATENTS.txt"),
-			filepath.Join(dirData, "PATENTS.txt"))
+		p.parseFromFile(filepath.Join(projectDir, "PATENTS.txt"),
+			filepath.Join(dataDir, "PATENTS.txt"))
 	}
 
 	return nil
@@ -145,20 +146,11 @@ func createFile(dst string) (*os.File, error) {
 }
 
 // Gets the path of the templates directory.
-func dirData() (string, error) {
-	dir := ""
-	goEnv := os.Getenv("GOPATH")
-
-	if goEnv == "" {
-		return "", errors.New("dirData: environment variable GOPATH is not set")
+func dataDir() (string, error) {
+	tree, pkg, err := build.FindTree(_DATA_PATH)
+	if err != nil {
+		return "", errors.New("dataDir: data directory not found")
 	}
 
-	for _, v := range strings.Split(goEnv, ":") {
-		dir = filepath.Join(v, _DIR_DATA)
-		if stat, err := os.Stat(dir); err == nil && stat.IsDir() {
-			return dir, nil
-		}
-	}
-
-	return "", errors.New("dirData: templates directory not found")
+	return filepath.FromSlash(filepath.Join(tree.SrcDir(), pkg)), nil
 }

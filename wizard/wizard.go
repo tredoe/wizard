@@ -33,8 +33,8 @@ const (
 	// Configuration file per user
 	_USER_CONFIG = ".gowizard"
 
-	// Subdirectory where is installed through "goinstall"
-	_DIR_DATA = "src/github.com/kless/GoWizard/data"
+	// Subdirectory where is installed through "go install"
+	_DATA_PATH = "github.com/kless/GoWizard/data"
 )
 
 /*// VCS configuration files to push to a server.
@@ -89,8 +89,8 @@ var ListVCS = map[string]string{
 
 // Represents all information to create a project
 type project struct {
-	dirData    string // directory with templates
-	dirProject string // directory of project created
+	dataDir    string // directory with templates
+	projectDir string // directory of project created
 
 	cfg  *Conf
 	tmpl *template.Template // set of templates
@@ -101,14 +101,14 @@ func NewProject(cfg *Conf) (*project, error) {
 	var err error
 	p := new(project)
 
-	if p.dirData, err = dirData(); err != nil {
+	if p.dataDir, err = dataDir(); err != nil {
 		return nil, err
 	}
 
 	if cfg.IsNewProject {
-		p.dirProject = filepath.Join(cfg.Project, cfg.Program)
+		p.projectDir = filepath.Join(cfg.Project, cfg.Program)
 	} else {
-		p.dirProject = cfg.Program
+		p.projectDir = cfg.Program
 	}
 
 	p.cfg = cfg
@@ -119,9 +119,9 @@ func NewProject(cfg *Conf) (*project, error) {
 
 // Creates a new project.
 func (p *project) Create() error {
-	dirTmpl := filepath.Join(p.dirData, "templ") // Base directory of templates
+	dirTmpl := filepath.Join(p.dataDir, "templ") // Base directory of templates
 
-	if err := os.MkdirAll(p.dirProject, _PERM_DIRECTORY); err != nil {
+	if err := os.MkdirAll(p.projectDir, _PERM_DIRECTORY); err != nil {
 		return fmt.Errorf("directory error: %s", err)
 	}
 
@@ -133,12 +133,12 @@ func (p *project) Create() error {
 
 	// === Render project files
 	if p.cfg.Type != "cmd" {
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+".go",
+		p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+".go",
 			"Pkg")
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+"_test.go",
+		p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+"_test.go",
 			"Test")
 	} else {
-		p.parseFromVar(filepath.Join(p.dirProject, p.cfg.Program)+".go",
+		p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+".go",
 			"Cmd")
 	}
 
