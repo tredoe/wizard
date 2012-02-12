@@ -152,5 +152,5 @@ func dataDir() (string, error) {
 		return "", errors.New("dataDir: data directory not found")
 	}
 
-	return filepath.FromSlash(filepath.Join(tree.SrcDir(), pkg)), nil
+	return filepath.Join(tree.SrcDir(), pkg), nil
 }
