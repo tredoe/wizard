@@ -116,12 +116,12 @@ func (c *Conf) SetNames(addProgram bool) {
 func (cfg *Conf) AddConfig() error {
 	tmpl := template.Must(template.New("Config").Parse(tmplUserConfig))
 
-	envHome := os.Getenv("HOME")
-	if envHome == "" {
+	home := os.Getenv("HOME")
+	if home == "" {
 		return errors.New("could not add user configuration file because $HOME is not set")
 	}
 
-	file, err := createFile(filepath.Join(envHome, _USER_CONFIG))
+	file, err := createFile(filepath.Join(home, _USER_CONFIG))
 	if err != nil {
 		return err
 	}
@@ -134,9 +134,9 @@ func (cfg *Conf) AddConfig() error {
 
 // Loads configuration per user, if any.
 func (c *Conf) UserConfig() error {
-	home, err := os.Getenverror("HOME")
-	if err != nil {
-		return fmt.Errorf("no variable HOME: %s", err)
+	home := os.Getenv("HOME")
+	if home == "" {
+		return fmt.Errorf("environment variable $HOME is not set")
 	}
 
 	pathUserConfig := filepath.Join(home, _USER_CONFIG)
