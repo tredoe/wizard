@@ -103,12 +103,12 @@ func NewProject(cfg *Conf) (*project, error) {
 	p := new(project)
 
 	// == Gets the path of the templates directory
-	tree, pkg, err := build.FindTree(_DATA_PATH)
+	pkg, err := build.Import(_DATA_PATH, build.Default.GOPATH, build.FindOnly)
 	if err != nil {
 		return nil, fmt.Errorf("NewProject: data directory not found: %s", err)
 	}
 
-	p.dataDir = filepath.Join(tree.SrcDir(), pkg)
+	p.dataDir = pkg.Dir
 	// ==
 
 	if cfg.IsNewProject {
