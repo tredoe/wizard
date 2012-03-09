@@ -6,12 +6,11 @@
 
 ## Installation
 
-	goinstall << DOWNLOAD URL >>
+	go get << DOWNLOAD URL >>
 {{if not .IsCmd}}
 To run the tests:
 
-	cd $GOROOT/src/pkg/<< IMPORT PATH >> &&
-	gotest -v && make clean && cd -
+	cd ${GOPATH//:*}/src/<< IMPORT PATH >> && go test && cd -
 {{end}}
 
 ## Configuration
