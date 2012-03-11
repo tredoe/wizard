@@ -97,19 +97,19 @@ func initConfig() (*wizard.Conf, error) {
 
 	// === Listing
 	if *fListType {
-		fmt.Println("  = Project types\n")
+		fmt.Print("  = Project types\n\n")
 		for k, v := range wizard.ListType {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
 	if *fListLicense {
-		fmt.Println("  = Licenses\n")
+		fmt.Print("  = Licenses\n\n")
 		for k, v := range wizard.ListLicense {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
 	if *fListVCS {
-		fmt.Println("  = Version control systems\n")
+		fmt.Print("  = Version control systems\n\n")
 		for k, v := range wizard.ListVCS {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
