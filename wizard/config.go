@@ -143,7 +143,7 @@ func (c *Conf) UserConfig() error {
 
 	// To know if the file exist.
 	switch stat, err := os.Stat(pathUserConfig); {
-	case err != nil: // not exist
+	case os.IsNotExist(err):
 		return nil
 	case stat.Mode()&os.ModeType != 0:
 		return fmt.Errorf("expected file: %s", _USER_CONFIG)
