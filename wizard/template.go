@@ -65,12 +65,12 @@ const (
 
 	tmplGNU = `{{.Comment}} {{template "Copyright" .}}
 {{.Comment}}
-{{.Comment}} This program is free software: you can redistribute it and/or modify
+{{.Comment}} This source code is free software: you can redistribute it and/or modify
 {{.Comment}} it under the terms of the GNU {{with .GNUextra}}{{.}} {{end}}General Public License as published by
 {{.Comment}} the Free Software Foundation, either version 3 of the License, or
 {{.Comment}} (at your option) any later version.
 {{.Comment}}
-{{.Comment}} This program is distributed in the hope that it will be useful,
+{{.Comment}} This software is distributed in the hope that it will be useful,
 {{.Comment}} but WITHOUT ANY WARRANTY; without even the implied warranty of
 {{.Comment}} MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 {{.Comment}} GNU {{with .GNUextra}}{{.}} {{end}}General Public License for more details.
