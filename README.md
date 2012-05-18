@@ -1,11 +1,11 @@
-GoWizard
+gowizard
 ========
 
 Tired of adding the same files every time you create a new Go project?  
 Don't know how to structure it?  
 Don't know how to apply the license?
 
-**GoWizard** creates the base for new Go projects, adds the license header
+**gowizard** creates the base for new Go projects, adds the license header
 to source code files, and creates an ignore file for the VCS given.
 
 The ignore file has been configured to ignore files finished in "~" (used like
@@ -16,11 +16,11 @@ files got from compiling and linking.
 
 ## Installation
 
-	go get github.com/kless/GoWizard/gowizard
+	go get github.com/kless/gowizard/gowizard
 
 To only install the library, which could be used by a Go IDE:
 
-	go get github.com/kless/GoWizard/wizard
+	go get github.com/kless/gowizard
 
 
 ## Configuration
@@ -81,7 +81,7 @@ years.
 
 ## Copyright and licensing
 
-*Copyright 2010  The "GoWizard" Authors*. See file AUTHORS and CONTRIBUTORS.  
+*Copyright 2010  The "gowizard" Authors*. See file AUTHORS and CONTRIBUTORS.  
 Unless otherwise noted, the source files are distributed under the
 *Apache License, version 2.0* found in the LICENSE file.
 

@@ -1,16 +1,17 @@
-// Copyright 2010  The "GoWizard" Authors
+// Copyright 2012  The "gowizard" Authors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -22,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/kless/Go-Inline/quest"
-	"github.com/kless/GoWizard/wizard"
+	"github.com/kless/gowizard"
 )
 
 const README = "README.md" // to get the year of creation
@@ -41,11 +42,6 @@ Usage: gowizard -i [-cfg | -add]
 }
 
 func main() {
-	fatalf := func(format string, a ...interface{}) {
-		fmt.Fprintf(os.Stderr, "gowizard: "+format+"\n", a...)
-		os.Exit(1)
-	}
-
 	cfg, err := initConfig()
 	if err != nil {
 		fatalf("%s", err)
@@ -54,7 +50,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	p, err := wizard.NewProject(cfg)
+	p, err := gowizard.NewProject(cfg)
 	if err != nil {
 		fatalf("%s", err)
 	}
@@ -66,7 +62,7 @@ func main() {
 
 // Loads configuration from flags and user configuration.
 // If returns "Conf" like nil when it is used the flag "cfg".
-func initConfig() (*wizard.Conf, error) {
+func initConfig() (*gowizard.Conf, error) {
 	var (
 		fType    = flag.String("type", "", "The type of project.")
 		fProject = flag.String("project", "", "The name of the project.")
@@ -98,19 +94,19 @@ func initConfig() (*wizard.Conf, error) {
 	// === Listing
 	if *fListType {
 		fmt.Print("  = Project types\n\n")
-		for k, v := range wizard.ListType {
+		for k, v := range gowizard.ListType {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
 	if *fListLicense {
 		fmt.Print("  = Licenses\n\n")
-		for k, v := range wizard.ListLicense {
+		for k, v := range gowizard.ListLicense {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
 	if *fListVCS {
 		fmt.Print("  = Version control systems\n\n")
-		for k, v := range wizard.ListVCS {
+		for k, v := range gowizard.ListVCS {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
@@ -120,7 +116,7 @@ func initConfig() (*wizard.Conf, error) {
 	}
 	// * * *
 
-	cfg := &wizard.Conf{
+	cfg := &gowizard.Conf{
 		Type:    *fType,
 		Project: *fProject,
 		Program: *fProgram,
@@ -156,7 +152,7 @@ func initConfig() (*wizard.Conf, error) {
 		cfg.Project = filepath.Base(wd)
 
 		// Get year of project's creation.
-		cfg.Year, err = wizard.ProjectYear(README)
+		cfg.Year, err = gowizard.ProjectYear(README)
 		if err != nil {
 			return nil, err
 		}
@@ -185,7 +181,7 @@ func initConfig() (*wizard.Conf, error) {
 }
 
 // Interactive mode.
-func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
+func interactive(c *gowizard.Conf, addConfig, addProgram bool) error {
 	var sFlags []string
 	var msg string
 	var err error
@@ -223,7 +219,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 		switch k {
 		case "type":
-			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(keys(wizard.ListType))
+			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(keys(gowizard.ListType))
 		case "project":
 			c.Project, err = prompt.ByDefault(c.Project).Mod(quest.REQUIRED).ReadString()
 		case "program":
@@ -237,11 +233,11 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 			c.Email, err = prompt.ByDefault(c.Email).Mod(quest.REQUIRED).ReadEmail()
 		case "license":
 			// It is got in upper case
-			c.License, err = prompt.ByDefault(wizard.ListLowerLicense[c.License]).
-				ChoiceString(keys(wizard.ListLicense))
+			c.License, err = prompt.ByDefault(gowizard.ListLowerLicense[c.License]).
+				ChoiceString(keys(gowizard.ListLicense))
 			c.License = strings.ToLower(c.License)
 		case "vcs":
-			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(keys(wizard.ListVCS))
+			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(keys(gowizard.ListVCS))
 		}
 
 		if err != nil {
@@ -255,6 +251,11 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 //
 // === Utility
+
+func fatalf(format string, a ...interface{}) {
+	fmt.Fprintf(os.Stderr, "gowizard: "+format+"\n", a...)
+	os.Exit(1)
+}
 
 // Gets an array from map keys.
 func keys(m map[string]string) []string {
