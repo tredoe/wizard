@@ -46,7 +46,7 @@ func (p *project) addLicense() error {
 			name = "LICENSE_" + name + ".txt"
 		}
 
-		return filepath.Join(projectDir, name)
+		return filepath.Join(projectDir, "doc", name)
 	}
 
 	switch lic := p.cfg.License; lic {
@@ -79,7 +79,7 @@ func (p *project) addLicense() error {
 			p.cfg.Owner = fmt.Sprintf("%q Authors", p.cfg.Project)
 		}
 
-		p.parseFromFile(filepath.Join(projectDir, "PATENTS.txt"),
+		p.parseFromFile(filepath.Join(projectDir, "doc", "PATENTS.txt"),
 			filepath.Join(dataDir, "PATENTS.txt"))
 	}
 

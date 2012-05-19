@@ -17,7 +17,6 @@ package gowizard
 import (
 	"fmt"
 	"go/build"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -112,7 +111,7 @@ func NewProject(cfg *Conf) (*project, error) {
 	// ==
 
 	if cfg.IsNewProject {
-		p.projectDir = filepath.Join(cfg.Project, cfg.Program)
+		p.projectDir = cfg.Project
 	} else {
 		p.projectDir = cfg.Program
 	}
@@ -129,6 +128,11 @@ func (p *project) Create() error {
 
 	if err := os.MkdirAll(p.projectDir, _PERM_DIRECTORY); err != nil {
 		return fmt.Errorf("directory error: %s", err)
+	}
+	if p.cfg.IsNewProject {
+		if err := os.Mkdir(filepath.Join(p.cfg.Project, "doc"), _PERM_DIRECTORY); err != nil {
+			return fmt.Errorf("directory error: %s", err)
+		}
 	}
 
 	p.parseLicense(CHAR_COMMENT)
@@ -148,21 +152,23 @@ func (p *project) Create() error {
 			"Cmd")
 	}
 
+	// === Option "add"
+	// ===
 	if !p.cfg.IsNewProject {
 		return nil
 	}
 
 	// === Render common files
-	p.parseFromFile(filepath.Join(p.cfg.Project, "CONTRIBUTORS.md"),
+	p.parseFromFile(filepath.Join(p.cfg.Project, "doc", "CONTRIBUTORS.md"),
 		filepath.Join(dirTmpl, "CONTRIBUTORS.md"))
-	p.parseFromFile(filepath.Join(p.cfg.Project, "NEWS.md"),
+	p.parseFromFile(filepath.Join(p.cfg.Project, "doc", "NEWS.md"),
 		filepath.Join(dirTmpl, "NEWS.md"))
 	p.parseFromFile(filepath.Join(p.cfg.Project, "README.md"),
 		filepath.Join(dirTmpl, "README.md"))
 
 	// The file AUTHORS is for copyright holders.
 	if p.cfg.License != "unlicense" && p.cfg.License != "cc0" {
-		p.parseFromFile(filepath.Join(p.cfg.Project, "AUTHORS.md"),
+		p.parseFromFile(filepath.Join(p.cfg.Project, "doc", "AUTHORS.md"),
 			filepath.Join(dirTmpl, "AUTHORS.md"))
 	}
 
@@ -172,15 +178,7 @@ func (p *project) Create() error {
 		break
 	default:
 		ignoreFile := "." + p.cfg.VCS + "ignore"
-
-		if p.cfg.VCS == "hg" {
-			tmplIgnore = hgIgnoreTop + tmplIgnore
-		}
-
-		if err := ioutil.WriteFile(filepath.Join(p.cfg.Project, ignoreFile),
-			[]byte(tmplIgnore), _PERM_FILE); err != nil {
-			return fmt.Errorf("write error: %s", err)
-		}
+		p.parseFromVar(filepath.Join(p.cfg.Project, ignoreFile), "Ignore")
 	}
 
 	return nil

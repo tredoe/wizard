@@ -145,22 +145,48 @@ license: {{.License}}
 vcs: {{.VCS}}
 `
 
-// === File ignore for VCS
+// === Ignore file for VCS
 const hgIgnoreTop = "syntax: glob\n"
 
-var tmplIgnore = `# Generic
+var tmplIgnore = `## Special files
 *~
 [._]*
 
-# Go
-*.[ao]
-*.[568vq]
+## Compiled Go source
 [568vq].out
-main
+*.[568vq]
+*.[ao]
+*.exe
+{{.Program}}
 
-# Cgo
+## Compiled Cgo source
 *.cgo*
+*.dll
 *.so
+
+## Data
+*.bin
+
+## Packages
+# It's better to unpack these files and commit the raw source since
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+## Logs and databases
+*.db
+*.log
+*.sql
+*.sqlite
+
+## OS generated files
+Icon?
 `
 
 // Renders the template "src", creating a file in "dst".
@@ -246,4 +272,10 @@ func (p *project) parseProject() {
 		p.tmpl = template.Must(p.tmpl.New("Pkg").Parse(tmplPkg))
 		p.tmpl = template.Must(p.tmpl.New("Test").Parse(tmplTest))
 	}
+
+	// == Ignore file
+	if p.cfg.VCS == "hg" {
+		tmplIgnore = hgIgnoreTop + tmplIgnore
+	}
+	p.tmpl = template.Must(p.tmpl.New("Ignore").Parse(tmplIgnore))
 }
