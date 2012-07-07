@@ -133,14 +133,12 @@ func (p *project) Create() error {
 	p.addLicense()
 
 	// === Render project files
+	p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+"_test.go", "Test")
+
 	if p.cfg.Type != "cmd" {
-		p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+".go",
-			"Pkg")
-		p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+"_test.go",
-			"Test")
+		p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+".go", "Pkg")
 	} else {
-		p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+".go",
-			"Cmd")
+		p.parseFromVar(filepath.Join(p.projectDir, p.cfg.Program)+".go", "Cmd")
 	}
 
 	// === Option "add"
