@@ -37,23 +37,23 @@ of static linking.
 
 #### GPL/AGPL 3.0
 
-Proprietary software linking: Not allowed.
-Distribution with code under another license: Not allowed with software whose license is not GNU GPL compatible.
+Proprietary software linking: Not allowed.  
+Distribution with code under another license: Not allowed with software whose license is not GNU GPL compatible.  
 Redistributing of the code with changes: Only under GNU GPL/AGPL.
 
 #### Apache Public 2.0
 
-Proprietary software linking: Allowed.
-Distribution with code under another license: Allowed.
-Redistributing of the code with changes: Allowed.
+Proprietary software linking: Allowed.  
+Distribution with code under another license: Allowed.  
+Redistributing of the code with changes: Allowed.  
 Compatible with GNU GPL: Yes.
 
 #### MPL 2.0
 
-Proprietary software linking: Allowed.
-Distribution with code under another license: Allowed.
-Redistributing of the code with changes: Only under MPL.
-Compatible with GNU GPL: Yes
+Proprietary software linking: Allowed.  
+Distribution with code under another license: Allowed.  
+Redistributing of the code with changes: Only under MPL.  
+Compatible with GNU GPL: Yes.
 
 
 ## Copyright and licensing

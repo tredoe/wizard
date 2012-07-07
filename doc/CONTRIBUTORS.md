@@ -17,7 +17,7 @@ because the organization holds the copyright.*
 
 ### Initial author(s)
 
-John Mac <charles.beck@sent.com>
+Jonas mg <jonas.mg@sent.at>
 
 ### Maintainer
 

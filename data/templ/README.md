@@ -1,26 +1,12 @@
 {{.Project}}
 {{.ProjectHeader}}
 
-<< DESCRIBE PROJECT >>
+<< http://go.pkgdoc.org/PROJECT >>
 
 
 ## Installation
 
 	go get << DOWNLOAD URL >>
-{{if not .IsCmd}}
-To run the tests:
-
-	cd ${GOPATH//:*}/src/<< IMPORT PATH >> && go test && cd -
-{{end}}
-
-## Configuration
-
-<< INSTRUCTIONS TO CONFIGURE THE PROGRAM, IF ANY >>
-
-
-## Operating instructions
-
-<< INSTRUCTIONS TO RUN THE PROGRAM >>
 
 
 ## {{if .HasCopyright}}Copyright{{else}}Copyleft{{end}} and licensing
