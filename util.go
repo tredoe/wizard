@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-// Creates a license file.
+// addLicense creates a license file.
 func (p *project) addLicense() error {
 	var addPatent bool
 
@@ -66,7 +66,8 @@ func (p *project) addLicense() error {
 	return nil
 }
 
-// Finds the first line that matches the copyright header to return the year.
+// ProjectYear finds the first line that matches the copyright header to return
+// the year.
 func ProjectYear(filename string) (int, error) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -95,7 +96,7 @@ func ProjectYear(filename string) (int, error) {
 
 // * * *
 
-// Copies a file from source to destination.
+// copyFile copies a file from source to destination.
 func copyFile(destination, source string) error {
 	src, err := ioutil.ReadFile(source)
 	if err != nil {
@@ -110,7 +111,7 @@ func copyFile(destination, source string) error {
 	return nil
 }
 
-// Creates a file.
+// createFile creates a file.
 func createFile(dst string) (*os.File, error) {
 	file, err := os.Create(dst)
 	if err != nil {

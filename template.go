@@ -177,7 +177,7 @@ var tmplIgnore = `## Special files
 Icon?
 `
 
-// Renders the template "src", creating a file in "dst".
+// parseFromFile renders the template "src", creating a file in "dst".
 func (p *project) parseFromFile(dst, src string) error {
 	file, err := createFile(dst)
 	if err != nil {
@@ -196,7 +196,7 @@ func (p *project) parseFromFile(dst, src string) error {
 	return nil
 }
 
-// Renders the template "tmplName" in "set" to the file "dst".
+// parseFromVar renders the template "tmplName" to the file "dst".
 func (p *project) parseFromVar(dst string, tmplName string) error {
 	file, err := createFile(dst)
 	if err != nil {
@@ -209,8 +209,8 @@ func (p *project) parseFromVar(dst string, tmplName string) error {
 	return nil
 }
 
-// Parses the license header.
-// "charComment" is the character used to comment in code files.
+// parseLicense parses the license header.
+// charComment is the character used to comment in code files.
 func (p *project) parseLicense(charComment string) {
 	var tmplHeader string
 
@@ -250,7 +250,7 @@ func (p *project) parseLicense(charComment string) {
 	}
 }
 
-// Parses the templates for the project.
+// parseProject parses the templates for the project.
 func (p *project) parseProject() {
 	if p.cfg.Type == "cmd" {
 		p.tmpl = template.Must(p.tmpl.New("Cmd").Parse(tmplCmd))

@@ -18,7 +18,7 @@ import (
 	"github.com/kless/goconfig/config"
 )
 
-// Represents the configuration of the project.
+// Conf represents the configuration of the project.
 type Conf struct {
 	Type    string
 	Project string
@@ -48,7 +48,7 @@ type Conf struct {
 // TODO: to be used by a GUI, in the first there is to get a new type Conf.
 // Then, it is passed to ExtraConfig().
 
-// Adds extra fields to pass to templates.
+// AddTemplateData adds extra fields to pass to templates.
 func (c *Conf) AddTemplateData() {
 	c.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(c.Project))
 
@@ -69,7 +69,7 @@ func (c *Conf) AddTemplateData() {
 	}
 }
 
-// Sets names for both project and package.
+// SetNames sets names for both project and package.
 func (c *Conf) SetNames(addProgram bool) {
 	if addProgram {
 		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
@@ -104,7 +104,7 @@ func (c *Conf) SetNames(addProgram bool) {
 //
 // === User configuration
 
-// Creates the user configuration file.
+// AddConfig creates the user configuration file.
 func (cfg *Conf) AddConfig() error {
 	tmpl := template.Must(template.New("Config").Parse(tmplUserConfig))
 
@@ -124,7 +124,7 @@ func (cfg *Conf) AddConfig() error {
 	return nil
 }
 
-// Loads configuration per user, if any.
+// UserConfig loads configuration per user, if any.
 func (c *Conf) UserConfig() error {
 	home := os.Getenv("HOME")
 	if home == "" {
@@ -196,7 +196,7 @@ func (c *Conf) UserConfig() error {
 //
 // === Checking
 
-// Checks values in the configuration.
+// Checking checks values in the configuration.
 func (c *Conf) Checking(interactive, addConfig, addProgram bool) error {
 	var required []string
 

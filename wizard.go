@@ -76,7 +76,7 @@ var ListVCS = map[string]string{
 
 // * * *
 
-// Represents all information to create a project
+// project represents all information to create a project.
 type project struct {
 	dataDir    string // directory with templates
 	projectDir string // directory of project created
@@ -85,7 +85,7 @@ type project struct {
 	tmpl *template.Template // set of templates
 }
 
-// Creates information for the project.
+// NewProject creates information for the project.
 func NewProject(cfg *Conf) (*project, error) {
 	var err error
 	p := new(project)
@@ -111,7 +111,7 @@ func NewProject(cfg *Conf) (*project, error) {
 	return p, nil
 }
 
-// Creates a new project.
+// Create creates a new project.
 func (p *project) Create() error {
 	dirTmpl := filepath.Join(p.dataDir, "templ") // Base directory of templates
 

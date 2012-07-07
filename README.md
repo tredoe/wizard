@@ -26,7 +26,7 @@ years.
 
 ### Licenses
 
-My suggestion is to use MPL 2.0 because it allows covered source code to be mixed
+My suggestion is **to use MPL 2.0** because it allows covered source code to be mixed
 with other files under a different, even proprietary license. However, code
 files licensed under the MPL must remain under the MPL and freely available in
 source form.
@@ -35,12 +35,12 @@ The BSD-like licenses have been excluded because they can not mitigate threats
 from software patents and LGPL because it has not benefits using into a language
 of static linking.
 
-#### GPL/AGPL 3.0
+#### MPL 2.0
 
-Proprietary software linking: Not allowed.  
-Distribution with code under another license: Not allowed with software whose
-license is not GNU GPL compatible.  
-Redistributing of the code with changes: Only under GNU GPL/AGPL.
+Proprietary software linking: Allowed.  
+Distribution with code under another license: Allowed.  
+Redistributing of the code with changes: Only under MPL.  
+Compatible with GNU GPL: Yes.
 
 #### Apache Public 2.0
 
@@ -49,12 +49,12 @@ Distribution with code under another license: Allowed.
 Redistributing of the code with changes: Allowed.  
 Compatible with GNU GPL: Yes, with version 3 of the GPL.
 
-#### MPL 2.0
+#### GPL/AGPL 3.0
 
-Proprietary software linking: Allowed.  
-Distribution with code under another license: Allowed.  
-Redistributing of the code with changes: Only under MPL.  
-Compatible with GNU GPL: Yes.
+Proprietary software linking: Not allowed.  
+Distribution with code under another license: Not allowed with software whose
+license is not GNU GPL compatible.  
+Redistributing of the code with changes: Only under GNU GPL/AGPL.
 
 
 ## Copyright and licensing
