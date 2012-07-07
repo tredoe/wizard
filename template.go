@@ -113,7 +113,7 @@ import (
 
 `
 	tmplTest = `{{template "Header" .}}
-package {{.Program}}
+package {{if .IsCmd}}main{{else}}{{.Program}}{{end}}
 
 import (
 	"testing"
