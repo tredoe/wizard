@@ -19,11 +19,6 @@ To only install the package, which could be used by a Go IDE:
 
 ## Suggestions
 
-### Maintenance
-
-Copyright notices only need the year when the file was created, so don't add new
-years.
-
 ### Licenses
 
 My suggestion is **[to use MPL 2.0](https://www.mozilla.org/MPL/2.0/)** because
@@ -69,6 +64,11 @@ for software per se.
 
 http://creativecommons.org/about/cc0  
 http://creativecommons.org/publicdomain/zero/1.0/
+
+### Maintenance
+
+Copyright notices only need the year when the file was created, so don't add new
+years.
 
 
 ## Copyright and licensing

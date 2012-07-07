@@ -256,8 +256,8 @@ func (p *project) parseProject() {
 		p.tmpl = template.Must(p.tmpl.New("Cmd").Parse(tmplCmd))
 	} else {
 		p.tmpl = template.Must(p.tmpl.New("Pkg").Parse(tmplPkg))
-		p.tmpl = template.Must(p.tmpl.New("Test").Parse(tmplTest))
 	}
+	p.tmpl = template.Must(p.tmpl.New("Test").Parse(tmplTest))
 
 	// == Ignore file
 	if p.cfg.VCS == "hg" {
