@@ -26,16 +26,14 @@ years.
 
 ### Licenses
 
-My suggestion is **to use [MPL 2.0][1]** because it allows covered source code
-to be mixed with other files under a different, even proprietary license.
-However, code files licensed under the MPL must remain under the MPL and freely
-available in source form.
+My suggestion is **[to use MPL 2.0](https://www.mozilla.org/MPL/2.0/)** because
+it allows covered source code to be mixed with other files under a different,
+even proprietary license. However, code files licensed under the MPL must remain
+under the MPL and freely available in source form.
 
-The BSD-like licenses have been excluded because they can not mitigate threats
-from software patents and LGPL because it has not benefits using into a language
-of static linking.
-
-[1]: https://www.mozilla.org/MPL/2.0/
+Both licenses BSD and MIT/X11 have been excluded because they can not mitigate
+threats from software patents and LGPL because it has not benefits using into a
+language of static linking.
 
 #### MPL 2.0
 
