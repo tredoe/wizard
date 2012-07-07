@@ -1,19 +1,18 @@
 {{.Project}}
 {{.ProjectHeader}}
 
-<< http://go.pkgdoc.org/PROJECT >>
+<< http://go.pkgdoc.org/IMPORT PATH >>
 
 
 ## Installation
 
 	go get << DOWNLOAD URL >>
 
+{{if .FullLicense}}
+## License
 
-## {{if .HasCopyright}}Copyright{{else}}Copyleft{{end}} and licensing
-
-*{{template "Copyright" .}}*. See file {{if .HasCopyright}}AUTHORS and {{end}}CONTRIBUTORS.  
-{{if .FullLicense}}Unless otherwise noted, the source files are distributed under the
-*{{.FullLicense}}* found in the {{if .IsUnlicense}}UN{{end}}LICENSE file.
+The source files are distributed under the {{.FullLicense}},
+unless otherwise noted.
 {{end}}
 
 * * *

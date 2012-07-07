@@ -47,25 +47,36 @@ var ListType = map[string]string{
 }
 
 // Available licenses
-var ListLicense = map[string]string{
-	"AGPL":      "GNU Affero General Public License, version 3 or later",
-	"Apache":    "Apache License, version 2.0",
-	"CC0":       "Creative Commons CC0, version 1.0 Universal (Not intended for software)",
-	"GPL":       "GNU General Public License, version 3 or later",
-	"MPL":       "Mozilla Public License, version 2.0",
-	"Unlicense": "Public domain",
-	"none":      "Proprietary license",
-}
+var (
+	ListLicense = map[string]string{
+		"AGPL":      "GNU Affero General Public License, version 3 or later",
+		"Apache":    "Apache License, version 2.0",
+		"CC0":       "Creative Commons CC0, version 1.0 Universal",
+		"GPL":       "GNU General Public License, version 3 or later",
+		"MPL":       "Mozilla Public License, version 2.0",
+		"Unlicense": "Public domain",
+		"none":      "Proprietary license",
+	}
 
-var ListLowerLicense = map[string]string{
-	"agpl":      "AGPL",
-	"apache":    "Apache",
-	"cc0":       "CC0",
-	"gpl":       "GPL",
-	"mpl":       "MPL",
-	"unlicense": "Unlicense",
-	"none":      "none",
-}
+	ListLowerLicense = map[string]string{
+		"agpl":      "AGPL",
+		"apache":    "Apache",
+		"cc0":       "CC0",
+		"gpl":       "GPL",
+		"mpl":       "MPL",
+		"unlicense": "Unlicense",
+		"none":      "none",
+	}
+
+	ListLicenseURL = map[string]string{
+		"agpl":      "http://www.gnu.org/licenses/agpl.html",
+		"apache":    "http://www.apache.org/licenses/LICENSE-2.0",
+		"cc0":       "http://creativecommons.org/publicdomain/zero/1.0/",
+		"gpl":       "http://www.gnu.org/licenses/gpl.html",
+		"mpl":       "http://mozilla.org/MPL/2.0/",
+		"unlicense": "http://unlicense.org/",
+	}
+)
 
 // Version control systems (VCS)
 var ListVCS = map[string]string{
