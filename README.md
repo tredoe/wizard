@@ -19,7 +19,7 @@ To only install the package, which could be used by a Go IDE:
 
 ## Suggestions
 
-### Licenses
+### About licenses
 
 My suggestion is **to use MPL 2.0** because it allows covered source code to be
 mixed with other files under a different, even proprietary license. However,
