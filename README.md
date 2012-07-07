@@ -30,6 +30,9 @@ Both licenses BSD and MIT/X11 have been excluded because they can not mitigate
 threats from software patents, and LGPL because it has not benefits using into a
 language of static linking.
 
+Here you have a description of the most important elements in every license
+included in gowizard:
+
 #### MPL 2.0
 
 Proprietary software linking: Allowed.  
