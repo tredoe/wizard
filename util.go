@@ -52,20 +52,8 @@ func (p *project) addLicense() error {
 	switch lic := p.cfg.License; lic {
 	case "none":
 		break
-	case "bsd-2", "bsd-3":
-		p.parseFromFile(licenseDst(license), filepath.Join(dataDir, license+".txt"))
-		addPatent = true
 	default:
 		copyFile(licenseDst(license), filepath.Join(dataDir, license+".txt"))
-
-		// The license LGPL must also add the GPL license text.
-		if lic == "lgpl" {
-			tmp := p.cfg.IsNewProject
-
-			p.cfg.IsNewProject = false
-			copyFile(licenseDst("GPL"), filepath.Join(dataDir, "GPL.txt"))
-			p.cfg.IsNewProject = tmp
-		}
 
 		if lic == "unlicense" {
 			addPatent = true

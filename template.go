@@ -53,16 +53,6 @@ const (
 {{.Comment}} limitations under the License.
 `
 
-	tmplBSD = `{{.Comment}} {{template "Copyright" .}}
-{{.Comment}}
-{{.Comment}} Use of this source code is governed by the {{.FullLicense}}
-{{.Comment}} that can be found in the LICENSE file.
-{{.Comment}}
-{{.Comment}} This software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
-{{.Comment}} OR CONDITIONS OF ANY KIND, either express or implied. See the License
-{{.Comment}} for more details.
-`
-
 	tmplGNU = `{{.Comment}} {{template "Copyright" .}}
 {{.Comment}}
 {{.Comment}} This program is free software: you can redistribute it and/or modify
@@ -77,6 +67,13 @@ const (
 {{.Comment}}
 {{.Comment}} You should have received a copy of the GNU {{with .GNUextra}}{{.}} {{end}}General Public License
 {{.Comment}} along with this program.  If not, see <http://www.gnu.org/licenses/>.
+`
+
+	tmplMPL = `{{.Comment}} {{template "Copyright" .}}
+{{.Comment}}
+{{.Comment}} This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+{{.Comment}} If a copy of the MPL was not distributed with this file, You can obtain one at
+{{.Comment}} http://mozilla.org/MPL/2.0/.
 `
 
 	tmplCC0 = `{{.Comment}} {{template "Copyright" .}}
@@ -235,19 +232,17 @@ func (p *project) parseLicense(charComment string) {
 	}
 
 	switch licenseName {
+	case "mpl":
+		tmplHeader = tmplMPL
 	case "apache":
 		tmplHeader = tmplApache
-	case "bsd":
-		tmplHeader = tmplBSD
 	case "cc0":
 		tmplHeader = tmplCC0
-	case "gpl", "lgpl", "agpl":
+	case "gpl", "agpl":
 		tmplHeader = tmplGNU
 
 		if licenseName == "agpl" {
 			p.cfg.GNUextra = "Affero"
-		} else if licenseName == "lgpl" {
-			p.cfg.GNUextra = "Lesser"
 		}
 	case "unlicense":
 		tmplHeader = tmplUnlicense
