@@ -26,7 +26,7 @@ years.
 
 ### Licenses
 
-My suggestion is [to use MPL 2.0](https://www.mozilla.org/MPL/2.0/) because
+My suggestion is **[to use MPL 2.0]**(https://www.mozilla.org/MPL/2.0/) because
 it allows covered source code to be mixed with other files under a different,
 even proprietary license. However, code files licensed under the MPL must remain
 under the MPL and freely available in source form.
@@ -67,7 +67,7 @@ http://unlicense.org/
 Creative Commons Zero dedicates works to the public domain. It is not intended
 for software per se.
 
-http://creativecommons.org/about/cc0
+http://creativecommons.org/about/cc0  
 http://creativecommons.org/publicdomain/zero/1.0/
 
 
