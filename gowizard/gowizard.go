@@ -235,7 +235,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 //
 
 func fatalf(format string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, "gowizard: "+format+"\n", a...)
+	fmt.Fprintf(os.Stderr, format+"\n", a...)
 	os.Exit(1)
 }
 

@@ -30,8 +30,8 @@ const (
 
 	README = "README.md"
 
-	// Subdirectory where is installed through "go install"
-	_DATA_PATH = "github.com/kless/gowizard/data"
+	// Subdirectory where is installed through "go get"
+	_DATA_PATH = "github.com/kless/wizard/data"
 )
 
 /*// VCS configuration files to push to a server.
@@ -88,8 +88,6 @@ var ListVCS = map[string]string{
 	"other": "other VCS",
 	"none":  "none",
 }
-
-// * * *
 
 // project represents all information to create a project.
 type project struct {
@@ -168,6 +166,55 @@ func (p *project) Create() error {
 			[]byte(tmplIgnore), _PERM_FILE); err != nil {
 			return fmt.Errorf("write error: %s", err)
 		}
+	}
+
+	return nil
+}
+
+// * * *
+
+// addLicense creates a license file.
+func (p *project) addLicense(dir string) error {
+	if p.cfg.License == "none" {
+		return nil
+	}
+
+	addPatent := false
+	license := ListLowerLicense[p.cfg.License]
+
+	licenseDst := func(name string) string {
+		if p.cfg.IsUnlicense {
+			name = "UNLICENSE.txt"
+			addPatent = true
+		} else {
+			name = "LICENSE_" + name + ".txt" // to handle multiple licenses
+		}
+		return filepath.Join(dir, "doc", name)
+	}
+
+	licensePath := licenseDst(license)
+
+	// Check if it exist.
+	if !p.cfg.IsNewProject {
+		if _, err := os.Stat(licensePath); !os.IsNotExist(err) {
+			return nil
+		}
+	}
+
+	dataDir := filepath.Join(p.dataDir, "license")
+
+	if err := copyFile(licensePath, filepath.Join(dataDir, license+".txt")); err != nil {
+		return err
+	}
+	if addPatent {
+		// The owner is the organization, else the Authors of the project
+		p.cfg.Owner = p.cfg.Org
+		if p.cfg.Owner == "" {
+			p.cfg.Owner = fmt.Sprintf("%q Authors", p.cfg.Project)
+		}
+
+		p.parseFromFile(filepath.Join(dir, "doc", "PATENTS.txt"),
+			filepath.Join(dataDir, "PATENTS.txt"))
 	}
 
 	return nil

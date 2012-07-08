@@ -10,52 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 )
-
-// addLicense creates a license file.
-func (p *project) addLicense(dir string) error {
-	addPatent := false
-
-	dataDir := filepath.Join(p.dataDir, "license")
-	license := ListLowerLicense[p.cfg.License]
-
-	licenseDst := func(name string) string {
-		if p.cfg.IsUnlicense {
-			name = "UNLICENSE.txt"
-		} else if p.cfg.IsNewProject {
-			name = "LICENSE.txt"
-		} else {
-			name = "LICENSE_" + name + ".txt"
-		}
-
-		return filepath.Join(dir, "doc", name)
-	}
-
-	switch lic := p.cfg.License; lic {
-	case "none":
-		break
-	default:
-		copyFile(licenseDst(license), filepath.Join(dataDir, license+".txt"))
-
-		if lic == "unlicense" {
-			addPatent = true
-		}
-	}
-
-	if addPatent {
-		// The owner is the organization, else the Authors of the project
-		p.cfg.Owner = p.cfg.Org
-		if p.cfg.Owner == "" {
-			p.cfg.Owner = fmt.Sprintf("%q Authors", p.cfg.Project)
-		}
-
-		p.parseFromFile(filepath.Join(dir, "doc", "PATENTS.txt"),
-			filepath.Join(dataDir, "PATENTS.txt"))
-	}
-
-	return nil
-}
 
 // copyFile copies a file from source to destination.
 func copyFile(destination, source string) error {
