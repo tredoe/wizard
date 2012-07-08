@@ -191,7 +191,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 	defer q.Restore()
 	q.ExitAtCtrlC(0)
 
-	fmt.Printf("\n  = Go Wizard :: %s\n\n", msg)
+	fmt.Printf("\n  = Gowizard :: %s\n\n", msg)
 
 	for _, k := range sFlags {
 		f := flag.Lookup(k)
@@ -199,6 +199,14 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 		switch k {
 		case "type":
+			if c.Type == "" {
+				if c.IsNewProject {
+					c.Type = "pkg"
+				} else {
+					c.Type = "cmd"
+				}
+			}
+
 			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(keys(wizard.ListType))
 		case "name":
 			if addProgram {
