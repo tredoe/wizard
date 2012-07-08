@@ -70,9 +70,10 @@ func (c *Conf) AddTemplateData() {
 	}
 }
 
-// SetNames sets names for both project and package.
-// A package is named as the project name, but in lower case and without prefix
-// or suffix related to "go".
+// SetNames sets names for both project and program.
+//
+// A program name is named as the project name but in lower case; and if it is
+// not a command then it is removed the prefix or suffix related to "go", if any.
 func (c *Conf) SetNames(addProgram bool) {
 	if addProgram {
 		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
@@ -86,12 +87,14 @@ func (c *Conf) SetNames(addProgram bool) {
 				c.Project = string(line)
 			}
 		}
-		if c.Type == "cmd" { // the program name is not changed
-			return
-		}
 	} else {
 		c.Project = strings.TrimSpace(c.Project)
 		c.Program = strings.ToLower(c.Project)
+	}
+
+	// The program name is not changed in commands.
+	if c.Type == "cmd" {
+		return
 	}
 
 	// To remove them from the program name, if any.
