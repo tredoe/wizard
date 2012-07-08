@@ -7,7 +7,6 @@ Don't know how to apply the license?
 
 http://go.pkgdoc.org/github.com/kless/wizard/gowizard
 
-
 ## Installation
 
 	go get github.com/kless/wizard/gowizard
