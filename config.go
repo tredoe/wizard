@@ -7,6 +7,7 @@
 package gowizard
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -22,7 +23,7 @@ import (
 type Conf struct {
 	Type    string
 	Project string
-	Program string
+	Program string // to lower case
 	License string
 	Author  string
 	Email   string
@@ -49,7 +50,9 @@ type Conf struct {
 
 // AddTemplateData adds extra fields to pass to templates.
 func (c *Conf) AddTemplateData() {
-	c.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(c.Project))
+	if c.IsNewProject {
+		c.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(c.Project))
+	}
 
 	if c.License != "none" {
 		c.FullLicense = fmt.Sprintf("[%s](%s)",
@@ -68,39 +71,45 @@ func (c *Conf) AddTemplateData() {
 }
 
 // SetNames sets names for both project and package.
+// A package is named as the project name, but in lower case and without prefix
+// or suffix related to "go".
 func (c *Conf) SetNames(addProgram bool) {
 	if addProgram {
 		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
-		return
+
+		// The first line of Readme file has the project name.
+		if f, err := os.Open(README); err == nil {
+			buf := bufio.NewReader(f)
+			defer f.Close()
+
+			if line, _, err := buf.ReadLine(); err == nil {
+				c.Project = string(line)
+			}
+		}
+		if c.Type == "cmd" { // the program name is not changed
+			return
+		}
+	} else {
+		c.Project = strings.TrimSpace(c.Project)
+		c.Program = strings.ToLower(c.Project)
 	}
 
-	// === To remove them from the project name, if any.
+	// To remove them from the program name, if any.
 	reStart1 := regexp.MustCompile(`^go-`)
 	reStart2 := regexp.MustCompile(`^go`)
 	reEnd := regexp.MustCompile(`-go$`)
 
-	c.Project = strings.TrimSpace(c.Project)
-
-	// A program is usually named as the project name.
-	// It is created removing prefix or suffix related to "go".
-	if c.Program == "" {
-		c.Program = strings.ToLower(c.Project)
-
-		if reStart1.MatchString(c.Program) {
-			c.Program = reStart1.ReplaceAllString(c.Program, "")
-		} else if reStart2.MatchString(c.Program) {
-			c.Program = reStart2.ReplaceAllString(c.Program, "")
-		} else if reEnd.MatchString(c.Program) {
-			c.Program = reEnd.ReplaceAllString(c.Program, "")
-		}
-
-	} else {
-		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
+	if reStart1.MatchString(c.Program) {
+		c.Program = reStart1.ReplaceAllString(c.Program, "")
+	} else if reStart2.MatchString(c.Program) {
+		c.Program = reStart2.ReplaceAllString(c.Program, "")
+	} else if reEnd.MatchString(c.Program) {
+		c.Program = reEnd.ReplaceAllString(c.Program, "")
 	}
 }
 
 //
-// === User configuration
+// == User configuration
 
 // AddConfig creates the user configuration file.
 func (cfg *Conf) AddConfig() error {
@@ -144,7 +153,7 @@ func (c *Conf) UserConfig() error {
 		return fmt.Errorf("error parsing configuration: %s", err)
 	}
 
-	// === Get values
+	// == Get values
 	var errKeys []string
 	ok := true
 
@@ -191,11 +200,12 @@ func (c *Conf) UserConfig() error {
 	return nil
 }
 
+// == Checking
 //
-// === Checking
 
-// Checking checks values in the configuration.
-func (c *Conf) Checking(interactive, addConfig, addProgram bool) error {
+// CheckAndSetNames checks values in the configuration, and set names of both
+// project and program whether it is not on interactive mode.
+func (c *Conf) CheckAndSetNames(interactive, addConfig, addProgram bool) error {
 	var required []string
 
 	if !interactive {
@@ -203,7 +213,7 @@ func (c *Conf) Checking(interactive, addConfig, addProgram bool) error {
 			c.SetNames(addProgram)
 		}
 
-		// === Necessary fields
+		// == Necessary fields
 		if addConfig {
 			required = []string{c.Author, c.Email, c.License, c.VCS}
 		} else if addProgram {
@@ -220,7 +230,7 @@ func (c *Conf) Checking(interactive, addConfig, addProgram bool) error {
 		}
 	}
 
-	// === Maps
+	// == Maps
 
 	// Project type
 	if c.Type != "" {

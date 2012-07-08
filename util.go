@@ -7,24 +7,15 @@
 package gowizard
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 )
 
 // addLicense creates a license file.
-func (p *project) addLicense() error {
-	var addPatent bool
-
-	projectDir := p.cfg.Project
-	if !p.cfg.IsNewProject {
-		projectDir = "." // actual directory
-	}
+func (p *project) addLicense(dir string) error {
+	addPatent := false
 
 	dataDir := filepath.Join(p.dataDir, "license")
 	license := ListLowerLicense[p.cfg.License]
@@ -38,7 +29,7 @@ func (p *project) addLicense() error {
 			name = "LICENSE_" + name + ".txt"
 		}
 
-		return filepath.Join(projectDir, "doc", name)
+		return filepath.Join(dir, "doc", name)
 	}
 
 	switch lic := p.cfg.License; lic {
@@ -59,42 +50,12 @@ func (p *project) addLicense() error {
 			p.cfg.Owner = fmt.Sprintf("%q Authors", p.cfg.Project)
 		}
 
-		p.parseFromFile(filepath.Join(projectDir, "doc", "PATENTS.txt"),
+		p.parseFromFile(filepath.Join(dir, "doc", "PATENTS.txt"),
 			filepath.Join(dataDir, "PATENTS.txt"))
 	}
 
 	return nil
 }
-
-// ProjectYear finds the first line that matches the copyright header to return
-// the year.
-func ProjectYear(filename string) (int, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return 0, fmt.Errorf("no project directory: %s", err)
-	}
-	defer file.Close()
-
-	fileBuf := bufio.NewReader(file)
-
-	for {
-		line, err := fileBuf.ReadString('\n')
-		if err == io.EOF {
-			break
-		}
-
-		if reCopyright.MatchString(line) || reCopyleft.MatchString(line) {
-			for _, v := range strings.Split(line, " ") {
-				if reYear.MatchString(v) {
-					return strconv.Atoi(v)
-				}
-			}
-		}
-	}
-	panic("unreached")
-}
-
-// * * *
 
 // copyFile copies a file from source to destination.
 func copyFile(destination, source string) error {

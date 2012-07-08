@@ -17,15 +17,13 @@ import (
 	"github.com/kless/gowizard"
 )
 
-const README = "README.md" // to get the year of creation
-
 func usage() {
 	fmt.Fprintf(os.Stderr, `Tool to create skeleton of Go projects
 Usage: gowizard -i [-cfg | -add]
 
  * Configuration: -cfg -author -email -license -vcs [-org]
- * Project: -type -project -license -author -email -vcs [-org -program]
- * Program: -add -type -program -license
+ * Project: -type -name -license -author -email -vcs [-org]
+ * Program: -type -name -license -add
 
 `)
 	flag.PrintDefaults()
@@ -51,13 +49,12 @@ func main() {
 
 // * * *
 
-// Loads configuration from flags and user configuration.
-// If returns "Conf" like nil when it is used the flag "cfg".
+// initConfig loads configuration from flags and user configuration.
+// Returns the configuration to nil when it is used the flag "cfg".
 func initConfig() (*gowizard.Conf, error) {
 	var (
 		fType    = flag.String("type", "", "The type of project.")
-		fProject = flag.String("project", "", "The name of the project.")
-		fProgram = flag.String("program", "", "The name of the program.")
+		fName    = flag.String("name", "", "The name of the project or program.")
 		fLicense = flag.String("license", "", "The license covering the program.")
 		fAuthor  = flag.String("author", "", "The author's name.")
 		fEmail   = flag.String("email", "", "The author's e-mail.")
@@ -74,7 +71,7 @@ func initConfig() (*gowizard.Conf, error) {
 		fListVCS     = flag.Bool("lv", false, "Show the list of version control systems (for flag \"vcs\").")
 	)
 
-	// === Parse the flags
+	// == Parse the flags
 	flag.Usage = usage
 	flag.Parse()
 
@@ -82,7 +79,7 @@ func initConfig() (*gowizard.Conf, error) {
 		usage()
 	}
 
-	// === Listing
+	// == Listing
 	if *fListType {
 		fmt.Print("  = Project types\n\n")
 		for k, v := range gowizard.ListType {
@@ -109,8 +106,7 @@ func initConfig() (*gowizard.Conf, error) {
 
 	cfg := &gowizard.Conf{
 		Type:    *fType,
-		Project: *fProject,
-		Program: *fProgram,
+		Program: *fName,
 		License: *fLicense,
 		Author:  *fAuthor,
 		Email:   *fEmail,
@@ -129,8 +125,6 @@ func initConfig() (*gowizard.Conf, error) {
 
 	// New program for existent project.
 	if *fAdd {
-		cfg.Program = *fProgram
-
 		if *fLicense != "" {
 			cfg.License = *fLicense
 		}
@@ -141,16 +135,12 @@ func initConfig() (*gowizard.Conf, error) {
 			return nil, err
 		}
 		cfg.Project = filepath.Base(wd)
-
-		// Get year of project's creation.
-		cfg.Year, err = gowizard.ProjectYear(README)
-		if err != nil {
-			return nil, err
-		}
+	} else {
+		cfg.Project = *fName
 	}
 
 	// Check flags
-	if err := cfg.Checking(*fInteractive, *fConfig, *fAdd); err != nil {
+	if err := cfg.CheckAndSetNames(*fInteractive, *fConfig, *fAdd); err != nil {
 		return nil, err
 	}
 
@@ -171,25 +161,24 @@ func initConfig() (*gowizard.Conf, error) {
 	return cfg, nil
 }
 
-// Interactive mode.
+// interactive uses the interactive mode.
 func interactive(c *gowizard.Conf, addConfig, addProgram bool) error {
 	var sFlags []string
 	var msg string
 	var err error
 
-	// === Sorted flags
+	// == Sorted flags
 	if addConfig {
 		msg = "New configuration"
 		sFlags = []string{"author", "email", "license", "vcs", "org"}
 	} else if addProgram {
 		msg = "Add program"
-		sFlags = []string{"type", "program", "license"}
+		sFlags = []string{"type", "name", "license"}
 	} else {
 		msg = "New project"
 		sFlags = []string{
 			"type",
-			"project",
-			"program",
+			"name",
 			"org",
 			"author",
 			"email",
@@ -211,11 +200,13 @@ func interactive(c *gowizard.Conf, addConfig, addProgram bool) error {
 		switch k {
 		case "type":
 			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(keys(gowizard.ListType))
-		case "project":
-			c.Project, err = prompt.ByDefault(c.Project).Mod(quest.REQUIRED).ReadString()
-		case "program":
+		case "name":
+			if addProgram {
+				c.Program, err = prompt.ByDefault(c.Program).Mod(quest.REQUIRED).ReadString()
+			} else {
+				c.Project, err = prompt.ByDefault(c.Project).Mod(quest.REQUIRED).ReadString()
+			}
 			c.SetNames(addProgram)
-			c.Program, err = prompt.ByDefault(c.Program).Mod(quest.REQUIRED).ReadString()
 		case "org":
 			c.Org, err = prompt.ByDefault(c.Org).ReadString()
 		case "author":
@@ -240,15 +231,15 @@ func interactive(c *gowizard.Conf, addConfig, addProgram bool) error {
 	return nil
 }
 
+// == Utility
 //
-// === Utility
 
 func fatalf(format string, a ...interface{}) {
 	fmt.Fprintf(os.Stderr, "gowizard: "+format+"\n", a...)
 	os.Exit(1)
 }
 
-// Gets an array from map keys.
+// keys gets an array from map keys.
 func keys(m map[string]string) []string {
 	a := make([]string, len(m))
 	i := 0

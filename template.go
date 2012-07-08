@@ -9,17 +9,9 @@ package gowizard
 import (
 	"fmt"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"text/template"
 	"time"
-)
-
-// To get the project's creation year
-var (
-	reCopyright = regexp.MustCompile(`(Copyright)[ ]+[0-9]{4}[ ].*Authors`)
-	reCopyleft  = regexp.MustCompile(`(Written in)[ ]+[0-9]{4}[ ].*Authors`)
-	reYear      = regexp.MustCompile(`[0-9]{4}`)
 )
 
 // Copyright and licenses
@@ -134,7 +126,7 @@ license: {{.License}}
 vcs: {{.VCS}}
 `
 
-// === Ignore file for VCS
+// == Ignore file for VCS
 const hgIgnoreTop = "syntax: glob\n"
 
 var tmplIgnore = `## Special files
@@ -212,15 +204,11 @@ func (p *project) parseFromVar(dst string, tmplName string) error {
 // parseLicense parses the license header.
 // charComment is the character used to comment in code files.
 func (p *project) parseLicense(charComment string) {
-	var tmplHeader string
-
 	licenseName := strings.Split(p.cfg.License, "-")[0]
-	p.cfg.Comment = charComment
+	tmplHeader := ""
 
-	// If "year" is nil then gets the actual year.
-	if p.cfg.Year == 0 {
-		p.cfg.Year = time.Now().Year()
-	}
+	p.cfg.Comment = charComment
+	p.cfg.Year = time.Now().Year()
 
 	switch licenseName {
 	case "mpl":
