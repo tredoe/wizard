@@ -5,16 +5,16 @@ Tired of adding the same files every time you create a new Go project?
 Don't know how to structure it?  
 Don't know how to apply the license?
 
-http://go.pkgdoc.org/github.com/kless/gowizard/gowizard
+http://go.pkgdoc.org/github.com/kless/wizard/gowizard
 
 
 ## Installation
 
-	go get github.com/kless/gowizard/gowizard
+	go get github.com/kless/wizard/gowizard
 
 To only install the package, which could be used by a Go IDE:
 
-	go get github.com/kless/gowizard
+	go get github.com/kless/wizard
 
 
 ## Suggestions

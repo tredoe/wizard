@@ -6,7 +6,7 @@
 
 // Package gowizard allows to create the base of new Go projects and to add new
 // packages or commands to the project.
-package gowizard
+package wizard
 
 import (
 	"fmt"

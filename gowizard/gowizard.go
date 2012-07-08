@@ -14,11 +14,11 @@ import (
 	"strings"
 
 	"github.com/kless/Go-Inline/quest"
-	"github.com/kless/gowizard"
+	"github.com/kless/wizard"
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `Tool to create skeleton of Go projects
+	fmt.Fprintf(os.Stderr, `Tool to create skeleton of Go projects.
 Usage: gowizard -i [-cfg | -add]
 
  * Configuration: -cfg -author -email -license -vcs [-org]
@@ -39,7 +39,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	p, err := gowizard.NewProject(cfg)
+	p, err := wizard.NewProject(cfg)
 	if err != nil {
 		fatalf("%s", err)
 	}
@@ -51,7 +51,7 @@ func main() {
 
 // initConfig loads configuration from flags and user configuration.
 // Returns the configuration to nil when it is used the flag "cfg".
-func initConfig() (*gowizard.Conf, error) {
+func initConfig() (*wizard.Conf, error) {
 	var (
 		fType    = flag.String("type", "", "The type of project.")
 		fName    = flag.String("name", "", "The name of the project or program.")
@@ -82,19 +82,19 @@ func initConfig() (*gowizard.Conf, error) {
 	// == Listing
 	if *fListType {
 		fmt.Print("  = Project types\n\n")
-		for k, v := range gowizard.ListType {
+		for k, v := range wizard.ListType {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
 	if *fListLicense {
 		fmt.Print("  = Licenses\n\n")
-		for k, v := range gowizard.ListLicense {
+		for k, v := range wizard.ListLicense {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
 	if *fListVCS {
 		fmt.Print("  = Version control systems\n\n")
-		for k, v := range gowizard.ListVCS {
+		for k, v := range wizard.ListVCS {
 			fmt.Printf("  %s: %s\n", k, v)
 		}
 	}
@@ -104,7 +104,7 @@ func initConfig() (*gowizard.Conf, error) {
 	}
 	// * * *
 
-	cfg := &gowizard.Conf{
+	cfg := &wizard.Conf{
 		Type:    *fType,
 		Program: *fName,
 		License: *fLicense,
@@ -162,7 +162,7 @@ func initConfig() (*gowizard.Conf, error) {
 }
 
 // interactive uses the interactive mode.
-func interactive(c *gowizard.Conf, addConfig, addProgram bool) error {
+func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 	var sFlags []string
 	var msg string
 	var err error
@@ -199,7 +199,7 @@ func interactive(c *gowizard.Conf, addConfig, addProgram bool) error {
 
 		switch k {
 		case "type":
-			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(keys(gowizard.ListType))
+			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(keys(wizard.ListType))
 		case "name":
 			if addProgram {
 				c.Program, err = prompt.ByDefault(c.Program).Mod(quest.REQUIRED).ReadString()
@@ -215,11 +215,11 @@ func interactive(c *gowizard.Conf, addConfig, addProgram bool) error {
 			c.Email, err = prompt.ByDefault(c.Email).Mod(quest.REQUIRED).ReadEmail()
 		case "license":
 			// It is got in upper case
-			c.License, err = prompt.ByDefault(gowizard.ListLowerLicense[c.License]).
-				ChoiceString(keys(gowizard.ListLicense))
+			c.License, err = prompt.ByDefault(wizard.ListLowerLicense[c.License]).
+				ChoiceString(keys(wizard.ListLicense))
 			c.License = strings.ToLower(c.License)
 		case "vcs":
-			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(keys(gowizard.ListVCS))
+			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(keys(wizard.ListVCS))
 		}
 
 		if err != nil {
