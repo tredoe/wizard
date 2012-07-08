@@ -1,10 +1,10 @@
-// Copyright 2010  The "gowizard" Authors
+// Copyright 2010  The "Gowizard" Authors
 //
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at
 // http://mozilla.org/MPL/2.0/.
 
-// Package gowizard allows to create the base of new Go projects and to add new
+// Package wizard allows to create the base of new Go projects and to add new
 // packages or commands to the project.
 package wizard
 

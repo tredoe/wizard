@@ -1,6 +1,6 @@
 ###### Notice
 
-*This is the official list of **gowizard** authors for copyright purposes.*
+*This is the official list of **Gowizard** authors for copyright purposes.*
 
 *This file is distinct from the CONTRIBUTORS file. See the latter for an
 explanation.*

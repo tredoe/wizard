@@ -1,4 +1,4 @@
-gowizard
+Gowizard
 ========
 
 ## Templates

@@ -1,4 +1,4 @@
-gowizard
+Gowizard
 ========
 
 Tired of adding the same files every time you create a new Go project?  
