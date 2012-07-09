@@ -9,6 +9,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,9 +32,12 @@ Usage: gowizard -i [-cfg | -add]
 }
 
 func main() {
+	log.SetFlags(0)
+	log.SetPrefix("ERROR: ")
+
 	cfg, err := initConfig()
 	if err != nil {
-		fatalf("%s", err)
+		log.Fatal(err)
 	}
 	if cfg == nil { // flag "-cfg"
 		os.Exit(0)
@@ -41,7 +45,7 @@ func main() {
 
 	p, err := wizard.NewProject(cfg)
 	if err != nil {
-		fatalf("%s", err)
+		log.Fatal(err)
 	}
 
 	p.Create()
@@ -241,11 +245,6 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 // == Utility
 //
-
-func fatalf(format string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, format+"\n", a...)
-	os.Exit(1)
-}
 
 // keys gets an array from map keys.
 func keys(m map[string]string) []string {
