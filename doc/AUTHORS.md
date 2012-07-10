@@ -7,7 +7,7 @@ explanation.*
 
 *Names should be added to this file as:*
 
-	`Organization` or `Name <email address>`
+	"Organization" or "Name <email address>"
 
 *Please keep the list sorted.*
 

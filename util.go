@@ -19,7 +19,7 @@ func copyFile(destination, source string) error {
 		return fmt.Errorf("copy error reading: %s", err)
 	}
 
-	err = ioutil.WriteFile(destination, src, _PERM_FILE)
+	err = ioutil.WriteFile(destination, src, _FILE_PERM)
 	if err != nil {
 		return fmt.Errorf("copy error writing: %s", err)
 	}
@@ -33,7 +33,7 @@ func createFile(dst string) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("file error: %s", err)
 	}
-	if err = file.Chmod(_PERM_FILE); err != nil {
+	if err = file.Chmod(_FILE_PERM); err != nil {
 		return nil, fmt.Errorf("file error: %s", err)
 	}
 

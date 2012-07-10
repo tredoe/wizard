@@ -51,7 +51,7 @@ type Conf struct {
 // AddTemplateData adds extra fields to pass to templates.
 func (c *Conf) AddTemplateData() {
 	if c.IsNewProject {
-		c.ProjectHeader = strings.Repeat(_CHAR_HEADER, len(c.Project))
+		c.ProjectHeader = strings.Repeat(_HEADER_CHAR, len(c.Project))
 	}
 
 	if c.License != "none" {
@@ -79,7 +79,7 @@ func (c *Conf) SetNames(addProgram bool) {
 		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
 
 		// The first line of Readme file has the project name.
-		if f, err := os.Open(README); err == nil {
+		if f, err := os.Open(_README); err == nil {
 			buf := bufio.NewReader(f)
 			defer f.Close()
 

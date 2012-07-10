@@ -11,7 +11,6 @@ package wizard
 import (
 	"fmt"
 	"go/build"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -19,19 +18,17 @@ import (
 
 const (
 	// Permissions
-	_PERM_DIRECTORY = 0755
-	_PERM_FILE      = 0644
+	_DIRECTORY_PERM = 0755
+	_FILE_PERM      = 0644
 
-	CHAR_COMMENT = "//" // For comments in source code files
-	_CHAR_HEADER = "="  // Header under the project name
-
-	// Configuration file per user
-	_USER_CONFIG = ".gowizard"
-
-	README = "README.md"
+	_COMMENT_CHAR = "//" // For comments in source code files
+	_HEADER_CHAR  = "="  // Header under the project name
 
 	// Subdirectory where is installed through "go get"
 	_DATA_PATH = "github.com/kless/wizard/data"
+
+	_README      = "README.md"
+	_USER_CONFIG = ".gowizard" // Configuration file per user
 )
 
 /*// VCS configuration files to push to a server.
@@ -109,50 +106,68 @@ func NewProject(cfg *Conf) (*project, error) {
 
 // Create creates a new project.
 func (p *project) Create() error {
-	dirTmpl := filepath.Join(p.dataDir, "templ") // Base directory of templates
-
-	if err := os.Mkdir(p.cfg.Program, _PERM_DIRECTORY); err != nil {
+	err := os.Mkdir(p.cfg.Program, _DIRECTORY_PERM)
+	if err != nil {
 		return fmt.Errorf("directory error: %s", err)
 	}
 	if p.cfg.IsNewProject {
-		if err := os.Mkdir(filepath.Join(p.cfg.Program, "doc"), _PERM_DIRECTORY); err != nil {
+		if err := os.Mkdir(filepath.Join(p.cfg.Program, "doc"),
+			_DIRECTORY_PERM); err != nil {
 			return fmt.Errorf("directory error: %s", err)
 		}
 	}
 
-	p.parseLicense(CHAR_COMMENT)
+	p.parseLicense(_COMMENT_CHAR)
 	p.parseProject()
 
-	// Render project files
-	p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+"_test.go", "Test")
-
-	if p.cfg.Type != "cmd" {
-		p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+".go", "Pkg")
-	} else {
-		p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+".go", "Cmd")
+	// == Render project files
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+"_test.go",
+		"Test"); err != nil {
+		return err
 	}
 
-	// == Option "add"
+	if p.cfg.Type != "cmd" {
+		err = p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+".go", "Pkg")
+	} else {
+		err = p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+".go", "Cmd")
+	}
+	if err != nil {
+		return err
+	}
+
+	// Option "add"
 	if !p.cfg.IsNewProject {
-		p.addLicense(".") // actual directory
+		if err = p.addLicense("."); err != nil { // actual directory
+			return err
+		}
 		return nil
 	}
 
 	// License file
-	p.addLicense(p.cfg.Program)
+	if err = p.addLicense(p.cfg.Program); err != nil {
+		return err
+	}
 
 	// Render common files
-	p.parseFromFile(filepath.Join(p.cfg.Program, "doc", "CONTRIBUTORS.md"),
-		filepath.Join(dirTmpl, "CONTRIBUTORS.md"))
-	p.parseFromFile(filepath.Join(p.cfg.Program, "doc", "NEWS.md"),
-		filepath.Join(dirTmpl, "NEWS.md"))
-	p.parseFromFile(filepath.Join(p.cfg.Program, README),
-		filepath.Join(dirTmpl, README))
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", "CONTRIBUTORS.md"),
+		"Contributors"); err != nil {
+		return err
+	}
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", "NEWS.md"),
+		"News"); err != nil {
+		return err
+	}
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", _README),
+		"Readme"); err != nil {
+		return err
+	}
 
 	// The file AUTHORS is for copyright holders.
 	if p.cfg.License != "unlicense" && p.cfg.License != "cc0" {
-		p.parseFromFile(filepath.Join(p.cfg.Program, "doc", "AUTHORS.md"),
-			filepath.Join(dirTmpl, "AUTHORS.md"))
+		if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", "AUTHORS.md"),
+			"Authors"); err != nil {
+			return err
+		}
 	}
 
 	// Add file related to VCS
@@ -161,10 +176,9 @@ func (p *project) Create() error {
 		break
 	default:
 		ignoreFile := "." + p.cfg.VCS + "ignore"
-		//p.parseFromVar(filepath.Join(p.cfg.Program, ignoreFile), "Ignore")
-		if err := ioutil.WriteFile(filepath.Join(p.cfg.Program, ignoreFile),
-			[]byte(tmplIgnore), _PERM_FILE); err != nil {
-			return fmt.Errorf("write error: %s", err)
+		if err = p.parseFromVar(filepath.Join(p.cfg.Program, ignoreFile),
+			"Ignore"); err != nil {
+			return err
 		}
 	}
 
@@ -201,9 +215,7 @@ func (p *project) addLicense(dir string) error {
 		}
 	}
 
-	dataDir := filepath.Join(p.dataDir, "license")
-
-	if err := copyFile(licensePath, filepath.Join(dataDir, license+".txt")); err != nil {
+	if err := copyFile(licensePath, filepath.Join(p.dataDir, license+".txt")); err != nil {
 		return err
 	}
 	if addPatent {
@@ -214,7 +226,7 @@ func (p *project) addLicense(dir string) error {
 		}
 
 		p.parseFromFile(filepath.Join(dir, "doc", "PATENTS.txt"),
-			filepath.Join(dataDir, "PATENTS.txt"))
+			filepath.Join(p.dataDir, "PATENTS.txt"))
 	}
 
 	return nil
