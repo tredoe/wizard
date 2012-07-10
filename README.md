@@ -2,7 +2,7 @@ Gowizard
 ========
 Tool to create skeleton of Go projects.
 
-http://go.pkgdoc.org/github.com/kless/wizard/gowizard
+[Documentation online](http://go.pkgdoc.org/github.com/kless/wizard/gowizard)
 
 ## Installation
 
@@ -51,12 +51,6 @@ Proprietary software linking: Not allowed.
 Distribution with code under another license: Not allowed with software whose
 license is not GNU GPL compatible.  
 Redistributing of the code with changes: Only under GNU GPL/AGPL.
-
-#### Unlicense
-
-Dedicates your software project to the public domain.
-
-http://unlicense.org/
 
 #### CC0
 

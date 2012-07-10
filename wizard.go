@@ -53,7 +53,6 @@ var (
 		"CC0":       "Creative Commons CC0, version 1.0 Universal",
 		"GPL":       "GNU General Public License, version 3 or later",
 		"MPL":       "Mozilla Public License, version 2.0",
-		"Unlicense": "Public domain",
 		"none":      "Proprietary license",
 	}
 
@@ -63,7 +62,6 @@ var (
 		"cc0":       "CC0",
 		"gpl":       "GPL",
 		"mpl":       "MPL",
-		"unlicense": "Unlicense",
 		"none":      "none",
 	}
 
@@ -73,7 +71,6 @@ var (
 		"cc0":       "http://creativecommons.org/publicdomain/zero/1.0/",
 		"gpl":       "http://www.gnu.org/licenses/gpl.html",
 		"mpl":       "http://mozilla.org/MPL/2.0/",
-		"unlicense": "http://unlicense.org/",
 	}
 )
 
@@ -163,7 +160,7 @@ func (p *project) Create() error {
 	}
 
 	// The file AUTHORS is for copyright holders.
-	if p.cfg.License != "unlicense" && p.cfg.License != "cc0" {
+	if p.cfg.License != "cc0" {
 		if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", "AUTHORS.md"),
 			"Authors"); err != nil {
 			return err
@@ -193,41 +190,18 @@ func (p *project) addLicense(dir string) error {
 		return nil
 	}
 
-	addPatent := false
 	license := ListLowerLicense[p.cfg.License]
-
-	licenseDst := func(name string) string {
-		if p.cfg.IsUnlicense {
-			name = "UNLICENSE.txt"
-			addPatent = true
-		} else {
-			name = "LICENSE_" + name + ".txt" // to handle multiple licenses
-		}
-		return filepath.Join(dir, "doc", name)
-	}
-
-	licensePath := licenseDst(license)
+	licenseDst := filepath.Join(dir, "doc", "LICENSE_" + license + ".txt")
 
 	// Check if it exist.
 	if !p.cfg.IsNewProject {
-		if _, err := os.Stat(licensePath); !os.IsNotExist(err) {
+		if _, err := os.Stat(licenseDst); !os.IsNotExist(err) {
 			return nil
 		}
 	}
 
-	if err := copyFile(licensePath, filepath.Join(p.dataDir, license+".txt")); err != nil {
+	if err := copyFile(licenseDst, filepath.Join(p.dataDir, license+".txt")); err != nil {
 		return err
 	}
-	if addPatent {
-		// The owner is the organization, else the Authors of the project
-		p.cfg.Owner = p.cfg.Org
-		if p.cfg.Owner == "" {
-			p.cfg.Owner = fmt.Sprintf("%q Authors", p.cfg.Project)
-		}
-
-		p.parseFromFile(filepath.Join(dir, "doc", "PATENTS.txt"),
-			filepath.Join(p.dataDir, "PATENTS.txt"))
-	}
-
 	return nil
 }

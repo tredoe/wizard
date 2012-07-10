@@ -35,8 +35,6 @@ type Conf struct {
 	FullLicense   string
 	GNUextra      string
 	ProjectHeader string
-	Owner         string // organization or project's Authors; for patents file
-	IsUnlicense   bool
 	IsCmd         bool
 	IsCgo         bool
 	Year          int
@@ -53,15 +51,10 @@ func (c *Conf) AddTemplateData() {
 	if c.IsNewProject {
 		c.ProjectHeader = strings.Repeat(_HEADER_CHAR, len(c.Project))
 	}
-
 	if c.License != "none" {
 		c.FullLicense = fmt.Sprintf("[%s](%s)",
 			ListLicense[ListLowerLicense[c.License]], ListLicenseURL[c.License])
 	}
-	if c.License == "unlicense" {
-		c.IsUnlicense = true
-	}
-
 	if c.Type == "cgo" {
 		c.IsCgo = true
 	}

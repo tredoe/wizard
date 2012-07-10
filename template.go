@@ -72,16 +72,6 @@ const (
 {{.Comment}} You should have received a copy of the CC0 Public Domain Dedication along
 {{.Comment}} with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 `
-
-	tmplUnlicense = `{{.Comment}} {{template "Copyright" .}}
-{{.Comment}}
-{{.Comment}} To the extent possible under law, the author(s) have waived all copyright
-{{.Comment}} and related or neighboring rights to this software to the public domain worldwide.
-{{.Comment}} This software is distributed without any warranty.
-{{.Comment}}
-{{.Comment}} You should have received a copy of the Unlicense along with this software.
-{{.Comment}} If not, see <http://unlicense.org/>.
-`
 )
 
 // Base of source files
@@ -239,10 +229,9 @@ because the organization holds the copyright.*
 
 	tmplReadme = `{{.Project}}
 {{.ProjectHeader}}
-
 << PROJECT SYNOPSIS >>
 
-<< http://go.pkgdoc.org/IMPORT URL >>
+[Documentation online](http://go.pkgdoc.org/<< IMPORT URL >>)
 
 ## Installation
 
@@ -313,15 +302,13 @@ func (p *project) parseLicense(charComment string) {
 		if licenseName == "agpl" {
 			p.cfg.GNUextra = "Affero"
 		}
-	case "unlicense":
-		tmplHeader = tmplUnlicense
 	case "none":
 		tmplHeader = tmplNone
 	}
 
 	p.tmpl = template.Must(p.tmpl.New("Header").Parse(tmplHeader))
 
-	if licenseName != "unlicense" && licenseName != "cc0" {
+	if licenseName != "cc0" {
 		p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyright))
 	} else {
 		p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyleft))
