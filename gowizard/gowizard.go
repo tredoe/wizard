@@ -1,8 +1,8 @@
 // Copyright 2012  The "Gowizard" Authors
 //
-// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-// If a copy of the MPL was not distributed with this file, You can obtain one at
-// http://mozilla.org/MPL/2.0/.
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 package main
 
@@ -19,8 +19,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `Tool to create skeleton of Go projects.
-Usage: gowizard -i [-cfg | -add]
+	fmt.Fprintf(os.Stderr, `Usage: gowizard -i [-cfg | -add]
 
  * Configuration: -cfg -author -email -license -vcs [-org]
  * Project: -type -name -license -author -email -vcs [-org]

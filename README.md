@@ -1,9 +1,6 @@
 Gowizard
 ========
-
-Tired of adding the same files every time you create a new Go project?  
-Don't know how to structure it?  
-Don't know how to apply the license?
+Tool to create skeleton of Go projects.
 
 http://go.pkgdoc.org/github.com/kless/wizard/gowizard
 
@@ -20,14 +17,16 @@ To only install the package, which could be used by a Go IDE:
 
 ### About licenses
 
-My suggestion is **to use MPL 2.0** because it allows covered source code to be
-mixed with other files under a different, even proprietary license. However,
-code files licensed under the MPL must remain under the MPL and freely available
-in source form.
+My suggestion is **to use MPL 2.0**, a simple copyleft license, designed to
+encourage contributors to share modifications they make to your code, while
+still allowing them to combine your code with code under other licenses (open or
+proprietary) with minimal restrictions.  
+Please read the [MPL 2.0 FAQ](http://www.mozilla.org/MPL/2.0/FAQ.html) if you
+have further questions regarding the license.
 
-Both licenses BSD and MIT/X11 have been excluded because they can not mitigate
-threats from software patents, and LGPL because it has not benefits using into a
-language of static linking.
+Both licenses BSD and MIT/X11 have been excluded of Gowizard because they can
+not mitigate threats from software patents, and LGPL because it has not benefits
+using into a language of static linking.
 
 Here you have a description of the most important elements in every license
 included in gowizard:

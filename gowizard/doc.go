@@ -1,3 +1,9 @@
+// Copyright 2012  The "Gowizard" Authors
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 /*
 Command gowizard creates the base for new Go projects, adds the license header
 to source code files, and creates a file ignore for the VCS given.

@@ -1,8 +1,8 @@
 // Copyright 2010  The "Gowizard" Authors
 //
-// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-// If a copy of the MPL was not distributed with this file, You can obtain one at
-// http://mozilla.org/MPL/2.0/.
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 package wizard
 
@@ -58,9 +58,9 @@ const (
 
 	tmplMPL = `{{.Comment}} {{template "Copyright" .}}
 {{.Comment}}
-{{.Comment}} This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-{{.Comment}} If a copy of the MPL was not distributed with this file, You can obtain one at
-{{.Comment}} http://mozilla.org/MPL/2.0/.
+{{.Comment}} This Source Code Form is subject to the terms of the Mozilla Public
+{{.Comment}} License, v. 2.0. If a copy of the MPL was not distributed with this
+{{.Comment}} file, You can obtain one at http://mozilla.org/MPL/2.0/.
 `
 
 	tmplCC0 = `{{.Comment}} {{template "Copyright" .}}
@@ -182,7 +182,7 @@ const (
 *This file is distinct from the CONTRIBUTORS file. See the latter for an
 explanation.*
 
-*Names should be added to this file as: `+"`"+`Organization`+"`"+` or `+"`"+`Name <email address>`+"`"+`*
+*Names should be added to this file as: ` + "`" + `Organization` + "`" + ` or ` + "`" + `Name <email address>` + "`" + `*
 
 *Please keep the list sorted.*
 
@@ -201,7 +201,7 @@ contributed) code to the **{{.Project}}** repository.*
 example, the employees of an organization are listed here but not in AUTHORS,
 because the organization holds the copyright.*
 
-*Names should be added to this file as: `+"`"+`Name <email address>`+"`"+`*
+*Names should be added to this file as: ` + "`" + `Name <email address>` + "`" + `*
 
 *Please keep the list sorted.*
 
