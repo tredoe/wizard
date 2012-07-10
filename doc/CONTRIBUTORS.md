@@ -9,7 +9,7 @@ because the organization holds the copyright.*
 
 *Names should be added to this file as:*
 
-	Name <email address>
+`Name <email address>`
 
 *Please keep the list sorted.*
 
