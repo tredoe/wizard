@@ -182,7 +182,7 @@ const (
 *This file is distinct from the CONTRIBUTORS file. See the latter for an
 explanation.*
 
-*Names should be added to this file as: `Organization` or `Name <email address>`*
+*Names should be added to this file as: `+"`"+`Organization`+"`"+` or `+"`"+`Name <email address>`+"`"+`*
 
 *Please keep the list sorted.*
 
@@ -201,7 +201,7 @@ contributed) code to the **{{.Project}}** repository.*
 example, the employees of an organization are listed here but not in AUTHORS,
 because the organization holds the copyright.*
 
-*Names should be added to this file as: `Name <email address>`*
+*Names should be added to this file as: `+"`"+`Name <email address>`+"`"+`*
 
 *Please keep the list sorted.*
 
