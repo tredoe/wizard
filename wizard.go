@@ -39,30 +39,40 @@ var configVCS = map[string]string{
 }*/
 
 // Project types
-var ListType = map[string]string{
-	"cmd": "Command line program",
-	"pkg": "Package",
-	"cgo": "Package that calls C code",
-}
+var (
+	ListTypeSorted = []string{"cgo", "cmd", "pkg"}
+
+	ListType = map[string]string{
+		"cmd": "command line program",
+		"pkg": "package",
+		"cgo": "package that calls C code",
+	}
+)
 
 // Version control systems (VCS)
-var ListVCS = map[string]string{
-	"bzr":   "Bazaar",
-	"git":   "Git",
-	"hg":    "Mercurial",
-	"other": "other VCS",
-	"none":  "none",
-}
+var (
+	ListVCSsorted = []string{"bzr", "git", "hg", "other", "none"}
+
+	ListVCS = map[string]string{
+		"bzr":   "Bazaar",
+		"git":   "Git",
+		"hg":    "Mercurial",
+		"other": "other VCS",
+		"none":  "none",
+	}
+)
 
 // Available licenses
 var (
+	ListLicenseSorted = []string{"AGPL", "Apache", "CC0", "GPL", "MPL", "none"}
+
 	ListLicense = map[string]string{
 		"AGPL":   "GNU Affero General Public License, version 3 or later",
 		"Apache": "Apache License, version 2.0",
 		"CC0":    "Creative Commons CC0, version 1.0 Universal",
 		"GPL":    "GNU General Public License, version 3 or later",
 		"MPL":    "Mozilla Public License, version 2.0",
-		"none":   "Proprietary license",
+		"none":   "proprietary license",
 	}
 	ListLowerLicense = map[string]string{
 		"agpl":   "AGPL",
@@ -72,6 +82,7 @@ var (
 		"mpl":    "MPL",
 		"none":   "none",
 	}
+
 	listLicenseURL = map[string]string{
 		"agpl":   "http://www.gnu.org/licenses/agpl.html",
 		"apache": "http://www.apache.org/licenses/LICENSE-2.0",

@@ -56,22 +56,22 @@ func main() {
 // Returns the configuration to nil when it is used the flag "cfg".
 func initConfig() (*wizard.Conf, error) {
 	var (
-		fType    = flag.String("type", "", "The type of project.")
-		fName    = flag.String("name", "", "The name of the project or program.")
-		fLicense = flag.String("license", "", "The license covering the program.")
-		fAuthor  = flag.String("author", "", "The author's name.")
-		fEmail   = flag.String("email", "", "The author's e-mail.")
-		fVCS     = flag.String("vcs", "", "Version control system.")
-		fOrg     = flag.String("org", "", "The organization holder of the copyright.")
+		fType    = flag.String("type", "", "type of project")
+		fName    = flag.String("name", "", "name of the project or program")
+		fLicense = flag.String("license", "", "license covering the program")
+		fAuthor  = flag.String("author", "", "author's name")
+		fEmail   = flag.String("email", "", "author's e-mail")
+		fVCS     = flag.String("vcs", "", "version control system")
+		fOrg     = flag.String("org", "", "organization holder of the copyright")
 
-		fAdd         = flag.Bool("add", false, "Add a program.")
-		fConfig      = flag.Bool("cfg", false, "Add the user configuration file.")
-		fInteractive = flag.Bool("i", false, "Interactive mode.")
+		fAdd         = flag.Bool("add", false, "add a program")
+		fConfig      = flag.Bool("cfg", false, "add the user configuration file")
+		fInteractive = flag.Bool("i", false, "interactive mode")
 
 		// Listing
-		fListType    = flag.Bool("lt", false, "Show the list of project types (for flag \"type\").")
-		fListLicense = flag.Bool("ll", false, "Show the list of licenses (for flag \"license\").")
-		fListVCS     = flag.Bool("lv", false, "Show the list of version control systems (for flag \"vcs\").")
+		fListType    = flag.Bool("lt", false, "list the available project types (for type flag)")
+		fListLicense = flag.Bool("ll", false, "list the available licenses (for license flag)")
+		fListVCS     = flag.Bool("lv", false, "list the available version control systems (for vcs flag)")
 	)
 
 	// == Parse the flags
@@ -84,21 +84,48 @@ func initConfig() (*wizard.Conf, error) {
 
 	// == Listing
 	if *fListType {
+		maxLen := 0
+		for _, v := range wizard.ListTypeSorted {
+			if len(v) > maxLen {
+				maxLen = len(v)
+			}
+		}
+
 		fmt.Print("  = Project types\n\n")
-		for k, v := range wizard.ListType {
-			fmt.Printf("  %s: %s\n", k, v)
+		for _, v := range wizard.ListTypeSorted {
+			fmt.Printf("  %s: %s%s\n",
+				v, strings.Repeat(" ", maxLen-len(v)), wizard.ListType[v],
+			)
 		}
 	}
 	if *fListLicense {
+		maxLen := 0
+		for _, v := range wizard.ListLicenseSorted {
+			if len(v) > maxLen {
+				maxLen = len(v)
+			}
+		}
+
 		fmt.Print("  = Licenses\n\n")
-		for k, v := range wizard.ListLicense {
-			fmt.Printf("  %s: %s\n", k, v)
+		for _, v := range wizard.ListLicenseSorted {
+			fmt.Printf("  %s: %s%s\n",
+				v, strings.Repeat(" ", maxLen-len(v)), wizard.ListLicense[v],
+			)
 		}
 	}
 	if *fListVCS {
+		maxLen := 0
+		for _, v := range wizard.ListVCSsorted {
+			if len(v) > maxLen {
+				maxLen = len(v)
+			}
+		}
+
 		fmt.Print("  = Version control systems\n\n")
-		for k, v := range wizard.ListVCS {
-			fmt.Printf("  %s: %s\n", k, v)
+		for _, v := range wizard.ListVCSsorted {
+			fmt.Printf("  %s: %s%s\n",
+				v, strings.Repeat(" ", maxLen-len(v)), wizard.ListVCS[v],
+			)
 		}
 	}
 
@@ -198,7 +225,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 	for _, k := range sFlags {
 		f := flag.Lookup(k)
-		prompt := q.NewPrompt(strings.TrimRight(f.Usage, "."))
+		prompt := q.NewPrompt(strings.ToUpper(string(f.Usage[0])) + f.Usage[1:])
 
 		switch k {
 		case "type":
@@ -210,7 +237,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 				}
 			}
 
-			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(keys(wizard.ListType))
+			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(wizard.ListTypeSorted)
 		case "name":
 			if addProgram {
 				c.Program, err = prompt.ByDefault(c.Program).Mod(quest.REQUIRED).ReadString()
@@ -227,10 +254,10 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 		case "license":
 			// It is got in upper case
 			c.License, err = prompt.ByDefault(wizard.ListLowerLicense[c.License]).
-				ChoiceString(keys(wizard.ListLicense))
+				ChoiceString(wizard.ListLicenseSorted)
 			c.License = strings.ToLower(c.License)
 		case "vcs":
-			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(keys(wizard.ListVCS))
+			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(wizard.ListVCSsorted)
 		}
 
 		if err != nil {
@@ -240,19 +267,4 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 	fmt.Println()
 	return nil
-}
-
-// == Utility
-//
-
-// keys gets an array from map keys.
-func keys(m map[string]string) []string {
-	a := make([]string, len(m))
-	i := 0
-
-	for k, _ := range m {
-		a[i] = k
-		i++
-	}
-	return a
 }
