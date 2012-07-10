@@ -33,6 +33,7 @@ type Conf struct {
 	// To pass to templates
 	Comment       string
 	FullLicense   string
+	LicenseFAQurl string
 	GNUextra      string
 	ProjectHeader string
 	IsCmd         bool
@@ -53,7 +54,8 @@ func (c *Conf) AddTemplateData() {
 	}
 	if c.License != "none" {
 		c.FullLicense = fmt.Sprintf("[%s](%s)",
-			ListLicense[ListLowerLicense[c.License]], ListLicenseURL[c.License])
+			ListLicense[ListLowerLicense[c.License]], listLicenseURL[c.License])
+		c.LicenseFAQurl = listLicenseFaq[c.License]
 	}
 	if c.Type == "cgo" {
 		c.IsCgo = true

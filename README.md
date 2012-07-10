@@ -20,9 +20,7 @@ To only install the package, which could be used by a Go IDE:
 My suggestion is **to use MPL 2.0**, a simple copyleft license, designed to
 encourage contributors to share modifications they make to your code, while
 still allowing them to combine your code with code under other licenses (open or
-proprietary) with minimal restrictions.  
-Please read the [MPL 2.0 FAQ](http://www.mozilla.org/MPL/2.0/FAQ.html) if you
-have further questions regarding the license.
+proprietary) with minimal restrictions.
 
 Both licenses BSD and MIT/X11 have been excluded of Gowizard because they can
 not mitigate threats from software patents, and LGPL because it has not benefits
@@ -69,5 +67,6 @@ years.
 ## License
 
 The source files are distributed under the [Mozilla Public License, version 2.0](http://mozilla.org/MPL/2.0/),
-unless otherwise noted.
-
+unless otherwise noted.  
+Please read the [FAQ](http://www.mozilla.org/MPL/2.0/FAQ.html)
+if you have further questions regarding the license.

@@ -45,35 +45,6 @@ var ListType = map[string]string{
 	"cgo": "Package that calls C code",
 }
 
-// Available licenses
-var (
-	ListLicense = map[string]string{
-		"AGPL":      "GNU Affero General Public License, version 3 or later",
-		"Apache":    "Apache License, version 2.0",
-		"CC0":       "Creative Commons CC0, version 1.0 Universal",
-		"GPL":       "GNU General Public License, version 3 or later",
-		"MPL":       "Mozilla Public License, version 2.0",
-		"none":      "Proprietary license",
-	}
-
-	ListLowerLicense = map[string]string{
-		"agpl":      "AGPL",
-		"apache":    "Apache",
-		"cc0":       "CC0",
-		"gpl":       "GPL",
-		"mpl":       "MPL",
-		"none":      "none",
-	}
-
-	ListLicenseURL = map[string]string{
-		"agpl":      "http://www.gnu.org/licenses/agpl.html",
-		"apache":    "http://www.apache.org/licenses/LICENSE-2.0",
-		"cc0":       "http://creativecommons.org/publicdomain/zero/1.0/",
-		"gpl":       "http://www.gnu.org/licenses/gpl.html",
-		"mpl":       "http://mozilla.org/MPL/2.0/",
-	}
-)
-
 // Version control systems (VCS)
 var ListVCS = map[string]string{
 	"bzr":   "Bazaar",
@@ -82,6 +53,40 @@ var ListVCS = map[string]string{
 	"other": "other VCS",
 	"none":  "none",
 }
+
+// Available licenses
+var (
+	ListLicense = map[string]string{
+		"AGPL":   "GNU Affero General Public License, version 3 or later",
+		"Apache": "Apache License, version 2.0",
+		"CC0":    "Creative Commons CC0, version 1.0 Universal",
+		"GPL":    "GNU General Public License, version 3 or later",
+		"MPL":    "Mozilla Public License, version 2.0",
+		"none":   "Proprietary license",
+	}
+	ListLowerLicense = map[string]string{
+		"agpl":   "AGPL",
+		"apache": "Apache",
+		"cc0":    "CC0",
+		"gpl":    "GPL",
+		"mpl":    "MPL",
+		"none":   "none",
+	}
+	listLicenseURL = map[string]string{
+		"agpl":   "http://www.gnu.org/licenses/agpl.html",
+		"apache": "http://www.apache.org/licenses/LICENSE-2.0",
+		"cc0":    "http://creativecommons.org/publicdomain/zero/1.0/",
+		"gpl":    "http://www.gnu.org/licenses/gpl.html",
+		"mpl":    "http://mozilla.org/MPL/2.0/",
+	}
+	listLicenseFaq = map[string]string{
+		"agpl":   "http://www.gnu.org/licenses/gpl-faq.html",
+		"apache": "http://www.apache.org/foundation/license-faq.html",
+		"cc0":    "http://creativecommons.org/about/cc0",
+		"gpl":    "http://www.gnu.org/licenses/gpl-faq.html",
+		"mpl":    "http://www.mozilla.org/MPL/2.0/FAQ.html",
+	}
+)
 
 // project represents all information to create a project.
 type project struct {
@@ -191,7 +196,7 @@ func (p *project) addLicense(dir string) error {
 	}
 
 	license := ListLowerLicense[p.cfg.License]
-	licenseDst := filepath.Join(dir, "doc", "LICENSE_" + license + ".txt")
+	licenseDst := filepath.Join(dir, "doc", "LICENSE_"+license+".txt")
 
 	// Check if it exist.
 	if !p.cfg.IsNewProject {
