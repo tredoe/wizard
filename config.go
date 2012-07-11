@@ -75,7 +75,7 @@ func (c *Conf) SetNames(addProgram bool) error {
 		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
 
 		// The first line of Readme file has the project name.
-		file, err := os.Open(filepath.Join("doc", _README))
+		file, err := os.Open(_README)
 		if err != nil {
 			return err
 		}

@@ -190,7 +190,7 @@ func (p *project) Create() error {
 		"News"); err != nil {
 		return err
 	}
-	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", _README),
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, _README),
 		"Readme"); err != nil {
 		return err
 	}
