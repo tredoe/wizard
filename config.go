@@ -33,7 +33,7 @@ type Conf struct {
 	// To pass to templates
 	Comment       string
 	FullLicense   string
-	LicenseFAQurl string
+	LicenseFaqURL string
 	GNUextra      string
 	ProjectHeader string
 	IsCmd         bool
@@ -52,10 +52,11 @@ func (c *Conf) AddTemplateData() {
 	if c.IsNewProject {
 		c.ProjectHeader = strings.Repeat(_HEADER_CHAR, len(c.Project))
 	}
+
 	if c.License != "none" {
 		c.FullLicense = fmt.Sprintf("[%s](%s)",
 			ListLicense[ListLowerLicense[c.License]], listLicenseURL[c.License])
-		c.LicenseFAQurl = listLicenseFaq[c.License]
+		c.LicenseFaqURL = listLicenseFaq[c.License]
 	}
 	if c.Type == "cgo" {
 		c.IsCgo = true
@@ -69,18 +70,22 @@ func (c *Conf) AddTemplateData() {
 //
 // A program name is named as the project name but in lower case; and if it is
 // not a command then it is removed the prefix or suffix related to "go", if any.
-func (c *Conf) SetNames(addProgram bool) {
+func (c *Conf) SetNames(addProgram bool) error {
 	if addProgram {
 		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
 
 		// The first line of Readme file has the project name.
-		if f, err := os.Open(_README); err == nil {
-			buf := bufio.NewReader(f)
-			defer f.Close()
+		file, err := os.Open(filepath.Join("doc", _README))
+		if err != nil {
+			return err
+		}
+		defer file.Close()
 
-			if line, _, err := buf.ReadLine(); err == nil {
-				c.Project = string(line)
-			}
+		buf := bufio.NewReader(file)
+		if line, _, err := buf.ReadLine(); err != nil {
+			return err
+		} else {
+			c.Project = string(line)
 		}
 	} else {
 		c.Project = strings.TrimSpace(c.Project)
@@ -89,7 +94,7 @@ func (c *Conf) SetNames(addProgram bool) {
 
 	// The program name is not changed in commands.
 	if c.Type == "cmd" {
-		return
+		return nil
 	}
 
 	// To remove them from the program name, if any.
@@ -104,6 +109,8 @@ func (c *Conf) SetNames(addProgram bool) {
 	} else if reEnd.MatchString(c.Program) {
 		c.Program = reEnd.ReplaceAllString(c.Program, "")
 	}
+
+	return nil
 }
 
 //
@@ -208,7 +215,9 @@ func (c *Conf) CheckAndSetNames(interactive, addConfig, addProgram bool) error {
 
 	if !interactive {
 		if !addConfig {
-			c.SetNames(addProgram)
+			if err := c.SetNames(addProgram); err != nil {
+				return err
+			}
 		}
 
 		// == Necessary fields

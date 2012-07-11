@@ -243,7 +243,7 @@ because the organization holds the copyright.*
 
 The source files are distributed under the {{.FullLicense}},
 unless otherwise noted.  
-Please read the [FAQ]({{.LicenseFAQurl}})
+Please read the [FAQ]({{.LicenseFaqURL}})
 if you have further questions regarding the license.
 {{end}}
 * * *

@@ -246,7 +246,9 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 			} else {
 				c.Project, err = prompt.ByDefault(c.Project).Mod(quest.REQUIRED).ReadString()
 			}
-			c.SetNames(addProgram)
+			if err = c.SetNames(addProgram); err != nil {
+				return err
+			}
 		case "org":
 			c.Org, err = prompt.ByDefault(c.Org).ReadString()
 		case "author":

@@ -215,6 +215,8 @@ func (p *project) Create() error {
 		}
 	}
 
+	// TODO: initialize VCS
+
 	return nil
 }
 
