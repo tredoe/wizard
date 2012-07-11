@@ -51,14 +51,13 @@ var (
 
 // Version control systems (VCS)
 var (
-	ListVCSsorted = []string{"bzr", "git", "hg", "other", "none"}
+	ListVCSsorted = []string{"bzr", "git", "hg", "none"}
 
 	ListVCS = map[string]string{
-		"bzr":   "Bazaar",
-		"git":   "Git",
-		"hg":    "Mercurial",
-		"other": "other VCS",
-		"none":  "none",
+		"bzr":  "Bazaar",
+		"git":  "Git",
+		"hg":   "Mercurial",
+		"none": "none",
 	}
 )
 
@@ -204,10 +203,7 @@ func (p *project) Create() error {
 	}
 
 	// Add file related to VCS
-	switch p.cfg.VCS {
-	case "other", "none":
-		break
-	default:
+	if p.cfg.VCS != "none" {
 		ignoreFile := "." + p.cfg.VCS + "ignore"
 		if err = p.parseFromVar(filepath.Join(p.cfg.Program, ignoreFile),
 			"Ignore"); err != nil {
