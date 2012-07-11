@@ -38,7 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if cfg == nil { // flag "-cfg"
+	if cfg == nil { // -cfg flag
 		os.Exit(0)
 	}
 
@@ -47,7 +47,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	p.Create()
+	if err = p.Create(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // * * *

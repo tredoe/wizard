@@ -161,6 +161,8 @@ var tmplIgnore = `## Special files
 
 ## OS generated files
 Icon?
+
+# * * *
 `
 
 // Information files

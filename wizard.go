@@ -148,10 +148,30 @@ func (p *project) Create() error {
 		return err
 	}
 
-	// Option "add"
+	// == -add flag
 	if !p.cfg.IsNewProject {
 		if err = p.addLicense("."); err != nil { // actual directory
 			return err
+		}
+		// Append the command name into the ignore file.
+		if p.cfg.IsCmd {
+			ignoreFile, err := filepath.Glob(".*ignore")
+			if err != nil {
+				return err
+			}
+			if len(ignoreFile) == 0 {
+				return nil
+			}
+
+			file, err := os.OpenFile(ignoreFile[0], os.O_WRONLY|os.O_APPEND, 0)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			if _, err = file.WriteString(p.cfg.Program + "/" + p.cfg.Program + "\n"); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
