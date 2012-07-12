@@ -26,6 +26,10 @@ Create project
 By default, the program name (flag *-program*) is named as the project name but
 in lower case, and removing the name "Go" of the prefix and suffix.
 
+The flag -import is the import path of your project, but you must substitute the
+project name by "$" since Gowizard uses it to add the name automatically. For
+example: *github.com/kless/$*
+
 The way fastest and simple to create it, is using the interactive mode:
 
 	gowizard -i

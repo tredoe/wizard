@@ -21,14 +21,15 @@ import (
 
 // Conf represents the configuration of the project.
 type Conf struct {
-	Type    string
-	Project string
-	Program string // to lower case
-	License string
-	Author  string
-	Email   string
-	VCS     string
-	Org     string // the author develops the program for an organization
+	Type       string
+	Project    string
+	Program    string // to lower case
+	License    string
+	Author     string
+	Email      string
+	VCS        string
+	ImportPath string
+	Org        string // the author develops the program for an organization
 
 	// To pass to templates
 	Comment       string
@@ -163,38 +164,39 @@ func (c *Conf) UserConfig() error {
 	ok := true
 
 	if c.Org == "" {
-		c.Org, err = cfg.String("DEFAULT", "org")
-		if err != nil {
+		if c.Org, err = cfg.String("DEFAULT", "org"); err != nil {
 			ok = false
 			errKeys = append(errKeys, "org")
 		}
 	}
 	if c.Author == "" {
-		c.Author, err = cfg.String("DEFAULT", "author")
-		if err != nil {
+		if c.Author, err = cfg.String("DEFAULT", "author"); err != nil {
 			ok = false
 			errKeys = append(errKeys, "author")
 		}
 	}
 	if c.Email == "" {
-		c.Email, err = cfg.String("DEFAULT", "email")
-		if err != nil {
+		if c.Email, err = cfg.String("DEFAULT", "email"); err != nil {
 			ok = false
 			errKeys = append(errKeys, "email")
 		}
 	}
 	if c.License == "" {
-		c.License, err = cfg.String("DEFAULT", "license")
-		if err != nil {
+		if c.License, err = cfg.String("DEFAULT", "license"); err != nil {
 			ok = false
 			errKeys = append(errKeys, "license")
 		}
 	}
 	if c.VCS == "" {
-		c.VCS, err = cfg.String("DEFAULT", "vcs")
-		if err != nil {
+		if c.VCS, err = cfg.String("DEFAULT", "vcs"); err != nil {
 			ok = false
 			errKeys = append(errKeys, "vcs")
+		}
+	}
+	if c.ImportPath == "" {
+		if c.ImportPath, err = cfg.String("DEFAULT", "import"); err != nil {
+			ok = false
+			errKeys = append(errKeys, "import")
 		}
 	}
 

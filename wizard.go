@@ -13,6 +13,7 @@ import (
 	"go/build"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -173,6 +174,11 @@ func (p *project) Create() error {
 			}
 		}
 		return nil
+	}
+	// ==
+
+	if p.cfg.ImportPath != "" {
+		p.cfg.ImportPath = strings.Replace(p.cfg.ImportPath, "$", p.cfg.Program, 1)
 	}
 
 	// License file

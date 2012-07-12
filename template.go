@@ -117,6 +117,7 @@ author: {{.Author}}
 email: {{.Email}}
 license: {{.License}}
 vcs: {{.VCS}}
+import: {{.ImportPath}}
 `
 
 // Ignore file for VCS
@@ -233,11 +234,11 @@ because the organization holds the copyright.*
 {{.ProjectHeader}}
 << PROJECT SYNOPSIS >>
 
-[Documentation online](http://go.pkgdoc.org/<< IMPORT URL >>)
+[Documentation online](http://go.pkgdoc.org/{{with .ImportPath}}{{.}}{{else}}<< IMPORT PATH >>{{end}})
 
 ## Installation
 
-	go get << IMPORT URL >>
+	go get {{with .ImportPath}}{{.}}{{else}}<< IMPORT PATH >>{{end}}
 {{if .FullLicense}}
 ## License
 

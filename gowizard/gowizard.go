@@ -22,7 +22,7 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `Usage: gowizard -i [-cfg | -add]
 
  * Configuration: -cfg -author -email -license -vcs [-org]
- * Project: -type -name -license -author -email -vcs [-org]
+ * Project: -type -name -license -author -email -vcs -import [-org]
  * Program: -type -name -license -add
 
 `)
@@ -58,13 +58,14 @@ func main() {
 // Returns the configuration to nil when it is used the flag "cfg".
 func initConfig() (*wizard.Conf, error) {
 	var (
-		fType    = flag.String("type", "", "type of project")
-		fName    = flag.String("name", "", "name of the project or program")
-		fLicense = flag.String("license", "", "license covering the program")
-		fAuthor  = flag.String("author", "", "author's name")
-		fEmail   = flag.String("email", "", "author's e-mail")
-		fVCS     = flag.String("vcs", "", "version control system")
-		fOrg     = flag.String("org", "", "organization holder of the copyright")
+		fType       = flag.String("type", "", "type of project")
+		fName       = flag.String("name", "", "name of the project or program")
+		fLicense    = flag.String("license", "", "license covering the program")
+		fAuthor     = flag.String("author", "", "author's name")
+		fEmail      = flag.String("email", "", "author's e-mail")
+		fVCS        = flag.String("vcs", "", "version control system")
+		fImportPath = flag.String("import", "", "import path")
+		fOrg        = flag.String("org", "", "organization holder of the copyright")
 
 		fAdd         = flag.Bool("add", false, "add a program")
 		fConfig      = flag.Bool("cfg", false, "add the user configuration file")
@@ -137,13 +138,14 @@ func initConfig() (*wizard.Conf, error) {
 	// * * *
 
 	cfg := &wizard.Conf{
-		Type:    *fType,
-		Program: *fName,
-		License: *fLicense,
-		Author:  *fAuthor,
-		Email:   *fEmail,
-		VCS:     *fVCS,
-		Org:     *fOrg,
+		Type:       *fType,
+		Program:    *fName,
+		License:    *fLicense,
+		Author:     *fAuthor,
+		Email:      *fEmail,
+		VCS:        *fVCS,
+		ImportPath: *fImportPath,
+		Org:        *fOrg,
 
 		IsNewProject: !*fAdd,
 	}
@@ -216,6 +218,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 			"email",
 			"license",
 			"vcs",
+			"import",
 		}
 	}
 
@@ -262,6 +265,8 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 			c.License = strings.ToLower(c.License)
 		case "vcs":
 			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(wizard.ListVCSsorted)
+		case "import":
+			c.ImportPath, err = prompt.ByDefault(c.ImportPath).ReadString()
 		}
 
 		if err != nil {
