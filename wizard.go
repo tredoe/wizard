@@ -177,8 +177,8 @@ func (p *project) Create() error {
 	}
 	// ==
 
-	if p.cfg.ImportPath != "" {
-		p.cfg.ImportPath = strings.Replace(p.cfg.ImportPath, "$", p.cfg.Program, 1)
+	if len(p.cfg.ImportPaths) != 0 {
+		p.cfg.ImportPath = strings.Replace(p.cfg.ImportPaths[0], "$", p.cfg.Program, 1)
 	}
 
 	// License file

@@ -18,6 +18,32 @@ import (
 	"github.com/kless/wizard"
 )
 
+type importPaths []string
+
+func (i *importPaths) String() string {
+	if len(*i) == 0 {
+		return `""`
+	}
+	return fmt.Sprint(*i)
+}
+
+func (i *importPaths) Set(value string) error {
+	*i = make([]string, 0)
+
+	for _, v := range strings.Split(value, ":") {
+		*i = append(*i, strings.TrimSpace(v))
+	}
+	return nil
+}
+
+var fImportPath importPaths
+
+func init() {
+	flag.Var(&fImportPath, "import", "import path; colon-separated list")
+}
+
+// * * *
+
 func usage() {
 	fmt.Fprintf(os.Stderr, `Usage: gowizard -i [-cfg | -add]
 
@@ -58,14 +84,13 @@ func main() {
 // Returns the configuration to nil when it is used the flag "cfg".
 func initConfig() (*wizard.Conf, error) {
 	var (
-		fType       = flag.String("type", "", "type of project")
-		fName       = flag.String("name", "", "name of the project or program")
-		fLicense    = flag.String("license", "", "license covering the program")
-		fAuthor     = flag.String("author", "", "author's name")
-		fEmail      = flag.String("email", "", "author's e-mail")
-		fVCS        = flag.String("vcs", "", "version control system")
-		fImportPath = flag.String("import", "", "import path")
-		fOrg        = flag.String("org", "", "organization holder of the copyright")
+		fType    = flag.String("type", "", "type of project")
+		fName    = flag.String("name", "", "name of the project or program")
+		fLicense = flag.String("license", "", "license covering the program")
+		fAuthor  = flag.String("author", "", "author's name")
+		fEmail   = flag.String("email", "", "author's e-mail")
+		fVCS     = flag.String("vcs", "", "version control system")
+		fOrg     = flag.String("org", "", "organization holder of the copyright")
 
 		fAdd         = flag.Bool("add", false, "add a program")
 		fConfig      = flag.Bool("cfg", false, "add the user configuration file")
@@ -138,14 +163,14 @@ func initConfig() (*wizard.Conf, error) {
 	// * * *
 
 	cfg := &wizard.Conf{
-		Type:       *fType,
-		Program:    *fName,
-		License:    *fLicense,
-		Author:     *fAuthor,
-		Email:      *fEmail,
-		VCS:        *fVCS,
-		ImportPath: *fImportPath,
-		Org:        *fOrg,
+		Type:        *fType,
+		Program:     *fName,
+		License:     *fLicense,
+		Author:      *fAuthor,
+		Email:       *fEmail,
+		VCS:         *fVCS,
+		ImportPaths: fImportPath,
+		Org:         *fOrg,
 
 		IsNewProject: !*fAdd,
 	}
@@ -204,7 +229,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 	// == Sorted flags
 	if addConfig {
 		msg = "New configuration"
-		sFlags = []string{"author", "email", "license", "vcs", "org"}
+		sFlags = []string{"author", "email", "license", "vcs", "import", "org"}
 	} else if addProgram {
 		msg = "Add program"
 		sFlags = []string{"type", "name", "license"}
@@ -230,6 +255,10 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 	for _, k := range sFlags {
 		f := flag.Lookup(k)
+
+		if strings.Contains(f.Usage, ";") {
+			f.Usage = strings.SplitN(f.Usage, ";", 2)[0]
+		}
 		prompt := q.NewPrompt(strings.ToUpper(string(f.Usage[0])) + f.Usage[1:])
 
 		switch k {
@@ -266,7 +295,11 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 		case "vcs":
 			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(wizard.ListVCSsorted)
 		case "import":
-			c.ImportPath, err = prompt.ByDefault(c.ImportPath).ReadString()
+			if addConfig {
+				c.ImportPaths, err = prompt.ReadMultipleString()
+			} else {
+				c.ImportPaths[0], err = prompt.ByDefault(c.ImportPaths[0]).ChoiceString(c.ImportPaths)
+			}
 		}
 
 		if err != nil {

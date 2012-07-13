@@ -21,17 +21,18 @@ import (
 
 // Conf represents the configuration of the project.
 type Conf struct {
-	Type       string
-	Project    string
-	Program    string // to lower case
-	License    string
-	Author     string
-	Email      string
-	VCS        string
-	ImportPath string
-	Org        string // the author develops the program for an organization
+	Type        string
+	Project     string
+	Program     string // to lower case
+	License     string
+	Author      string
+	Email       string
+	VCS         string
+	Org         string // the author develops the program for an organization
+	ImportPaths []string
 
 	// To pass to templates
+	ImportPath    string
 	Comment       string
 	FullLicense   string
 	LicenseFaqURL string
@@ -131,6 +132,8 @@ func (cfg *Conf) AddConfig() error {
 		return err
 	}
 
+	cfg.ImportPath = strings.Join(cfg.ImportPaths, ":")
+
 	if err := tmpl.Execute(file, cfg); err != nil {
 		return fmt.Errorf("execution failed: %s", err)
 	}
@@ -193,10 +196,14 @@ func (c *Conf) UserConfig() error {
 			errKeys = append(errKeys, "vcs")
 		}
 	}
-	if c.ImportPath == "" {
-		if c.ImportPath, err = cfg.String("DEFAULT", "import"); err != nil {
+	if len(c.ImportPaths) == 0 {
+		var imports string
+
+		if imports, err = cfg.String("DEFAULT", "import"); err != nil {
 			ok = false
 			errKeys = append(errKeys, "import")
+		} else {
+			c.ImportPaths = strings.Split(imports, ":")
 		}
 	}
 
