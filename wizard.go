@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"go/build"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -31,13 +32,6 @@ const (
 	_README      = "README.md"
 	_USER_CONFIG = ".gowizard" // Configuration file per user
 )
-
-/*// VCS configuration files to push to a server.
-var configVCS = map[string]string{
-	"bzr": ".bzr/branch/branch.conf",
-	"git": ".git/config",
-	"hg":  ".hg/hgrc",
-}*/
 
 // Project types
 var (
@@ -59,6 +53,13 @@ var (
 		"git":  "Git",
 		"hg":   "Mercurial",
 		"none": "none",
+	}
+
+	// VCS configuration files
+	listConfigVCS = map[string]string{
+		"bzr": ".bzr/branch/branch.conf",
+		"git": ".git/config",
+		"hg":  ".hg/hgrc",
 	}
 )
 
@@ -215,9 +216,16 @@ func (p *project) Create() error {
 			"Ignore"); err != nil {
 			return err
 		}
-	}
 
-	// TODO: initialize VCS
+		// Initialize VCS
+		out, err := exec.Command(p.cfg.VCS, "init", p.cfg.Program).CombinedOutput()
+		if err != nil {
+			return err
+		}
+		if out != nil {
+			fmt.Print(string(out))
+		}
+	}
 
 	return nil
 }
