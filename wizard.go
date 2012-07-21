@@ -9,13 +9,19 @@
 package wizard
 
 import (
+	"bufio"
+	"bytes"
+	"errors"
 	"fmt"
 	"go/build"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
+	"time"
 )
 
 const (
@@ -55,12 +61,12 @@ var (
 		"none": "none",
 	}
 
-	// VCS configuration files
+	/*// VCS configuration files
 	listConfigVCS = map[string]string{
 		"bzr": ".bzr/branch/branch.conf",
 		"git": ".git/config",
 		"hg":  ".hg/hgrc",
-	}
+	}*/
 )
 
 // Available licenses
@@ -105,6 +111,131 @@ type project struct {
 	dataDir string             // directory with templates
 	tmpl    *template.Template // set of templates
 	cfg     *Conf
+}
+
+// NewFile creates a new file in the current directory.
+func NewFile(name string, addGo, addCgo, addTest bool) error {
+	cfg := new(Conf)
+	pkg, err := build.ImportDir(".", 0)
+
+	if err == nil {
+		cfg.Program = pkg.Name
+	} else {
+		cfg.Program = "main"
+	}
+	if pkg.IsCommand() {
+		cfg.IsCmd = true
+	}
+	if addCgo {
+		cfg.IsCgo = true
+	}
+
+	proj := &project{"", new(template.Template), cfg}
+
+	// == Try get the license file in directory doc
+	hasDirDoc := true
+	hasHeader := false
+
+	info, err := os.Stat("doc")
+	if os.IsNotExist(err) {
+		info, err = os.Stat(filepath.Join("..", "doc"))
+		if os.IsNotExist(err) {
+			hasDirDoc = false
+		}
+	}
+
+	if hasDirDoc && info.IsDir() {
+		licenseFiles, err := filepath.Glob(filepath.Join(info.Name(), "LICENSE_*"))
+		if err != nil {
+			return err
+		}
+
+		// Get license name from the file if there is only one.
+		if len(licenseFiles) == 1 {
+			if proj.cfg.Project, err = getProjectName(); err != nil {
+				return err
+			}
+			license := filepath.Base(licenseFiles[0])
+			license = strings.SplitN(license, "_", 2)[1]
+			license = strings.SplitN(license, ".", 2)[0]
+
+			proj.cfg.License = strings.ToLower(license)
+			proj.parseLicense("//")
+			hasHeader = true
+		}
+	}
+
+	// == Get the header from a Go file
+	if !hasHeader {
+		goFiles, err := filepath.Glob("*.go")
+		if err != nil {
+			return err
+		}
+		if len(goFiles) == 0 {
+			return errors.New("no found any Go source file in current directory")
+		}
+
+		bComment := []byte("//")
+		bPackage := []byte("package")
+		header := ""
+		reYear := regexp.MustCompile(`[[:blank:]]\d{4}[[:blank:]]`)
+
+		// Get header of a Go source file
+		for _, f := range goFiles {
+			file, err := os.Open(f)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			buf := bufio.NewReader(file)
+			headerBuf := new(bytes.Buffer)
+			isFirst := true
+
+			for {
+				line, _, err := buf.ReadLine()
+				if err == io.EOF {
+					break
+				}
+
+				if bytes.HasPrefix(line, bComment) {
+					if isFirst {
+						line = reYear.ReplaceAll(line, []byte(fmt.Sprintf(" %d ", time.Now().Year())))
+						isFirst = false
+					}
+					headerBuf.Write(line)
+					headerBuf.WriteRune('\n')
+
+				} else if headerBuf.Len() != 0 || bytes.HasPrefix(line, bPackage) {
+					break
+				}
+			}
+
+			if headerBuf.Len() != 0 {
+				header = headerBuf.String()
+				break
+			}
+		}
+
+		proj.tmpl = template.Must(proj.tmpl.New("Header").Parse(header))
+	}
+
+	// Render files
+
+	if addGo || addCgo {
+		proj.tmpl = template.Must(proj.tmpl.New("Pkg").Parse(tmplPkg))
+		if err = proj.parseFromVar(name+".go", "Pkg"); err != nil {
+			return err
+		}
+	}
+	if addTest {
+		proj.tmpl = template.Must(proj.tmpl.New("Test").Parse(tmplTest))
+		if err = proj.parseFromVar(name+"_test.go", "Test"); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // NewProject initializes information for a new project.

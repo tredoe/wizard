@@ -7,7 +7,6 @@
 package wizard
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -74,21 +73,13 @@ func (c *Conf) AddTemplateData() {
 // not a command then it is removed the prefix or suffix related to "go", if any.
 func (c *Conf) SetNames(addProgram bool) error {
 	if addProgram {
-		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
-
-		// The first line of Readme file has the project name.
-		file, err := os.Open(_README)
+		project, err := getProjectName()
 		if err != nil {
 			return err
 		}
-		defer file.Close()
 
-		buf := bufio.NewReader(file)
-		if line, _, err := buf.ReadLine(); err != nil {
-			return err
-		} else {
-			c.Project = string(line)
-		}
+		c.Project = project
+		c.Program = strings.ToLower(strings.TrimSpace(c.Program))
 	} else {
 		c.Project = strings.TrimSpace(c.Project)
 		c.Program = strings.ToLower(c.Project)

@@ -332,7 +332,9 @@ func (p *project) parseProject() {
 	} else {
 		p.tmpl = template.Must(p.tmpl.New("Pkg").Parse(tmplPkg))
 	}
-	p.tmpl = template.Must(p.tmpl.New("Test").Parse(tmplTest))
+//	if p.cfg.Type != "cmd" {
+		p.tmpl = template.Must(p.tmpl.New("Test").Parse(tmplTest))
+//	}
 
 	// == Ignore file
 	if p.cfg.VCS == "hg" {

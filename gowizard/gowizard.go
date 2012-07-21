@@ -1,4 +1,4 @@
-// Copyright 2012  The "Gowizard" Authors
+// Copyright 2010  The "Gowizard" Authors
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -50,6 +50,7 @@ func usage() {
  * Configuration: -cfg -author -email -license -vcs [-org]
  * Project: -type -name -license -author -email -vcs -import [-org]
  * Program: -type -name -license -add
+ * File: (-g | -c | -t) name
 
 `)
 	flag.PrintDefaults()
@@ -64,7 +65,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if cfg == nil { // -cfg flag
+	if cfg == nil {
 		os.Exit(0)
 	}
 
@@ -95,6 +96,10 @@ func initConfig() (*wizard.Conf, error) {
 		fAdd         = flag.Bool("add", false, "add a program")
 		fConfig      = flag.Bool("cfg", false, "add the user configuration file")
 		fInteractive = flag.Bool("i", false, "interactive mode")
+
+		fGo   = flag.Bool("g", false, "new Go source file")
+		fCgo  = flag.Bool("c", false, "new Cgo source file")
+		fTest = flag.Bool("t", false, "new test file")
 
 		// Listing
 		fListType    = flag.Bool("lt", false, "list the available project types (for type flag)")
@@ -158,8 +163,21 @@ func initConfig() (*wizard.Conf, error) {
 	}
 
 	if *fListType || *fListLicense || *fListVCS {
-		os.Exit(0)
+		return nil, nil
 	}
+
+	// New file
+	if *fGo || *fCgo || *fTest {
+		if flag.NArg() != 1 {
+			usage()
+		}
+
+		if err := wizard.NewFile(flag.Arg(0), *fGo, *fCgo, *fTest); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+
 	// * * *
 
 	cfg := &wizard.Conf{

@@ -7,9 +7,11 @@
 package wizard
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 // copyFile copies a file from source to destination.
@@ -38,4 +40,30 @@ func createFile(dst string) (*os.File, error) {
 	}
 
 	return file, nil
+}
+
+// getProjectName returns the project name from Readme file.
+// It should be in the first line.
+func getProjectName() (string, error) {
+	info, err := os.Stat(_README)
+	if os.IsNotExist(err) {
+		info, err = os.Stat(filepath.Join("..", _README))
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("file %s not found", _README)
+		}
+	}
+
+	file, err := os.Open(info.Name())
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	buf := bufio.NewReader(file)
+	line, _, err := buf.ReadLine()
+
+	if err != nil {
+		return "", err
+	}
+	return string(line), nil
 }
