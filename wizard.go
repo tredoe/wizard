@@ -223,8 +223,8 @@ func NewFile(name string, addGo, addCgo, addTest bool) error {
 	// Render files
 
 	if addGo || addCgo {
-		proj.tmpl = template.Must(proj.tmpl.New("Pkg").Parse(tmplPkg))
-		if err = proj.parseFromVar(name+".go", "Pkg"); err != nil {
+		proj.tmpl = template.Must(proj.tmpl.New("Go").Parse(tmplGo))
+		if err = proj.parseFromVar(name+".go", "Go"); err != nil {
 			return err
 		}
 	}
@@ -266,18 +266,15 @@ func (p *project) Create() error {
 	p.parseProject()
 
 	// == Render project files
-	if err = p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+"_test.go",
-		"Test"); err != nil {
-		return err
-	}
-
-	if p.cfg.Type != "cmd" {
-		err = p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+".go", "Pkg")
-	} else {
-		err = p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+".go", "Cmd")
-	}
+	err = p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+".go", "Go")
 	if err != nil {
 		return err
+	}
+	if p.cfg.Type != "cmd" {
+		err = p.parseFromVar(filepath.Join(p.cfg.Program, p.cfg.Program)+"_test.go", "Test")
+		if err != nil {
+			return err
+		}
 	}
 
 	// == -add flag

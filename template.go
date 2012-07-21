@@ -76,19 +76,8 @@ const (
 
 // Base of source files
 const (
-	tmplCmd = `{{template "Header" .}}
-package main
-
-import (
-
-)
-
-func main() {
-
-}
-`
-	tmplPkg = `{{template "Header" .}}
-package {{.Program}}
+	tmplGo = `{{template "Header" .}}
+package {{if .IsCmd}}main{{else}}{{.Program}}{{end}}
 {{if .IsCgo}}
 import "C"{{end}}
 import (
@@ -326,15 +315,10 @@ func (p *project) parseProject() {
 	p.tmpl = template.Must(p.tmpl.New("Contributors").Parse(tmplContributors))
 	p.tmpl = template.Must(p.tmpl.New("News").Parse(tmplNews))
 	p.tmpl = template.Must(p.tmpl.New("Readme").Parse(tmplReadme))
-
-	if p.cfg.Type == "cmd" {
-		p.tmpl = template.Must(p.tmpl.New("Cmd").Parse(tmplCmd))
-	} else {
-		p.tmpl = template.Must(p.tmpl.New("Pkg").Parse(tmplPkg))
-	}
-//	if p.cfg.Type != "cmd" {
+	p.tmpl = template.Must(p.tmpl.New("Go").Parse(tmplGo))
+	if p.cfg.Type != "cmd" {
 		p.tmpl = template.Must(p.tmpl.New("Test").Parse(tmplTest))
-//	}
+	}
 
 	// == Ignore file
 	if p.cfg.VCS == "hg" {
