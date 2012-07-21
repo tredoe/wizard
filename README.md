@@ -4,6 +4,10 @@ Tool to create skeleton of Go projects.
 
 [Documentation online](http://go.pkgdoc.org/github.com/kless/wizard/gowizard)
 
+#### TODO
+
+* Allow rename project
+
 ## Installation
 
 	go get github.com/kless/wizard/gowizard
