@@ -81,11 +81,14 @@ package {{if .IsCmd}}main{{else}}{{.Program}}{{end}}
 {{if .IsCgo}}
 import "C"{{end}}
 import (
-
+	
 )
 
+{{if .IsCmd}}func main() {
+	
+}
+{{end}}`
 
-`
 	tmplTest = `{{template "Header" .}}
 package {{if .IsCmd}}main{{else}}{{.Program}}{{end}}
 
@@ -94,7 +97,7 @@ import (
 )
 
 func Test(t *testing.T) {
-
+	
 }
 `
 )
