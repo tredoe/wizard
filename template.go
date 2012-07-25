@@ -100,6 +100,71 @@ func Test(t *testing.T) {
 	
 }
 `
+
+	tmplInstall = `{{template "Header" .}}
+// Command Install manages files related to the system.
+//
+// To use during develpment:
+//
+// sudo env PATH=$PATH GOPATH=$GOPATH go run Install.go <flag...>
+package main
+
+import (
+	"flag"
+	"log"
+	"os"
+	//"runtime"
+)
+
+func Install() {
+	
+}
+
+func Remove() {
+	// Remove binary files.
+}
+
+func Purge() {
+	Remove()
+	// Remove config files, directories, etc.
+}
+
+// * * *
+
+func init() {
+	log.SetFlags(0)
+	log.SetPrefix("ERROR: ")
+
+	/* If a system has not implemented on this installation, use:
+	if runtime.GOOS == "windows" {
+		log.Fatal("TODO: handle Windows")
+	}*/
+	if os.Getuid() != 0 {
+		log.Fatal("you have to be root")
+	}
+}
+
+func main() {
+	install := flag.Bool("i", false, "install")
+	remove := flag.Bool("r", false, "remove")
+	purge := flag.Bool("p", false, "purge")
+
+	flag.Parse()
+	if flag.NFlag() == 0 {
+		flag.PrintDefaults()
+		os.Exit(2)
+	}
+
+	if *purge {
+		Purge()
+	} else if *remove {
+		Remove()
+	}
+	if *install {
+		Install()
+	}
+}
+`
 )
 
 // User configuration

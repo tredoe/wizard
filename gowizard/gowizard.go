@@ -50,6 +50,7 @@ func usage() {
  * Configuration: -cfg -author -email -license -vcs [-org]
  * Project: -type -name -license -author -email -vcs -import [-org]
  * Program: -type -name -license -add
+ * Install: -install
  * File: (-g | -c | -t) name
 
 `)
@@ -93,8 +94,9 @@ func initConfig() (*wizard.Conf, error) {
 		fVCS     = flag.String("vcs", "", "version control system")
 		fOrg     = flag.String("org", "", "organization holder of the copyright")
 
-		fAdd         = flag.Bool("add", false, "add a program")
 		fConfig      = flag.Bool("cfg", false, "add the user configuration file")
+		fAdd         = flag.Bool("add", false, "add a program")
+		fInstall     = flag.Bool("install", false, "add a manager related to the system")
 		fInteractive = flag.Bool("i", false, "interactive mode")
 
 		fGo   = flag.Bool("g", false, "new Go source file")
@@ -172,7 +174,13 @@ func initConfig() (*wizard.Conf, error) {
 			usage()
 		}
 
-		if err := wizard.NewFile(flag.Arg(0), *fGo, *fCgo, *fTest); err != nil {
+		if err := wizard.NewFile(flag.Arg(0), *fGo, *fCgo, *fTest, *fInstall); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+	if *fInstall {
+		if err := wizard.NewFile("", false, false, false, *fInstall); err != nil {
 			return nil, err
 		}
 		return nil, nil

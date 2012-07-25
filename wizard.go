@@ -35,8 +35,10 @@ const (
 	// Subdirectory where is installed through "go get"
 	_DATA_PATH = "github.com/kless/wizard/data"
 
-	_README      = "README.md"
-	_USER_CONFIG = ".gowizard" // Configuration file per user
+	_DOC_DIR      = "Doc"
+	_INSTALL_FILE = "Install"
+	_README       = "README.md"
+	_USER_CONFIG  = ".gowizard" // Configuration file per user
 )
 
 // Project types
@@ -114,31 +116,34 @@ type project struct {
 }
 
 // NewFile creates a new file in the current directory.
-func NewFile(name string, addGo, addCgo, addTest bool) error {
+// If addInstall is used then the name is set to a value fixed.
+func NewFile(name string, addGo, addCgo, addTest, addInstall bool) error {
 	cfg := new(Conf)
 	pkg, err := build.ImportDir(".", 0)
 
-	if err == nil {
-		cfg.Program = pkg.Name
-	} else {
-		cfg.Program = "main"
-	}
-	if pkg.IsCommand() {
-		cfg.IsCmd = true
-	}
-	if addCgo {
-		cfg.IsCgo = true
+	if !addInstall {
+		if err == nil {
+			cfg.Program = pkg.Name
+		} else {
+			cfg.Program = "main"
+		}
+		if pkg.IsCommand() {
+			cfg.IsCmd = true
+		}
+		if addCgo {
+			cfg.IsCgo = true
+		}
 	}
 
 	proj := &project{"", new(template.Template), cfg}
 
-	// == Try get the license file in directory Doc
+	// == Try get the license file in documentation directory
 	hasDirDoc := true
 	hasHeader := false
 
-	info, err := os.Stat("Doc")
+	info, err := os.Stat(_DOC_DIR)
 	if os.IsNotExist(err) {
-		info, err = os.Stat(filepath.Join("..", "Doc"))
+		info, err = os.Stat(filepath.Join("..", _DOC_DIR))
 		if os.IsNotExist(err) {
 			hasDirDoc = false
 		}
@@ -234,6 +239,20 @@ func NewFile(name string, addGo, addCgo, addTest bool) error {
 			return err
 		}
 	}
+	if addInstall {
+		if _, err = os.Stat(_README); os.IsNotExist(err) {
+			return errors.New("file README not found; maybe current directory is not a Go project")
+		}
+		if err = os.Mkdir(_INSTALL_FILE, _DIRECTORY_PERM); err != nil {
+			return err
+		}
+
+		proj.tmpl = template.Must(proj.tmpl.New(_INSTALL_FILE).Parse(tmplInstall))
+		if err = proj.parseFromVar(filepath.Join(_INSTALL_FILE, _INSTALL_FILE+".go"),
+			_INSTALL_FILE); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -256,7 +275,7 @@ func (p *project) Create() error {
 		return fmt.Errorf("directory error: %s", err)
 	}
 	if p.cfg.IsNewProject {
-		if err := os.Mkdir(filepath.Join(p.cfg.Program, "Doc"),
+		if err := os.Mkdir(filepath.Join(p.cfg.Program, _DOC_DIR),
 			_DIRECTORY_PERM); err != nil {
 			return fmt.Errorf("directory error: %s", err)
 		}
@@ -316,11 +335,11 @@ func (p *project) Create() error {
 	}
 
 	// Render common files
-	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "Doc", "CONTRIBUTORS.md"),
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, _DOC_DIR, "CONTRIBUTORS.md"),
 		"Contributors"); err != nil {
 		return err
 	}
-	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "Doc", "NEWS.md"),
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, _DOC_DIR, "NEWS.md"),
 		"News"); err != nil {
 		return err
 	}
@@ -331,7 +350,7 @@ func (p *project) Create() error {
 
 	// The file AUTHORS is for copyright holders.
 	if p.cfg.License != "cc0" {
-		if err = p.parseFromVar(filepath.Join(p.cfg.Program, "Doc", "AUTHORS.md"),
+		if err = p.parseFromVar(filepath.Join(p.cfg.Program, _DOC_DIR, "AUTHORS.md"),
 			"Authors"); err != nil {
 			return err
 		}
@@ -367,7 +386,7 @@ func (p *project) addLicense(dir string) error {
 	}
 
 	license := ListLowerLicense[p.cfg.License]
-	licenseDst := filepath.Join(dir, "Doc", "LICENSE_"+license+".txt")
+	licenseDst := filepath.Join(dir, _DOC_DIR, "LICENSE_"+license+".txt")
 
 	// Check if it exist.
 	if !p.cfg.IsNewProject {
