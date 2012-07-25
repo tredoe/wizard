@@ -104,7 +104,7 @@ func Test(t *testing.T) {
 	tmplInstall = `{{template "Header" .}}
 // Command Install manages files related to the system.
 //
-// To use during develpment:
+// During the development, it could be used the command:
 //
 // sudo env PATH=$PATH GOPATH=$GOPATH go run Install.go <flag...>
 package main
@@ -135,7 +135,7 @@ func init() {
 	log.SetFlags(0)
 	log.SetPrefix("ERROR: ")
 
-	/* If a system has not implemented on this installation, use:
+	/* If a system has not been implemented on this manager, use:
 	if runtime.GOOS == "windows" {
 		log.Fatal("TODO: handle Windows")
 	}*/
