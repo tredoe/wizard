@@ -136,9 +136,9 @@ func NewFile(name string, addGo, addCgo, addTest bool) error {
 	hasDirDoc := true
 	hasHeader := false
 
-	info, err := os.Stat("doc")
+	info, err := os.Stat("Doc")
 	if os.IsNotExist(err) {
-		info, err = os.Stat(filepath.Join("..", "doc"))
+		info, err = os.Stat(filepath.Join("..", "Doc"))
 		if os.IsNotExist(err) {
 			hasDirDoc = false
 		}
@@ -256,7 +256,7 @@ func (p *project) Create() error {
 		return fmt.Errorf("directory error: %s", err)
 	}
 	if p.cfg.IsNewProject {
-		if err := os.Mkdir(filepath.Join(p.cfg.Program, "doc"),
+		if err := os.Mkdir(filepath.Join(p.cfg.Program, "Doc"),
 			_DIRECTORY_PERM); err != nil {
 			return fmt.Errorf("directory error: %s", err)
 		}
@@ -316,11 +316,11 @@ func (p *project) Create() error {
 	}
 
 	// Render common files
-	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", "CONTRIBUTORS.md"),
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "Doc", "CONTRIBUTORS.md"),
 		"Contributors"); err != nil {
 		return err
 	}
-	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", "NEWS.md"),
+	if err = p.parseFromVar(filepath.Join(p.cfg.Program, "Doc", "NEWS.md"),
 		"News"); err != nil {
 		return err
 	}
@@ -331,7 +331,7 @@ func (p *project) Create() error {
 
 	// The file AUTHORS is for copyright holders.
 	if p.cfg.License != "cc0" {
-		if err = p.parseFromVar(filepath.Join(p.cfg.Program, "doc", "AUTHORS.md"),
+		if err = p.parseFromVar(filepath.Join(p.cfg.Program, "Doc", "AUTHORS.md"),
 			"Authors"); err != nil {
 			return err
 		}
@@ -367,7 +367,7 @@ func (p *project) addLicense(dir string) error {
 	}
 
 	license := ListLowerLicense[p.cfg.License]
-	licenseDst := filepath.Join(dir, "doc", "LICENSE_"+license+".txt")
+	licenseDst := filepath.Join(dir, "Doc", "LICENSE_"+license+".txt")
 
 	// Check if it exist.
 	if !p.cfg.IsNewProject {
