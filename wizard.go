@@ -132,7 +132,7 @@ func NewFile(name string, addGo, addCgo, addTest bool) error {
 
 	proj := &project{"", new(template.Template), cfg}
 
-	// == Try get the license file in directory doc
+	// == Try get the license file in directory Doc
 	hasDirDoc := true
 	hasHeader := false
 
