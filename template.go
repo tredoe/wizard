@@ -102,7 +102,7 @@ func Test(t *testing.T) {
 `
 
 	tmplInstall = `{{template "Header" .}}
-// Command Install manages files related to the system.
+// Installer manages files related to the system.
 //
 // During the development, it could be used the command:
 //
