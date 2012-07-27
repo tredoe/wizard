@@ -285,7 +285,8 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 		if strings.Contains(f.Usage, ";") {
 			f.Usage = strings.SplitN(f.Usage, ";", 2)[0]
 		}
-		prompt := q.NewPrompt(strings.ToUpper(string(f.Usage[0])) + f.Usage[1:])
+		f.Usage = strings.ToUpper(string(f.Usage[0])) + f.Usage[1:]
+		prompt := q.NewPrompt(f.Usage)
 
 		switch k {
 		case "type":
@@ -308,7 +309,16 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 				return err
 			}
 		case "org":
-			c.Org, err = prompt.ByDefault(c.Org).ReadString()
+			isOrg := true
+
+			if c.Org == "" {
+				prompt := q.NewPrompt("Is for an organization?")
+				isOrg, err = prompt.ByDefault(false).ReadBool()
+			}
+			if isOrg {
+				prompt := q.NewPrompt(f.Usage)
+				c.Org, err = prompt.ByDefault(c.Org).ReadString()
+			}
 		case "author":
 			c.Author, err = prompt.ByDefault(c.Author).Mod(quest.REQUIRED).ReadString()
 		case "email":
