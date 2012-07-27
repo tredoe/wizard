@@ -4,7 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// Package wizard allows to create the base of new Go projects and to add new
+// Package wizard allows to create the base of new Go projects and add new
 // packages or commands to the project.
 package wizard
 
@@ -26,8 +26,8 @@ import (
 
 const (
 	// Permissions
-	_DIR_PERM = 0755
-	_FILE_PERM      = 0644
+	_DIR_PERM  = 0755
+	_FILE_PERM = 0644
 
 	_COMMENT_CHAR = "//" // For comments in source code files
 	_HEADER_CHAR  = "="  // Header under the project name
@@ -118,7 +118,7 @@ type project struct {
 
 // NewFile creates a new file in the current directory.
 // If addInstall is used then the name is set to a value fixed.
-func NewFile(name string, addGo, addCgo, addTest, addInstall bool) error {
+func NewFile(addGo, addCgo, addTest, addInstall bool, name ...string) error {
 	cfg := new(Conf)
 	pkg, err := build.ImportDir(".", 0)
 
@@ -136,110 +136,90 @@ func NewFile(name string, addGo, addCgo, addTest, addInstall bool) error {
 		}
 	}
 
-	proj := &project{"", new(template.Template), cfg}
-
-	// == Try get the license file in documentation directory
-	hasDirDoc := true
-	hasHeader := false
-
-	info, err := os.Stat(_DOC_DIR)
-	if os.IsNotExist(err) {
-		info, err = os.Stat(filepath.Join("..", _DOC_DIR))
-		if os.IsNotExist(err) {
-			hasDirDoc = false
-		}
+	goFiles, err := filepath.Glob("*.go")
+	if err != nil {
+		return err
 	}
-
-	if hasDirDoc && info.IsDir() {
-		licenseFiles, err := filepath.Glob(filepath.Join(info.Name(), "LICENSE_*"))
-		if err != nil {
-			return err
-		}
-
-		// Get license name from the file if there is only one.
-		if len(licenseFiles) == 1 {
-			if proj.cfg.Project, err = getProjectName(); err != nil {
-				return err
-			}
-			license := filepath.Base(licenseFiles[0])
-			license = strings.SplitN(license, "_", 2)[1]
-			license = strings.SplitN(license, ".", 2)[0]
-
-			proj.cfg.License = strings.ToLower(license)
-			proj.parseLicense("//")
-			hasHeader = true
-		}
+	if len(goFiles) == 0 {
+		return errors.New("no found any Go source file in current directory")
 	}
 
 	// == Get the header from a Go file
-	if !hasHeader {
-		goFiles, err := filepath.Glob("*.go")
+	var file *os.File
+	bComment := []byte("//")
+	bPackage := []byte("package")
+	found := false
+	header := ""
+	reYear := regexp.MustCompile(`[[:blank:]]\d{4}[[:blank:]]`)
+
+	for _, f := range goFiles {
+		if file != nil {
+			file.Close()
+		}
+		file, err = os.Open(f)
 		if err != nil {
 			return err
 		}
-		if len(goFiles) == 0 {
-			return errors.New("no found any Go source file in current directory")
-		}
+		defer file.Close()
 
-		bComment := []byte("//")
-		bPackage := []byte("package")
-		header := ""
-		reYear := regexp.MustCompile(`[[:blank:]]\d{4}[[:blank:]]`)
+		buf := bufio.NewReader(file)
+		headerBuf := new(bytes.Buffer)
+		isFirst := true
 
-		// Get header of a Go source file
-		for _, f := range goFiles {
-			file, err := os.Open(f)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			buf := bufio.NewReader(file)
-			headerBuf := new(bytes.Buffer)
-			isFirst := true
-
-			for {
-				line, _, err := buf.ReadLine()
-				if err == io.EOF {
-					break
-				}
-
-				if bytes.HasPrefix(line, bComment) {
-					if isFirst {
-						line = reYear.ReplaceAll(line, []byte(fmt.Sprintf(" %d ", time.Now().Year())))
-						isFirst = false
-					}
-					headerBuf.Write(line)
-					headerBuf.WriteRune('\n')
-
-				} else if headerBuf.Len() != 0 || bytes.HasPrefix(line, bPackage) {
-					break
-				}
+		for {
+			line, _, err := buf.ReadLine()
+			if err == io.EOF {
+				break
 			}
 
-			if headerBuf.Len() != 0 {
-				header = headerBuf.String()
+			if bytes.HasPrefix(line, bComment) {
+				if isFirst {
+					line = reYear.ReplaceAll(line, []byte(fmt.Sprintf(" %d ", time.Now().Year())))
+					found = true
+					isFirst = false
+				}
+				headerBuf.Write(line)
+				headerBuf.WriteRune('\n')
+
+			} else if headerBuf.Len() != 0 || bytes.HasPrefix(line, bPackage) {
 				break
 			}
 		}
 
-		proj.tmpl = template.Must(proj.tmpl.New("Header").Parse(header))
+		if headerBuf.Len() != 0 {
+			header = headerBuf.String()
+			break
+		}
 	}
 
-	// Render files
+	if !found {
+		return errors.New("any Go source file has a copyright & license notice")
+	}
+	proj := &project{"", new(template.Template), cfg}
+	proj.tmpl = template.Must(proj.tmpl.New("Header").Parse(header))
+
+	// == Render files
 
 	if addGo || addCgo {
 		proj.tmpl = template.Must(proj.tmpl.New("Go").Parse(tmplGo))
-		if err = proj.parseFromVar(name+".go", "Go"); err != nil {
-			return err
-		}
 	}
 	if addTest {
 		proj.tmpl = template.Must(proj.tmpl.New("Test").Parse(tmplTest))
-		if err = proj.parseFromVar(name+"_test.go", "Test"); err != nil {
-			return err
+	}
+
+	for _, n := range name {
+		if addGo || addCgo {
+			if err = proj.parseFromVar(n+".go", "Go"); err != nil {
+				return err
+			}
+		}
+		if addTest {
+			if err = proj.parseFromVar(n+"_test.go", "Test"); err != nil {
+				return err
+			}
 		}
 	}
+
 	if addInstall {
 		if _, err = os.Stat(_README); os.IsNotExist(err) {
 			return errors.New("file README not found; maybe current directory is not a Go project")
@@ -254,7 +234,6 @@ func NewFile(name string, addGo, addCgo, addTest, addInstall bool) error {
 			return err
 		}
 	}
-
 	return nil
 }
 

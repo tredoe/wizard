@@ -51,7 +51,7 @@ func usage() {
  * Project: -type -name -license -author -email -vcs -import [-org]
  * Program: -type -name -license -add
  * Installer: -installer
- * File: (-g | -c | -t) name
+ * File: (-g | -c | -t) name...
 
 `)
 	flag.PrintDefaults()
@@ -170,17 +170,13 @@ func initConfig() (*wizard.Conf, error) {
 
 	// New file
 	if *fGo || *fCgo || *fTest {
-		if flag.NArg() != 1 {
-			usage()
-		}
-
-		if err := wizard.NewFile(flag.Arg(0), *fGo, *fCgo, *fTest, *fInstaller); err != nil {
+		if err := wizard.NewFile(*fGo, *fCgo, *fTest, *fInstaller, flag.Args()...); err != nil {
 			return nil, err
 		}
 		return nil, nil
 	}
 	if *fInstaller {
-		if err := wizard.NewFile("", false, false, false, *fInstaller); err != nil {
+		if err := wizard.NewFile(false, false, false, *fInstaller, ""); err != nil {
 			return nil, err
 		}
 		return nil, nil

@@ -16,8 +16,11 @@ import (
 
 // Copyright
 const (
-	tmplCopyright = `Copyright {{.Year}}  The "{{.Project}}" Authors`
-	tmplCopyleft  = `Written in {{.Year}} by the "{{.Project}}" Authors`
+	tmplCopyright = `Copyright {{.Year}} {{.Author}}`
+	tmplCopyleft  = `Written in {{.Year}} by {{.Author}}`
+
+	tmplOrgCopyright = `Copyright {{.Year}} The {{.Project}} Authors`
+	tmplOrgCopyleft  = `Written in {{.Year}} by the {{.Project}} Authors`
 )
 
 // Licenses
@@ -371,9 +374,17 @@ func (p *project) parseLicense(charComment string) {
 	p.tmpl = template.Must(p.tmpl.New("Header").Parse(tmplHeader))
 
 	if licenseName != "cc0" {
-		p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyright))
+		if p.cfg.Org == "" {
+			p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyright))
+		} else {
+			p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplOrgCopyright))
+		}
 	} else {
-		p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyleft))
+		if p.cfg.Org == "" {
+			p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplCopyleft))
+		} else {
+			p.tmpl = template.Must(p.tmpl.New("Copyright").Parse(tmplOrgCopyleft))
+		}
 	}
 }
 
