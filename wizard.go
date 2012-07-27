@@ -26,7 +26,7 @@ import (
 
 const (
 	// Permissions
-	_DIRECTORY_PERM = 0755
+	_DIR_PERM = 0755
 	_FILE_PERM      = 0644
 
 	_COMMENT_CHAR = "//" // For comments in source code files
@@ -36,7 +36,8 @@ const (
 	_DATA_PATH = "github.com/kless/wizard/data"
 
 	_DOC_DIR      = "Doc"
-	_INSTALL_FILE = "Install"
+	_INSTALL_DIR  = "Installer"
+	_INSTALL_FILE = "install.go"
 	_README       = "README.md"
 	_USER_CONFIG  = ".gowizard" // Configuration file per user
 )
@@ -243,13 +244,13 @@ func NewFile(name string, addGo, addCgo, addTest, addInstall bool) error {
 		if _, err = os.Stat(_README); os.IsNotExist(err) {
 			return errors.New("file README not found; maybe current directory is not a Go project")
 		}
-		if err = os.Mkdir(_INSTALL_FILE, _DIRECTORY_PERM); err != nil {
+		if err = os.Mkdir(_INSTALL_DIR, _DIR_PERM); err != nil {
 			return err
 		}
 
-		proj.tmpl = template.Must(proj.tmpl.New(_INSTALL_FILE).Parse(tmplInstall))
-		if err = proj.parseFromVar(filepath.Join(_INSTALL_FILE, _INSTALL_FILE+".go"),
-			_INSTALL_FILE); err != nil {
+		proj.tmpl = template.Must(proj.tmpl.New(_INSTALL_DIR).Parse(tmplInstall))
+		if err = proj.parseFromVar(filepath.Join(_INSTALL_DIR, _INSTALL_FILE),
+			_INSTALL_DIR); err != nil {
 			return err
 		}
 	}
@@ -270,13 +271,13 @@ func NewProject(cfg *Conf) (*project, error) {
 
 // Create creates a new project.
 func (p *project) Create() error {
-	err := os.Mkdir(p.cfg.Program, _DIRECTORY_PERM)
+	err := os.Mkdir(p.cfg.Program, _DIR_PERM)
 	if err != nil {
 		return fmt.Errorf("directory error: %s", err)
 	}
 	if p.cfg.IsNewProject {
 		if err := os.Mkdir(filepath.Join(p.cfg.Program, _DOC_DIR),
-			_DIRECTORY_PERM); err != nil {
+			_DIR_PERM); err != nil {
 			return fmt.Errorf("directory error: %s", err)
 		}
 	}

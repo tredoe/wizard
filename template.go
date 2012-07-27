@@ -106,7 +106,7 @@ func Test(t *testing.T) {
 //
 // During the development, it could be used the command:
 //
-// sudo env PATH=$PATH GOPATH=$GOPATH go run Install.go <flag...>
+// sudo env PATH=$PATH GOPATH=$GOPATH go run install.go <flag...>
 package main
 
 import (
