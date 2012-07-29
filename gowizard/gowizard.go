@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kless/Go-Inline/quest"
+	"github.com/kless/inline/quest"
 	"github.com/kless/wizard"
 )
 
