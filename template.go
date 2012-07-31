@@ -104,7 +104,7 @@ func Test(t *testing.T) {
 }
 `
 
-	tmplInstall = `{{template "Header" .}}
+	tmplInstaller = `{{template "Header" .}}
 // Installer manages files related to the system.
 //
 // During the development, it could be used the command:
@@ -166,6 +166,55 @@ func main() {
 	if *install {
 		Install()
 	}
+}
+`
+
+	tmplTester = `{{template "Header" .}}
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+)
+
+var EXEC string
+
+func init() {
+	var err error
+	log.SetFlags(0)
+	log.SetPrefix("ERROR: ")
+
+	// The executable name will be the directory name.
+	if EXEC, err = os.Getwd(); err != nil {
+		log.Fatal(err)
+	}
+	EXEC = filepath.Base(EXEC)
+
+	if _, err = exec.LookPath(EXEC); err != nil {
+		if err.(*exec.Error).Err == exec.ErrNotFound {
+			if err = exec.Command("go", "install").Run(); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatal(err)
+		}
+	}
+}
+
+func Example() {
+	out, err := exec.Command(EXEC).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print(string(out))
+
+	// Output:
+/*
+
+*/
 }
 `
 )

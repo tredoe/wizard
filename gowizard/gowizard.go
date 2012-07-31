@@ -50,8 +50,12 @@ func usage() {
  * Configuration: -cfg -author -email -license -vcs [-org]
  * Project: -type -name -license -author -email -vcs -import [-org]
  * Program: -type -name -license -add
+
+Add new files to current project:
+
+ * File: (-go | -c | -t) name...
  * Installer: -installer
- * File: (-g | -c | -t) name...
+ * Command tester: -tester
 
 `)
 	flag.PrintDefaults()
@@ -96,12 +100,14 @@ func initConfig() (*wizard.Conf, error) {
 
 		fConfig      = flag.Bool("cfg", false, "add the user configuration file")
 		fAdd         = flag.Bool("add", false, "add a program")
-		fInstaller   = flag.Bool("installer", false, "add a manager related to the system")
 		fInteractive = flag.Bool("i", false, "interactive mode")
 
-		fGo   = flag.Bool("g", false, "new Go source file")
+		fGo   = flag.Bool("go", false, "new Go source file")
 		fCgo  = flag.Bool("c", false, "new Cgo source file")
 		fTest = flag.Bool("t", false, "new test file")
+
+		fInstaller = flag.Bool("installer", false, "add a manager related to the system")
+		fTester    = flag.Bool("tester", false, "add test file for testing the command output")
 
 		// Listing
 		fListType    = flag.Bool("lt", false, "list the available project types (for type flag)")
@@ -168,15 +174,12 @@ func initConfig() (*wizard.Conf, error) {
 		return nil, nil
 	}
 
-	// New file
-	if *fGo || *fCgo || *fTest {
-		if err := wizard.NewFile(*fGo, *fCgo, *fTest, *fInstaller, flag.Args()...); err != nil {
-			return nil, err
-		}
-		return nil, nil
-	}
-	if *fInstaller {
-		if err := wizard.NewFile(false, false, false, *fInstaller, ""); err != nil {
+	// == New file
+	var err error
+
+	if *fGo || *fCgo || *fTest || *fInstaller || *fTester {
+		err = wizard.NewFile(*fGo, *fCgo, *fTest, *fInstaller, *fTester, flag.Args()...)
+		if err != nil {
 			return nil, err
 		}
 		return nil, nil
@@ -199,7 +202,7 @@ func initConfig() (*wizard.Conf, error) {
 
 	// Get configuration per user, if any.
 	if !*fConfig {
-		if err := cfg.UserConfig(); err != nil {
+		if err = cfg.UserConfig(); err != nil {
 			return nil, err
 		}
 	}
@@ -221,13 +224,13 @@ func initConfig() (*wizard.Conf, error) {
 	}
 
 	// Check flags
-	if err := cfg.CheckAndSetNames(*fInteractive, *fConfig, *fAdd); err != nil {
+	if err = cfg.CheckAndSetNames(*fInteractive, *fConfig, *fAdd); err != nil {
 		return nil, err
 	}
 
 	// Interactive mode
 	if *fInteractive {
-		if err := interactive(cfg, *fConfig, *fAdd); err != nil {
+		if err = interactive(cfg, *fConfig, *fAdd); err != nil {
 			return nil, err
 		}
 	}

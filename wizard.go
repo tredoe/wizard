@@ -117,17 +117,16 @@ type project struct {
 }
 
 // NewFile creates a new file in the current directory.
-// If addInstall is used then the name is set to a value fixed.
-func NewFile(addGo, addCgo, addTest, addInstall bool, name ...string) error {
+func NewFile(addGo, addCgo, addTest, addInstaller, addTester bool, name ...string) error {
 	cfg := new(Conf)
 	pkg, err := build.ImportDir(".", 0)
+	if err != nil {
+		return err
+	}
 
-	if !addInstall {
-		if err == nil {
-			cfg.Program = pkg.Name
-		} else {
-			cfg.Program = "main"
-		}
+	if addGo || addCgo || addTest {
+		cfg.Program = pkg.Name
+
 		if pkg.IsCommand() {
 			cfg.IsCmd = true
 		}
@@ -136,6 +135,7 @@ func NewFile(addGo, addCgo, addTest, addInstall bool, name ...string) error {
 		}
 	}
 
+	// == Get the header from a Go file
 	goFiles, err := filepath.Glob("*.go")
 	if err != nil {
 		return err
@@ -144,7 +144,6 @@ func NewFile(addGo, addCgo, addTest, addInstall bool, name ...string) error {
 		return errors.New("no found any Go source file in current directory")
 	}
 
-	// == Get the header from a Go file
 	var file *os.File
 	bComment := []byte("//")
 	bPackage := []byte("package")
@@ -220,7 +219,7 @@ func NewFile(addGo, addCgo, addTest, addInstall bool, name ...string) error {
 		}
 	}
 
-	if addInstall {
+	if addInstaller {
 		if _, err = os.Stat(_README); os.IsNotExist(err) {
 			return errors.New("file README not found; maybe current directory is not a Go project")
 		}
@@ -228,12 +227,30 @@ func NewFile(addGo, addCgo, addTest, addInstall bool, name ...string) error {
 			return err
 		}
 
-		proj.tmpl = template.Must(proj.tmpl.New(_INSTALL_DIR).Parse(tmplInstall))
+		proj.tmpl = template.Must(proj.tmpl.New(_INSTALL_DIR).Parse(tmplInstaller))
 		if err = proj.parseFromVar(filepath.Join(_INSTALL_DIR, _INSTALL_FILE),
 			_INSTALL_DIR); err != nil {
 			return err
 		}
 	}
+	if addTester {
+		if !pkg.IsCommand() {
+			return errors.New("this project is not a command")
+		}
+
+		name, err := os.Getwd()
+		if err != nil {
+			name = "main"
+		} else {
+			name = filepath.Base(name)
+		}
+
+		proj.tmpl = template.Must(proj.tmpl.New("TestCmd").Parse(tmplTester))
+		if err = proj.parseFromVar(name+"_test.go", "TestCmd"); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
