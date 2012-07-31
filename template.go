@@ -180,6 +180,21 @@ import (
 	"path/filepath"
 )
 
+func Example() {
+	out, err := exec.Command(EXEC).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print(string(out))
+
+	// Output:
+/*
+
+*/
+}
+
+// * * *
+
 var EXEC string
 
 func init() {
@@ -202,19 +217,6 @@ func init() {
 			log.Fatal(err)
 		}
 	}
-}
-
-func Example() {
-	out, err := exec.Command(EXEC).Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Print(string(out))
-
-	// Output:
-/*
-
-*/
 }
 `
 )
