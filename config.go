@@ -93,14 +93,17 @@ func (c *Conf) SetNames(addProgram bool) error {
 	// To remove them from the program name, if any.
 	reStart1 := regexp.MustCompile(`^go-`)
 	reStart2 := regexp.MustCompile(`^go`)
-	reEnd := regexp.MustCompile(`-go$`)
+	reEnd1 := regexp.MustCompile(`-go$`)
+	reEnd2 := regexp.MustCompile(`go$`)
 
 	if reStart1.MatchString(c.Program) {
 		c.Program = reStart1.ReplaceAllString(c.Program, "")
 	} else if reStart2.MatchString(c.Program) {
 		c.Program = reStart2.ReplaceAllString(c.Program, "")
-	} else if reEnd.MatchString(c.Program) {
-		c.Program = reEnd.ReplaceAllString(c.Program, "")
+	} else if reEnd1.MatchString(c.Program) {
+		c.Program = reEnd1.ReplaceAllString(c.Program, "")
+	} else if reEnd2.MatchString(c.Program) {
+		c.Program = reEnd2.ReplaceAllString(c.Program, "")
 	}
 
 	return nil
