@@ -272,7 +272,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 		}
 	}
 
-	q := quest.NewDefaultQuestion()
+	q := quest.NewDefault()
 	defer q.Restore()
 	q.ExitAtCtrlC(0)
 
