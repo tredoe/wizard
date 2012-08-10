@@ -272,7 +272,7 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 		}
 	}
 
-	q := quest.NewQuestionByDefault()
+	q := quest.NewDefaultQuestion()
 	defer q.Restore()
 	q.ExitAtCtrlC(0)
 
@@ -297,12 +297,12 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 				}
 			}
 
-			c.Type, err = prompt.ByDefault(c.Type).ChoiceString(wizard.ListTypeSorted)
+			c.Type, err = prompt.Default(c.Type).ChoiceString(wizard.ListTypeSorted)
 		case "name":
 			if addProgram {
-				c.Program, err = prompt.ByDefault(c.Program).Mod(quest.REQUIRED).ReadString()
+				c.Program, err = prompt.Default(c.Program).Mod(quest.REQUIRED).ReadString()
 			} else {
-				c.Project, err = prompt.ByDefault(c.Project).Mod(quest.REQUIRED).ReadString()
+				c.Project, err = prompt.Default(c.Project).Mod(quest.REQUIRED).ReadString()
 			}
 			if err = c.SetNames(addProgram); err != nil {
 				return err
@@ -312,28 +312,28 @@ func interactive(c *wizard.Conf, addConfig, addProgram bool) error {
 
 			if c.Org == "" {
 				prompt := q.NewPrompt("Is for an organization?")
-				isOrg, err = prompt.ByDefault(false).ReadBool()
+				isOrg, err = prompt.Default(false).ReadBool()
 			}
 			if isOrg {
 				prompt := q.NewPrompt(f.Usage)
-				c.Org, err = prompt.ByDefault(c.Org).ReadString()
+				c.Org, err = prompt.Default(c.Org).ReadString()
 			}
 		case "author":
-			c.Author, err = prompt.ByDefault(c.Author).Mod(quest.REQUIRED).ReadString()
+			c.Author, err = prompt.Default(c.Author).Mod(quest.REQUIRED).ReadString()
 		case "email":
-			c.Email, err = prompt.ByDefault(c.Email).Mod(quest.REQUIRED).ReadEmail()
+			c.Email, err = prompt.Default(c.Email).Mod(quest.REQUIRED).ReadEmail()
 		case "license":
 			// It is got in upper case
-			c.License, err = prompt.ByDefault(wizard.ListLowerLicense[c.License]).
+			c.License, err = prompt.Default(wizard.ListLowerLicense[c.License]).
 				ChoiceString(wizard.ListLicenseSorted)
 			c.License = strings.ToLower(c.License)
 		case "vcs":
-			c.VCS, err = prompt.ByDefault(c.VCS).ChoiceString(wizard.ListVCSsorted)
+			c.VCS, err = prompt.Default(c.VCS).ChoiceString(wizard.ListVCSsorted)
 		case "import":
 			if addConfig {
 				c.ImportPaths, err = prompt.ReadMultipleString()
 			} else {
-				c.ImportPaths[0], err = prompt.ByDefault(c.ImportPaths[0]).ChoiceString(c.ImportPaths)
+				c.ImportPaths[0], err = prompt.Default(c.ImportPaths[0]).ChoiceString(c.ImportPaths)
 			}
 		}
 
