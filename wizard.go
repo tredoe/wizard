@@ -4,7 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// Package wizard allows to create the base of new Go projects and add new
+// Package wizard enables to create the base of new Go projects and add new
 // packages or commands to the project.
 package wizard
 
