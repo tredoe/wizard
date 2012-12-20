@@ -2,7 +2,7 @@ Gowizard
 ========
 Tool to create skeleton of Go projects.
 
-[Documentation online](http://go.pkgdoc.org/github.com/kless/wizard/gowizard)
+[Documentation online](http://godoc.org/github.com/kless/wizard/gowizard)
 
 #### TODO
 
