@@ -345,7 +345,7 @@ because the organization holds the copyright.*
 {{.ProjectHeader}}
 << PROJECT SYNOPSIS >>
 
-[Documentation online](http://go.pkgdoc.org/{{with .ImportPath}}{{.}}{{else}}<< IMPORT PATH >>{{end}})
+[Documentation online](http://godoc.org/{{with .ImportPath}}{{.}}{{else}}<< IMPORT PATH >>{{end}})
 
 ## Installation
 
