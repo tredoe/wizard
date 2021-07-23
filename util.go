@@ -9,19 +9,18 @@ package wizard
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
 
 // copyFile copies a file from source to destination.
 func copyFile(destination, source string) error {
-	src, err := ioutil.ReadFile(source)
+	src, err := os.ReadFile(source)
 	if err != nil {
 		return fmt.Errorf("copy error reading: %s", err)
 	}
 
-	err = ioutil.WriteFile(destination, src, _FILE_PERM)
+	err = os.WriteFile(destination, src, _FILE_PERM)
 	if err != nil {
 		return fmt.Errorf("copy error writing: %s", err)
 	}

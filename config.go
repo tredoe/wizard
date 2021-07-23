@@ -9,7 +9,6 @@ package wizard
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -109,7 +108,7 @@ func (c *Conf) UserConfig() error {
 		return fmt.Errorf("expected regular file: %s", _USER_CONFIG)
 	}
 
-	data, err := ioutil.ReadFile(pathUserConfig)
+	data, err := os.ReadFile(pathUserConfig)
 	if err != nil {
 		return err
 	}
